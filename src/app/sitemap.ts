@@ -1,18 +1,19 @@
 // 1. IMPORTACIÓN DE TIPOS:
-// Le pedimos a Next.js que nos preste la "plantilla de reglas" (TypeScript) 
+// Le pedimos a Next.js que nos preste la "plantilla de reglas" (TypeScript)
 // para asegurarnos de que no nos falte ningún dato obligatorio en el sitemap.
-import type { MetadataRoute } from 'next';
+import type { MetadataRoute } from "next";
+
+export const dynamic = "force-static";
 
 // 2. FUNCIÓN PRINCIPAL:
 // Next.js busca por defecto una función llamada 'sitemap' que esté exportada (export default).
-// El ": MetadataRoute.Sitemap" le dice a TypeScript: "Oye, esta función va a devolver 
+// El ": MetadataRoute.Sitemap" le dice a TypeScript: "Oye, esta función va a devolver
 // una lista de enlaces estructurada exactamente como Google y el estándar XML lo exigen".
 export default function sitemap(): MetadataRoute.Sitemap {
-
   // 3. VARIABLE BASE:
-  // Guardamos tu dominio en una variable para no tener que escribir "https://ariri.app" 
+  // Guardamos tu dominio en una variable para no tener que escribir "https://ariri.app"
   // a mano en cada enlace. Si el día de mañana cambias de dominio, solo lo editas aquí.
-  const baseUrl = 'https://ariri.app';
+  const baseUrl = "https://ariri.app";
 
   // 4. EL RETORNO (LA LISTA DE PÁGINAS):
   // La función devuelve un arreglo (un listado entre corchetes [ ]) con cada página de tu blog.
@@ -26,13 +27,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       // Usamos "new Date()" para que ponga en automático la fecha exacta de cuando haces el 'build'.
       lastModified: new Date(),
 
-      // 'changeFrequency': Le da una pista a Google de cada cuánto tiempo debería volver 
+      // 'changeFrequency': Le da una pista a Google de cada cuánto tiempo debería volver
       // a revisar esta página para buscar contenido nuevo.
       // Opciones válidas: 'always', 'hourly', 'daily', 'weekly', 'monthly', 'yearly', 'never'.
-      changeFrequency: 'weekly',
+      changeFrequency: "weekly",
 
-      // 'priority': Es una escala del 0.0 al 1.0 para decirle a Google cuál página 
-      // es más relevante dentro de TU propio sitio web. 
+      // 'priority': Es una escala del 0.0 al 1.0 para decirle a Google cuál página
+      // es más relevante dentro de TU propio sitio web.
       // La portada casi siempre lleva 1.0 (la máxima prioridad).
       priority: 1.0,
     },
@@ -43,12 +44,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       // Esto equivale a escribir: 'https://ariri.app/about'
       url: `${baseUrl}/about`,
       lastModified: new Date(),
-      changeFrequency: 'monthly', // Cambia menos seguido que la portada
-      priority: 0.8,              // Un poco menos prioritaria que el inicio
+      changeFrequency: "monthly", // Cambia menos seguido que la portada
+      priority: 0.8, // Un poco menos prioritaria que el inicio
     },
 
     // 💡 NOTA PARA EL FUTURO:
-    // Conforme crees más páginas estáticas (o leas tus posts en Markdown), 
+    // Conforme crees más páginas estáticas (o leas tus posts en Markdown),
     // irás agregando más objetos { url: ..., lastModified: ... } dentro de este arreglo.
   ];
 }
