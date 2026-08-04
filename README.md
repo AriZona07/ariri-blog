@@ -74,7 +74,31 @@ El diseño busca replicar la experiencia retro de blogs de los años 2000 (Blogg
 
 ---
 
-## 📦 3. Dependencias y Herramientas
+## 📂 3. Arquitectura y Estructura de Carpetas
+
+```text
+src/
+├── app/                  <-- SOLO archivos de rutas/páginas
+│   ├── layout.tsx
+│   ├── page.tsx
+│   └── sitemap.ts
+│
+├── styles/               <-- Tu CSS organizado
+│   ├── globals.css       (Mueves globals.css aquí)
+│   └── retro.css         (Tus estilos 2000s)
+│
+├── components/           <-- Tus componentes React (Widgets, Navbar, etc.)
+│   ├── Guestbook.tsx
+│   └── MusicPlayer.tsx
+│
+└── content/              <-- Tus publicaciones en Markdown (.md)
+    ├── primer-post.md
+    └── hola-mundo.md
+```
+
+---
+
+## 📦 4. Dependencias y Herramientas
 
 Para ver la explicación detallada de cada librería, consulta la [Guía de Dependencias](/DEPENDENCIES.md).
 
@@ -85,7 +109,7 @@ Para ver la explicación detallada de cada librería, consulta la [Guía de Depe
 
 ---
 
-## 🛠️ 4. Guía Técnica y Comandos
+## 🛠️ 5. Guía Técnica y Comandos
 
 ### 🚀 Entorno de Desarrollo
 Para iniciar el servidor de desarrollo local:
@@ -104,7 +128,7 @@ npm run build
 
 ---
 
-## 🗺️ 5. Plan de Trabajo / Roadmap
+## 🗺️ 6. Plan de Trabajo / Roadmap
 
 - [ ] **Fase 1: Maquetación Base (HTML + CSS Puro)**
   - Implementar contenedor flotante con márgenes y fondo provisional.

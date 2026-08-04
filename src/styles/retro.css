@@ -1,0 +1,870 @@
+/* retro.css — Estética Emo Scene 2000s (Black & Hot Pink)
+   Blog Ariri · Paleta Maximalista, sin efectos de neón futurista */
+
+
+/* 1. TIPOGRAFÍAS */
+
+/* Fuente general */
+@font-face {
+  font-family: "SimpleJapan";
+  src: url("/fonts/simple-japan.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Fuente de títulos punk */
+@font-face {
+  font-family: "SpecialPunk";
+  src: url("/fonts/special-punk.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+/* 2. VARIABLES DE COLOR Y DISEÑO — Paleta Emo Scene (2004-2008) */
+:root {
+  /* --- Paleta Emo Scene Maximalista (Negro & Hot Pink) --- */
+  --color-bg-page:         #0c0b10;   /* Negro noche profundo */
+  --color-bg-container:    #16131d;   /* Carbón oscuro — contenedor principal */
+  --color-bg-sidebar:      #1c1726;   /* Violeta-gris oscuro — sidebars */
+  --color-bg-box:          #221b2e;   /* Fondo de cajas widget */
+  --color-bg-header:       #110e17;   /* Fondo del header */
+  --color-bg-nav:          #d6006e;   /* Hot Pink sólido */
+  --color-bg-footer:       #110e17;   /* Footer */
+
+  /* --- Colores de Texto --- */
+  --color-text-primary:    #f5ebfa;   /* Blanco lavanda — alta legibilidad */
+  --color-text-secondary:  #d8bfdf;   /* Rosa lila — textos secundarios */
+  --color-text-muted:      #a482b5;   /* Fechas y meta */
+  --color-text-header:     #ff1493;   /* Hot Pink clásico */
+  --color-text-nav:        #ffffff;   /* Blanco navegación */
+  --color-text-link:       #ff66b2;   /* Rosa intenso — enlaces */
+  --color-text-link-hover: #ffffff;   /* Blanco sobre fondo magenta al hover */
+
+  /* --- Acentos Emo Scene --- */
+  --color-accent-pink:     #ff1493;   /* Hot Pink */
+  --color-accent-magenta:  #b80058;   /* Magenta profundo */
+  --color-accent-purple:   #7b1fa2;   /* Morado intesivo */
+  --color-accent-dark:     #000000;   /* Negro sólido para sombras 3D */
+
+  /* --- Bordes Táctiles (Sin Neón) --- */
+  --color-border:          #4a203b;   /* Borde vinoso */
+  --color-border-strong:   #ff1493;   /* Borde Hot Pink */
+  --color-border-accent:   #b80058;   /* Borde magenta */
+  --shadow-heavy:          0 8px 32px rgba(0, 0, 0, 0.9);   /* Sombra negra profunda */
+  --shadow-inset:          inset 0 2px 4px rgba(0, 0, 0, 0.6);
+
+  /* --- Tipografía --- */
+  --font-main:  "SimpleJapan", "Trebuchet MS", sans-serif;
+  --font-punk:  "SpecialPunk", "Impact", fantasy, sans-serif;
+  --font-mono:  "Courier New", "Lucida Console", monospace;
+
+  /* --- Tamaños de Fuente Generales --- */
+  --fs-xs:   0.75rem;   /* 12px */
+  --fs-sm:   0.875rem;  /* 14px */
+  --fs-base: 1rem;      /* 16px */
+  --fs-md:   1.125rem;  /* 18px */
+  --fs-lg:   1.375rem;  /* 22px */
+  --fs-xl:   1.75rem;   /* 28px */
+  --fs-xxl:  2.6rem;    /* 41px */
+
+  /* --- Tamaños Específicos para Secciones Clave --- */
+  --fs-header-subtitle: 1.05rem; /* 1. Descripción del header */
+  --fs-sidebar-detail:  1.05rem; /* 2. Bio "Sobre mí" y títulos de canciones */
+  --fs-main-content:    1.2rem;  /* 3. Cuerpo del texto principal (WelcomeSection, posts en markdown) */
+
+  /* --- Radios y Espaciados --- */
+  --radius-sm:   3px;    /* Bordes nítidos táctiles */
+  --radius-md:   6px;
+  --radius-lg:   10px;
+  --radius-pill: 999px;
+  --gap-sm:  0.75rem;
+  --gap-md:  1rem;
+  --gap-lg:  1.5rem;
+}
+
+
+/* 3. RESET Y ESTILOS BASE */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-main);
+  font-size: var(--fs-base);
+  line-height: 1.65;
+  color: var(--color-text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: var(--color-bg-page);
+  /* Textura de rayas diagonales */
+  background-image: repeating-linear-gradient(
+    45deg,
+    #0c0b10 0px,
+    #0c0b10 12px,
+    #14111c 12px,
+    #14111c 24px
+  );
+}
+
+/* Enlaces con fondo resaltado al hacer hover */
+a {
+  color: var(--color-text-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 600;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+a:hover {
+  color: var(--color-text-link-hover);
+  background-color: var(--color-accent-magenta);
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+
+/* 4. FONDO DECORATIVO — capa de puntos estilo MySpace/Blogger */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(255, 20, 147, 0.12) 1px, transparent 1px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-position: 0 0, 16px 16px;
+  background-size: 32px 32px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+/* 5. CONTENEDOR FLOTANTE — borde doble estilo marco MySpace */
+.page-wrapper {
+  width: 90%;
+  max-width: 1200px;
+  margin: 1.5rem auto 3rem auto;
+  min-height: calc(100vh - 3rem);
+
+  background: var(--color-bg-container);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-heavy), 0 0 0 4px #000000;
+  border: 4px double var(--color-accent-pink);
+
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+
+/* 6. ENCABEZADO — textura rayada, sombra 3D dura */
+.site-header {
+  background-color: var(--color-bg-header);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    #181222 0px,
+    #181222 10px,
+    #100c17 10px,
+    #100c17 20px
+  );
+  border-bottom: 4px solid var(--color-accent-pink);
+  padding: 2rem 2rem 1.6rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Franja decorativa punteada en la parte superior */
+.site-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    #ff1493 0px,
+    #ff1493 12px,
+    #000000 12px,
+    #000000 24px
+  );
+}
+
+/* Símbolos decorativos en esquina inferior derecha */
+.site-header::after {
+  content: "★彡 ☠ 彡★";
+  position: absolute;
+  bottom: 0.5rem;
+  right: 1.2rem;
+  font-size: 0.75rem; /* Tamaño original mantenido para site header */
+  color: var(--color-accent-pink);
+  font-weight: bold;
+  letter-spacing: 0.25em;
+}
+
+/* Título: Hot Pink con sombra 3D */
+.site-header__title {
+  font-family: var(--font-punk);
+  font-size: 3.8rem;
+  color: var(--color-accent-pink);
+  line-height: 1.1;
+  text-shadow:
+    3px 3px 0px #000000,
+    -1px -1px 0px #000000,
+    1px -1px 0px #000000,
+    -1px 1px 0px #000000,
+    1px 1px 0px #000000;
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.02em;
+}
+
+.site-header__subtitle {
+  font-size: var(--fs-header-subtitle);
+  color: var(--color-text-secondary);
+  font-style: italic;
+  letter-spacing: 0.08em;
+  font-weight: bold;
+}
+
+
+/* 7. BARRA DE NAVEGACIÓN — Hot Pink con hover oscuro */
+.site-nav {
+  background: linear-gradient(90deg, #d6006e 0%, #b80058 50%, #990049 100%);
+  border-bottom: 3px solid #000000;
+  padding: 0 1rem;
+}
+
+.site-nav__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+}
+
+.site-nav__link {
+  display: inline-block;
+  padding: 0.65rem 1.2rem;
+  color: var(--color-text-nav);
+  text-decoration: none;
+  font-size: var(--fs-sm);
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+  text-shadow: 1px 1px 0 #000;
+}
+
+.site-nav__link:hover,
+.site-nav__link.active {
+  background-color: #000000;
+  color: var(--color-accent-pink);
+  text-decoration: none;
+  padding-top: 0.65rem;
+}
+
+
+/* 8. LAYOUT DE 3 COLUMNAS */
+.site-body {
+  display: grid;
+  grid-template-areas: "sidebar-left content sidebar-right";
+  grid-template-columns: 1fr minmax(0, 3fr) 1fr;
+  gap: 0;
+  align-items: stretch;
+  min-height: 400px;
+}
+
+
+/* 9. SIDEBAR IZQUIERDA */
+.sidebar-left {
+  grid-area: sidebar-left;
+  padding: 1rem;
+  background: var(--color-bg-sidebar);
+  border-right: 2px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-lg);
+}
+
+.profile-section {
+  text-align: center;
+}
+
+/* Avatar con doble borde */
+.profile-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 3px solid var(--color-accent-pink);
+  box-shadow: 0 0 0 2px #000000, 0 4px 10px rgba(0,0,0,0.8);
+  margin: 0 auto var(--gap-sm);
+  object-fit: cover;
+}
+
+.profile-avatar-placeholder {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 3px solid var(--color-accent-pink);
+  box-shadow: 0 0 0 2px #000000, 0 4px 10px rgba(0,0,0,0.8);
+  margin: 0 auto var(--gap-sm);
+  background: linear-gradient(135deg, #b80058, #4a0023);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+}
+
+.profile-name {
+  font-family: var(--font-punk);
+  font-size: var(--fs-lg);
+  color: var(--color-accent-pink);
+  text-shadow: 2px 2px 0 #000000;
+  margin-bottom: 0.25rem;
+}
+
+.profile-bio {
+  font-size: var(--fs-sidebar-detail);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.social-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+/* Botones de redes sociales con borde izquierdo */
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: #14101d;
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-accent-pink);
+  font-size: var(--fs-sm);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.social-link:hover {
+  background: var(--color-accent-pink);
+  color: #ffffff;
+  border-left-color: #000000;
+  text-decoration: none;
+}
+
+.social-link__icon {
+  font-size: var(--fs-md);
+}
+
+
+/* 10. CUERPO / ÁREA DE CONTENIDO */
+.site-content {
+  grid-area: content;
+  padding: 1.25rem 1.5rem;
+  background: var(--color-bg-container);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-lg);
+}
+
+/* Estilos de texto para contenido principal y artículos markdown */
+.welcome-text,
+.post-content p {
+  font-size: var(--fs-main-content);
+  line-height: 1.75;
+}
+
+
+/* 11. SIDEBAR DERECHA */
+.sidebar-right {
+  grid-area: sidebar-right;
+  padding: 1rem;
+  background: var(--color-bg-sidebar);
+  border-left: 2px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-lg);
+}
+
+
+/* 12. CAJAS RETRO — borde Hot Pink + fondo oscuro */
+.retro-box {
+  border: 2px solid var(--color-accent-pink);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-box);
+  box-shadow: var(--shadow-heavy);
+  overflow: hidden;
+}
+
+.retro-box__header {
+  background: linear-gradient(90deg, #d6006e 0%, #8b0046 100%);
+  padding: 0.45rem 0.75rem;
+  border-bottom: 2px solid #000000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.retro-box__title {
+  font-size: var(--fs-sm);
+  font-weight: bold;
+  color: #ffffff;
+  font-family: var(--font-main);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 0 #000000;
+}
+
+.retro-box__body {
+  padding: 0.85rem;
+}
+
+.retro-box__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.retro-box__list li {
+  padding: 0.3rem 0;
+  border-bottom: 1px dashed var(--color-border);
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+}
+
+.retro-box__list li:last-child {
+  border-bottom: none;
+}
+
+
+/* 13. TARJETAS DE POST — borde Hot Pink y botón 3D */
+.post-card {
+  border: 2px solid var(--color-accent-pink);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-box);
+  box-shadow: var(--shadow-heavy);
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.95);
+}
+
+.post-card__header {
+  background: linear-gradient(90deg, #32122b 0%, #1c0a18 100%);
+  padding: 0.9rem 1.2rem;
+  border-bottom: 2px solid var(--color-accent-pink);
+}
+
+.post-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.post-card__meta-item {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-weight: 600;
+}
+
+.post-card__meta-icon {
+  margin-right: 0.2rem;
+}
+
+.post-card__title {
+  font-family: var(--font-punk);
+  font-size: var(--fs-xl);
+  color: var(--color-accent-pink);
+  line-height: 1.2;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.post-card__title a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.post-card__title a:hover {
+  color: #ffffff;
+  background-color: var(--color-accent-pink);
+  padding: 0 4px;
+}
+
+.post-card__body {
+  padding: 1.1rem;
+}
+
+.post-card__excerpt {
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin-bottom: 1.1rem;
+}
+
+/* Botón "Leer más" con bisel 3D */
+.post-card__read-more {
+  display: inline-block;
+  padding: 0.45rem 1.2rem;
+  background: linear-gradient(180deg, #ff1493 0%, #b80058 100%);
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  font-weight: bold;
+  border: 1px solid #ffffff;
+  box-shadow: 2px 2px 0px #000000;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.post-card__read-more:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px #000000;
+  color: #ffffff;
+  background: linear-gradient(180deg, #ff3399 0%, #d6006e 100%);
+  text-decoration: none;
+}
+
+.post-card__read-more:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px #000000;
+}
+
+
+/* 14. BADGES DE ROLES — alto contraste, bordes sólidos */
+.role-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-xs);
+  font-weight: bold;
+  letter-spacing: 0.03em;
+  border: 1px solid #000000;
+  box-shadow: 1px 1px 0px #000000;
+  cursor: default;
+}
+
+.role-badge--gaming {
+  background-color: #006644;
+  color: #ffffff;
+  border-color: #003322;
+}
+
+.role-badge--manga {
+  background-color: #ff1493;
+  color: #ffffff;
+  border-color: #8b0046;
+}
+
+.role-badge--punk {
+  background-color: #000000;
+  color: #ff1493;
+  border-color: #ff1493;
+}
+
+.role-badge--linux {
+  background-color: #1a4971;
+  color: #ffffff;
+  border-color: #0d273e;
+}
+
+.role-badge--vampire {
+  background-color: #660033;
+  color: #ffffff;
+  border-color: #330019;
+}
+
+.role-badge--anarchy {
+  background-color: #222222;
+  color: #ff3366;
+  border-color: #ff3366;
+}
+
+.role-badge--roblox {
+  background-color: #c92a2a;
+  color: #ffffff;
+  border-color: #801818;
+}
+
+.role-badge--minecraft {
+  background-color: #2b7238;
+  color: #ffffff;
+  border-color: #17421f;
+}
+
+.role-badge--hollow-knight {
+  background-color: #2d233d;
+  color: #e0d0f0;
+  border-color: #9c6bb0;
+}
+
+
+/* 15. REPRODUCTOR DE MÚSICA — pantalla LCD, bordes Hot Pink */
+.music-player {
+  background: #110d17;
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  border: 2px solid var(--color-accent-pink);
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.music-player__screen {
+  background: #08060a;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.6rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-inset);
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.music-player__marquee {
+  color: #ff66b2;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+  animation: marquee-scroll 12s linear infinite;
+}
+
+.music-player__track {
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sidebar-detail);
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.music-player__controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.music-player__btn {
+  background: linear-gradient(180deg, #d6006e, #8b0046);
+  border: 1px solid #000000;
+  border-radius: var(--radius-sm);
+  color: #ffffff;
+  cursor: pointer;
+  padding: 0.3rem 0.6rem;
+  font-size: var(--fs-md);
+  line-height: 1;
+  box-shadow: 1px 1px 0px #000;
+  transition: background-color 0.15s ease;
+}
+
+.music-player__btn:hover {
+  background: #ff1493;
+}
+
+@keyframes marquee-scroll {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+
+/* 16. PIZARRÓN INTERACTIVO */
+.sketch-board {
+  background: #16121e;
+  border: 2px solid var(--color-accent-pink);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.sketch-board__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  background: #281427;
+  border-bottom: 2px solid #000000;
+  flex-wrap: wrap;
+}
+
+.sketch-board__tool-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #000000;
+  cursor: pointer;
+}
+
+.sketch-board__tool-btn.selected {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 2px #ff1493;
+}
+
+.sketch-board__canvas {
+  display: block;
+  width: 100%;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.sketch-board__hint {
+  padding: 0.35rem 0.6rem;
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+  font-style: italic;
+  background: #281427;
+  border-top: 1px solid #000000;
+}
+
+
+/* 17. FOOTER */
+.site-footer {
+  background: var(--color-bg-footer);
+  border-top: 4px solid var(--color-accent-pink);
+  padding: 1.25rem 2rem;
+  text-align: center;
+}
+
+.site-footer__text {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+
+.banner-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+}
+
+.banner-88x31 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 31px;
+  border: 1px solid #000000;
+  border-radius: 2px;
+  overflow: hidden;
+  font-size: 9px;
+  background: linear-gradient(135deg, #b80058, #4a0023);
+  color: #ffffff;
+  font-weight: bold;
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  box-shadow: 1px 1px 0px #000;
+  transition: transform 0.15s ease, background 0.15s ease;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.banner-88x31:hover {
+  background: #ff1493;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+
+/* 18. MEDIA QUERIES — responsive mobile */
+@media (max-width: 768px) {
+
+  .page-wrapper {
+    width: 96%;
+    margin: 0.5rem auto 1.5rem;
+    border-radius: var(--radius-md);
+  }
+
+  .site-body {
+    grid-template-areas:
+      "content"
+      "sidebar-left"
+      "sidebar-right";
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar-left,
+  .sidebar-right {
+    border-right: none;
+    border-left: none;
+    border-top: 2px solid var(--color-border);
+  }
+
+  .site-header__title {
+    font-size: 2.8rem;
+  }
+
+  .site-content {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .page-wrapper {
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .site-header {
+    padding: 1.25rem 1rem 1rem;
+  }
+
+  .site-header__title {
+    font-size: 2.2rem;
+  }
+
+  .role-badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+  }
+}

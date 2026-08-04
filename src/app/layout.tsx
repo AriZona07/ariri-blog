@@ -1,47 +1,74 @@
+/**
+ * layout.tsx — Layout raíz de la aplicación
+ *
+ * En Next.js App Router, este archivo envuelve TODAS las páginas del sitio.
+ * Los componentes aquí (header, nav, sidebars, footer) aparecen en cada ruta.
+ * El contenido específico de cada página llega a través de "children".
+ */
+
 import type { Metadata } from "next";
-import '@/styles/globals.css';
+import "@/styles/globals.css";
+import "@/styles/retro.css";
 
+import SiteHeader   from "@/components/SiteHeader";
+import SidebarLeft  from "@/components/SidebarLeft";
+import SidebarRight from "@/components/SidebarRight";
+import SiteFooter  from "@/components/SiteFooter";
+
+/* Metadatos SEO: title, description, Open Graph y Twitter Card */
 export const metadata: Metadata = {
-  // Metadatos básicos de la página
-  title: "Blog de Ariri",
-  description: "Blog de Ariri",
-
-  // Conexión con el archivo manifest de tu favicon
-  manifest: '/site.webmanifest',
-
-  // --- CONFIGURACIÓN DE OPEN GRAPH ---
-  openGraph: {
-    title: 'Blog de Ariri', // Título que se muestra en la tarjeta
-    description: 'Mi vida y aficiones en un blog retro.', // Descripción corta
-    url: 'https://ariri.app', // URL canónica de tu sitio
-    siteName: 'ariri.app', // Nombre de la marca o sitio web
-    locale: 'es_MX', // Idioma y región (ej. español)
-    type: 'website', // Tipo de contenido (usualmente 'website' o 'article')
-    
-    // Lista de imágenes para la vista previa al compartir el enlace
-    images: [
-      {
-        url: 'https://ariri.app/og-image.png', // Debe ser la ruta absoluta a tu imagen
-        width: 1200, // Ancho recomendado por el estándar
-        height: 630, // Alto recomendado por el estándar
-        alt: 'Vista previa del Blog de Ariri',
-      },
-    ],
+  title: {
+    default: "Ariri Blog",
+    template: "%s | Ariri Blog",
   },
-
-  // --- CONFIGURACIÓN EXTRA PARA TWITTER / X ---
+  description: "Blog personal de Ariri — videojuegos, manga, linux, punk y más. Estética retro de los 2000s.",
+  keywords: ["blog", "retro", "linux", "manga", "gaming", "anarquismo", "software libre"],
+  manifest: "/site.webmanifest",
+  openGraph: {
+    title: "Ariri Blog",
+    description: "Mi vida y aficiones en un blog retro de los 2000s.",
+    url: "https://ariri.app",
+    siteName: "ariri.app",
+    locale: "es_MX",
+    type: "website",
+    images: [{ url: "https://ariri.app/og-image.png", width: 1200, height: 630, alt: "Vista previa del Blog de Ariri" }],
+  },
   twitter: {
-    card: 'summary_large_image', // Muestra una tarjeta grande con imagen arriba
-    title: 'Blog de Ariri',
-    description: 'Mi vida y aficiones en un blog retro.',
-    images: ['https://ariri.app/og-image.png'],
+    card: "summary_large_image",
+    title: "Ariri Blog",
+    description: "Mi vida y aficiones en un blog retro de los 2000s.",
+    images: ["https://ariri.app/og-image.png"],
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+interface RootLayoutProps {
+  children: React.ReactNode;
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body>
+        <div className="page-wrapper">
+
+          <SiteHeader />
+
+          {/* Layout de 3 columnas: sidebar izquierda | contenido | sidebar derecha */}
+          <div className="site-body">
+            <SidebarLeft />
+
+            {/* children = la página activa (page.tsx de la ruta actual) */}
+            <main className="site-content" id="main-content" role="main">
+              {children}
+            </main>
+
+            <SidebarRight />
+          </div>
+
+          <SiteFooter />
+
+        </div>
+      </body>
     </html>
   );
 }
