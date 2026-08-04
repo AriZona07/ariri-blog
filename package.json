@@ -1,5 +1,5 @@
 {
-  "name": "arizona-blog",
+  "name": "ariri-blog",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -20,5 +20,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
     "typescript": "^5"
+  },
+  "allowScripts": {
+    "unrs-resolver@1.12.2": true
   }
 }
