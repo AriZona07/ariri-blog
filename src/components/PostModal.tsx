@@ -97,7 +97,7 @@ export default function PostModal({ posts, currentIndex, onClose, onNavigate }: 
                     alt={`Portada de ${post.song}`}
                     width={18}
                     height={18}
-                    style={{ borderRadius: "3px", objectFit: "cover" }}
+                    style={{ borderRadius: "3px", objectFit: "cover", width: "auto", height: "auto" }}
                   />
                 ) : (
                   <span className="post-card__meta-icon">🎵</span>

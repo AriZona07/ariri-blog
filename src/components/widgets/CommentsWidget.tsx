@@ -104,6 +104,7 @@ export default function CommentsWidget({ postSlug }: CommentsWidgetProps) {
                   width={36}
                   height={36}
                   className="comment-item__avatar"
+                  style={{ width: "auto", height: "auto" }}
                 />
               ) : (
                 <div className="comment-item__avatar-placeholder" aria-hidden>👤</div>

@@ -212,14 +212,16 @@ export default function MusicPlayer({
         playerRef.current = new window.YT.Player(playerId, {
           height: "1",
           width:  "1",
-          host:   "https://www.youtube.com",
+          host:   "https://www.youtube-nocookie.com",
           playerVars: {
-            listType:    "playlist",
-            list:        playlistId,
-            autoplay:    0,
-            controls:    0,
-            enablejsapi: 1,
-            origin:      originUrl,
+            listType:        "playlist",
+            list:            playlistId,
+            autoplay:        0,
+            controls:        0,
+            enablejsapi:     1,
+            origin:          originUrl,
+            widget_referrer: originUrl,
+            rel:             0,
           },
           events: {
             onReady: (event: YTEvent) => {
@@ -245,6 +247,7 @@ export default function MusicPlayer({
                 setIsPlaying(false);
               } else if (event.data === 0) {
                 setIsPlaying(false);
+                updateTrackInfo(event.target);
                 setLoopMode((currentLoop) => {
                   if (currentLoop === "track") {
                     setCurrentIndex((ci) => {
@@ -257,10 +260,10 @@ export default function MusicPlayer({
               }
             },
             onError: (event: YTEvent) => {
-              console.warn("YouTube Player error code:", event.data);
-              setIsReady(true);
-              const errCode = event.data;
-              if (errCode === 150 || errCode === 101) {
+              if (isCancelled) return;
+              console.warn("Aviso en el reproductor de YouTube:", event.data);
+              const errCode = Number(event.data);
+              if (errCode === 101 || errCode === 150) {
                 setSongTitle("⚠️ Playlist de YouTube privada o con reproducción incrustada desactivada");
               } else if (errCode === 100) {
                 setSongTitle("⚠️ Playlist no encontrada o eliminada de YouTube");
@@ -273,7 +276,7 @@ export default function MusicPlayer({
           },
         });
       } catch (err) {
-        console.error("Error instanciando YT.Player:", err);
+        console.error("Error al inicializar iframe de YouTube:", err);
       }
     };
 
@@ -390,14 +393,35 @@ export default function MusicPlayer({
   return (
     <div className="music-player">
       {/* IFrame de YouTube oculto posicionalmente para permitir ejecuciones del navegador */}
-      <div id={playerId} style={{ position: "absolute", width: "1px", height: "1px", opacity: 0, pointerEvents: "none", overflow: "hidden", left: "-9999px" }} />
+      <iframe
+        id={playerId}
+        title="YouTube Audio Player"
+        allow="autoplay; encrypted-media"
+        style={{
+          position: "absolute",
+          width: "1px",
+          height: "1px",
+          opacity: 0,
+          pointerEvents: "none",
+          overflow: "hidden",
+          left: "-9999px",
+          border: "none",
+        }}
+      />
 
       {/* Pantalla LCD retro */}
       <div className="music-player__screen">
         {/* Portada de la canción — se actualiza en cada cambio de pista */}
         {thumbnailUrl && (
           <div className="music-player__thumb">
-            <Image src={thumbnailUrl} alt={songTitle} width={120} height={90} unoptimized />
+            <Image
+              src={thumbnailUrl}
+              alt={songTitle}
+              width={120}
+              height={90}
+              style={{ width: "100%", height: "auto", objectFit: "cover" }}
+              unoptimized
+            />
           </div>
         )}
         {/* Estado y título de la pista */}

@@ -79,6 +79,7 @@ export default function SiteHeader({
                     width={28}
                     height={28}
                     className="header-auth-btn__avatar"
+                    style={{ width: "auto", height: "auto" }}
                   />
                 )}
                 {user.displayName?.split(" ")[0] ?? "Cuenta"} ▾

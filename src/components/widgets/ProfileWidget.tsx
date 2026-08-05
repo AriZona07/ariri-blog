@@ -36,8 +36,9 @@ export default function ProfileWidget({
               src={avatarSrc}
               alt={avatarAlt}
               className="profile-avatar"
-              width={90}
-              height={90}
+              width={96}
+              height={96}
+              style={{ width: "auto", height: "auto" }}
             />
             <h2 className="profile-name">{name}</h2>
             <p className="profile-bio">{bio}</p>

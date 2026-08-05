@@ -67,10 +67,18 @@ export default function AccountWidget() {
 
       if (photoMode === "file") {
         if (photoFile) {
+          // Validar tamaño máximo del archivo (5 MB)
+          if (photoFile.size > 5 * 1024 * 1024) {
+            setError("El archivo es demasiado grande. El límite para la foto de perfil es 5 MB.");
+            setSaving(false);
+            return;
+          }
+
           setUploading(true);
-          const storageRef = ref(storage, `avatars/${currentUser.uid}/${photoFile.name}`);
-          const snapshot   = await uploadBytes(storageRef, photoFile);
-          finalPhotoURL    = await getDownloadURL(snapshot.ref);
+          const cleanFileName = photoFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+          const storageRef    = ref(storage, `avatars/${currentUser.uid}/${Date.now()}_${cleanFileName}`);
+          const snapshot      = await uploadBytes(storageRef, photoFile);
+          finalPhotoURL       = await getDownloadURL(snapshot.ref);
           setPhotoURL(finalPhotoURL);
         } else if (!photoURL) {
           finalPhotoURL = undefined;
@@ -85,9 +93,16 @@ export default function AccountWidget() {
       });
       await reloadUser();
       setSuccess("Perfil actualizado correctamente.");
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error al actualizar perfil:", err);
-      setError("No se pudo actualizar el perfil.");
+      const errMsg = err instanceof Error ? err.message : String(err);
+      if (errMsg.includes("storage/unauthorized") || errMsg.includes("permission-denied")) {
+        setError("Error de permisos en Firebase Storage: Asegúrate de tener las reglas activas en la consola de Firebase.");
+      } else if (errMsg.includes("storage/retry-limit-exceeded") || errMsg.includes("network")) {
+        setError("Error de conexión al subir la imagen. Verifica tu red e inténtalo de nuevo.");
+      } else {
+        setError(`No se pudo actualizar el perfil: ${errMsg || "Error desconocido."}`);
+      }
     } finally {
       setSaving(false);
       setUploading(false);
@@ -148,6 +163,7 @@ export default function AccountWidget() {
             width={72}
             height={72}
             className="account-avatar"
+            style={{ width: "auto", height: "auto" }}
           />
         ) : (
           <div className="account-avatar-placeholder" aria-hidden>👤</div>
