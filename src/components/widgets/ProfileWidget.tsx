@@ -9,6 +9,8 @@ interface ProfileWidgetProps {
   name?: string;
   /** Breve descripción / bio */
   bio?: string;
+  /** Título del widget */
+  title?: string;
 }
 
 /**
@@ -20,18 +22,28 @@ export default function ProfileWidget({
   avatarAlt = "Logo del blog / Avatar de Ariri",
   name = "aRIRI",
   bio = "Estudiante de programación ✦ Lectora de Manga GL/Yuri ✦ Anarquista Ⓐ",
+  title = "Sobre mí",
 }: ProfileWidgetProps) {
   return (
-    <section className="profile-section" aria-label="Perfil">
-      <Image
-        src={avatarSrc}
-        alt={avatarAlt}
-        className="profile-avatar"
-        width={90}
-        height={90}
-      />
-      <h2 className="profile-name">{name}</h2>
-      <p className="profile-bio">{bio}</p>
+    <section aria-label="Perfil">
+      <div className="retro-box">
+        <div className="retro-box__header">
+          <span className="retro-box__title">{title}</span>
+        </div>
+        <div className="retro-box__body">
+          <div className="profile-section">
+            <Image
+              src={avatarSrc}
+              alt={avatarAlt}
+              className="profile-avatar"
+              width={90}
+              height={90}
+            />
+            <h2 className="profile-name">{name}</h2>
+            <p className="profile-bio">{bio}</p>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
