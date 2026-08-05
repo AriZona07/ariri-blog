@@ -108,8 +108,14 @@ export default function NewPostPage() {
       });
 
       setSuccess(true);
-    } catch {
-      setError("Error al publicar o subir la imagen. Verifica tu conexión y permisos.");
+    } catch (err: unknown) {
+      console.error("Error al publicar entrada:", err);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      if (errMsg.includes("CORS") || errMsg.toLowerCase().includes("failed to fetch") || errMsg.toLowerCase().includes("network")) {
+        setError("🚫 Error de CORS al subir la imagen a Firebase Storage. Aplica la configuración cors.json en tu proyecto de Firebase/Google Cloud, o utiliza la opción 'Enlace URL Externo'.");
+      } else {
+        setError(`Error al publicar: ${errMsg || "Verifica tu conexión y permisos de admin."}`);
+      }
     } finally {
       setSaving(false);
     }
