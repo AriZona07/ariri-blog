@@ -883,3 +883,128 @@ body::before {
     padding: 0.15rem 0.5rem;
   }
 }
+
+
+/* 19. PAGINACIÓN — estilo manga/ebook (TMO), estética Emo Scene MySpace */
+
+/*
+ * Contenedor principal: fila centrada con separación entre controles.
+ * Para cambiar el espaciado vertical, ajusta padding-block aquí.
+ */
+.pagination-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.1rem 1rem 1.4rem;
+  border-top: 2px solid var(--color-border);
+  background: linear-gradient(180deg, #1a1226 0%, #110e17 100%);
+}
+
+/*
+ * Botones anterior / siguiente con bisel 3D MySpace.
+ * Para cambiar el color de los botones activos, edita el background aquí
+ * y el color de :hover en .pagination-nav__btn:not(:disabled):hover.
+ */
+.pagination-nav__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 36px;
+  padding: 0 0.75rem;
+
+  background: linear-gradient(180deg, #ff1493 0%, #b80058 100%);
+  color: #ffffff;
+  font-size: var(--fs-base);
+  font-weight: bold;
+  font-family: var(--font-main);
+
+  border: 2px solid #000000;
+  border-radius: var(--radius-sm);
+  /* Bisel 3D — da el efecto de botón elevado característico del estilo 2000s */
+  box-shadow: 2px 2px 0px #000000, inset 0 1px 0 rgba(255,255,255,0.25);
+
+  cursor: pointer;
+  text-shadow: 1px 1px 0 #000000;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.12s ease;
+  user-select: none;
+}
+
+.pagination-nav__btn:not(:disabled):hover {
+  background: linear-gradient(180deg, #ff3399 0%, #d6006e 100%);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px #000000, inset 0 1px 0 rgba(255,255,255,0.25);
+  color: #ffffff;
+}
+
+.pagination-nav__btn:not(:disabled):active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px #000000;
+}
+
+/*
+ * Estado deshabilitado (primera o última página).
+ * Para cambiar el color "apagado", edita el background y color aquí.
+ */
+.pagination-nav__btn:disabled {
+  background: linear-gradient(180deg, #3a1030 0%, #220b1d 100%);
+  color: #6b3355;
+  border-color: #3a1030;
+  box-shadow: 1px 1px 0px #000000;
+  cursor: not-allowed;
+  text-shadow: none;
+}
+
+/* Agrupador del input + texto "/ N" */
+.pagination-nav__selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #0c0a10;
+  border: 2px solid var(--color-accent-pink);
+  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.6rem 0.2rem 0.5rem;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.7), 0 0 0 1px #000000;
+}
+
+/*
+ * Campo numérico de selección de página.
+ * Para cambiar el ancho del input, edita width aquí.
+ * Para cambiar el color del texto, edita color.
+ */
+.pagination-nav__input {
+  width: 3ch;           /* Se ajusta al número de dígitos esperados */
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ff66b2;
+  font-family: var(--font-mono);
+  font-size: var(--fs-base);
+  font-weight: bold;
+  text-align: center;
+  caret-color: #ff1493;
+  /* Elimina las flechas del input type=number en todos los navegadores */
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.pagination-nav__input:focus {
+  color: #ffffff;
+}
+
+/* "/ N" — total de páginas */
+.pagination-nav__total {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* Responsive: en móvil los botones se hacen un poco más grandes para touch */
+@media (max-width: 480px) {
+  .pagination-nav__btn {
+    min-width: 44px;
+    height: 40px;
+  }
+}
