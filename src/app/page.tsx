@@ -13,12 +13,15 @@ import matter from "gray-matter";
 import PostList from "@/components/PostList";
 
 export interface Post {
-  slug:    string;
-  title:   string;
-  date:    string;   /* ISO 8601: "YYYY-MM-DD" */
-  mood:    string;
-  song:    string;
-  excerpt: string;
+  slug:       string;
+  title:      string;
+  date:       string;   /* ISO 8601: "YYYY-MM-DD" */
+  mood:       string;
+  song:       string;
+  songCover?: string;
+  cover?:     string;
+  excerpt:    string;
+  content:    string;
 }
 
 /** Lee y ordena todos los posts de /src/content/ */
@@ -33,15 +36,18 @@ function getAllPosts(): Post[] {
   const posts: Post[] = files.map((filename) => {
     const slug    = filename.replace(/\.md$/, "");
     const raw     = fs.readFileSync(path.join(contentDir, filename), "utf-8");
-    const { data } = matter(raw);
+    const { data, content } = matter(raw);
 
     return {
       slug,
-      title:   String(data.title   ?? slug),
-      date:    String(data.date    ?? ""),
-      mood:    String(data.mood    ?? ""),
-      song:    String(data.song    ?? ""),
-      excerpt: String(data.excerpt ?? ""),
+      title:     String(data.title   ?? slug),
+      date:      String(data.date    ?? ""),
+      mood:      String(data.mood    ?? ""),
+      song:      String(data.song    ?? ""),
+      songCover: data.songCover ? String(data.songCover) : undefined,
+      cover:     data.cover ? String(data.cover) : undefined,
+      excerpt:   String(data.excerpt ?? ""),
+      content:   content.trim(),
     };
   });
 

@@ -20,13 +20,24 @@ import { useRef } from "react";
 interface PaginationNavWidgetProps {
   /** Página actualmente visible (1-indexed) */
   currentPage:  number;
-  /** Total de páginas calculado por PostListSection */
+  /** Total de páginas calculado por el padre */
   totalPages:   number;
   /** Callback para cambiar la página en el padre */
   onPageChange: (page: number) => void;
+  /**
+   * Prefijo para los IDs del DOM.
+   * Cambiarlo cuando haya más de una instancia visible a la vez para evitar IDs duplicados.
+   * Por defecto: "pagination".
+   */
+  idPrefix?: string;
 }
 
-export default function PaginationNavWidget({ currentPage, totalPages, onPageChange }: PaginationNavWidgetProps) {
+export default function PaginationNavWidget({
+  currentPage,
+  totalPages,
+  onPageChange,
+  idPrefix = "pagination",
+}: PaginationNavWidgetProps) {
   /* Ref para leer el valor del input al presionar Enter (uncontrolled) */
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -60,7 +71,7 @@ export default function PaginationNavWidget({ currentPage, totalPages, onPageCha
 
       {/* Botón: página anterior */}
       <button
-        id="pagination-prev"
+        id={`${idPrefix}-prev`}
         className="pagination-nav__btn"
         onClick={() => goToPage(currentPage - 1)}
         disabled={isFirst}
@@ -77,7 +88,7 @@ export default function PaginationNavWidget({ currentPage, totalPages, onPageCha
         <input
           key={currentPage}
           ref={inputRef}
-          id="pagination-page-input"
+          id={`${idPrefix}-page-input`}
           className="pagination-nav__input"
           type="text"
           inputMode="numeric"
@@ -92,7 +103,7 @@ export default function PaginationNavWidget({ currentPage, totalPages, onPageCha
 
       {/* Botón: página siguiente */}
       <button
-        id="pagination-next"
+        id={`${idPrefix}-next`}
         className="pagination-nav__btn"
         onClick={() => goToPage(currentPage + 1)}
         disabled={isLast}
