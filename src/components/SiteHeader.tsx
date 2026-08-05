@@ -41,7 +41,11 @@ export default function SiteHeader({
     <>
       <header className="site-header" role="banner">
         <div className="site-header__content">
-          <h1 className="site-header__title">{title}</h1>
+          <h1 className="site-header__title">
+            <Link href="/" className="site-header__title-link">
+              {title}
+            </Link>
+          </h1>
           <p  className="site-header__subtitle">{subtitle}</p>
         </div>
 
@@ -82,6 +86,15 @@ export default function SiteHeader({
 
               {showUserMenu && (
                 <div className="header-user-menu__dropdown" role="menu">
+                  <Link
+                    href="/"
+                    className="header-user-menu__item"
+                    onClick={() => setShowUserMenu(false)}
+                    role="menuitem"
+                    id="header-home-btn"
+                  >
+                    🏠 Inicio
+                  </Link>
                   <Link
                     href="/account"
                     className="header-user-menu__item"

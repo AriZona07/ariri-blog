@@ -1,7 +1,6 @@
 import ProfileWidget      from "@/components/widgets/ProfileWidget";
 import SocialLinksWidget  from "@/components/widgets/SocialLinksWidget";
 import RoleBadgesWidget   from "@/components/widgets/RoleBadgesWidget";
-import GuestbookWidget    from "@/components/widgets/GuestbookWidget";
 
 /**
  * SidebarLeft — Barra lateral izquierda.
@@ -13,7 +12,6 @@ export default function SidebarLeft() {
       <ProfileWidget />
       <SocialLinksWidget />
       <RoleBadgesWidget />
-      <GuestbookWidget />
     </aside>
   );
 }

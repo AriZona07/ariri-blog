@@ -1,5 +1,6 @@
 import MusicPlayerWidget from "@/components/widgets/MusicPlayerWidget";
 import SketchBoardWidget  from "@/components/widgets/SketchBoardWidget";
+import GuestbookWidget   from "@/components/widgets/GuestbookWidget";
 
 /**
  * SidebarRight — Barra lateral derecha.
@@ -10,6 +11,7 @@ export default function SidebarRight() {
     <aside className="sidebar-right" role="complementary" aria-label="Widgets interactivos">
       <MusicPlayerWidget playlistId="PLb_cyNEBFTVA" />
       <SketchBoardWidget />
+      <GuestbookWidget />
     </aside>
   );
 }

@@ -76,6 +76,15 @@
   letter-spacing: 0.02em;
 }
 
+.site-header__title-link {
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+.site-header__title-link:hover {
+  opacity: 0.9;
+}
+
 /* Subtítulo */
 .site-header__subtitle {
   font-size: 1.5rem;
