@@ -356,7 +356,7 @@ body::before {
 
 .profile-name {
   font-family: var(--font-punk);
-  font-size: var(--fs-lg);
+  font-size: var(--fs-xxl);
   color: var(--color-accent-pink);
   text-shadow: 2px 2px 0 #000000;
   margin-bottom: 0.25rem;
