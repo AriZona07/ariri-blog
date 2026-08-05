@@ -186,10 +186,9 @@ Para ver el desglose detallado de arquitectura, implicaciones y planes de acció
 - [x] **SEO & Infraestructura:** Sitemap dinámico estático, metadatos OpenGraph/Twitter Card, `robots.txt` y despliegue continuo en GitHub Pages (`ariri.app`).
 
 ### 🔥 Próxima Funcionalidad Prioritaria (En Desarrollo)
-- [ ] **Sindicación RSS 2.0 (`/feed.xml`):** Ver plan de acción y arquitectura en [`PLANEATION.md`](/PLANEATION.md).
+- [ ] **Ecosistema Dinámico Firebase + RSS 2.0:** Autenticación (Admin/Amigos), Comentarios, Libro de Visitas, Creación de Posts desde Web (`/admin`) y RSS unificado. Ver plan de acción y arquitectura en [`PLANEATION.md`](/PLANEATION.md).
 
 ### 🔮 Ideas & Mejoras Futuras
-- [ ] **Libro de Visitas (Guestbook):** Ver detalles en [`PLANEATION.md`](/PLANEATION.md).
 - [ ] **Resaltado de Sintaxis en Código:** Ver detalles en [`PLANEATION.md`](/PLANEATION.md).
 
 ---
