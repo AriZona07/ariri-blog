@@ -46,6 +46,13 @@ La IA tiene autorización para crear o modificar directamente los siguientes tip
 
 ---
 
+## 🎨 4. Prohibición de Generación de Multimedia con IA
+
+- **Generación de Contenido Multimedia:** Está **totalmente prohibido** generar imágenes, audio o video mediante Inteligencia Artificial (herramientas como `generate_image` u otros generadores sintéticos).
+- **Obtención de Imágenes:** En caso de requerirse una imagen o archivo multimedia, la IA debe buscar/extraer la imagen original existente en la web o solicitarla/usar archivos proporcionados por el usuario, **nunca crearla sintéticamente**.
+
+---
+
 ## 📝 Resumen de Reglas
 
 | Tipo de Tarea / Archivo | ¿La IA puede intervenir? | Condición / Alcance |
@@ -55,3 +62,4 @@ La IA tiene autorización para crear o modificar directamente los siguientes tip
 | **Refactorización / Reorganización** | **SÍ** | Permitida bajo la cláusula de configuración y mantenimiento del proyecto. |
 | **Archivos de Configuración** | **SÍ** | Cuando sea necesario configurar o ajustar el entorno del proyecto. |
 | **Documentación (`README.md`, `*.md`)** | **SÍ** | Para mantener actualizada la información técnica del repositorio. |
+| **Generación de Multimedia (IA)** | **NO** | **Totalmente prohibido** generar imágenes, audio o video con IA. Extraer de la web o usar originales del usuario. |

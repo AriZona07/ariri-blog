@@ -19,7 +19,7 @@ export default function ProfileWidget({
   avatarSrc = "/android-chrome-192x192.png",
   avatarAlt = "Logo del blog / Avatar de Ariri",
   name = "aRIRI",
-  bio = "Estudiante de programación · Lectora de manga GL · Anarquista Ⓐ",
+  bio = "Estudiante de programación ✦ Lectora de Manga GL/Yuri ✦ Anarquista Ⓐ",
 }: ProfileWidgetProps) {
   return (
     <section className="profile-section" aria-label="Perfil">

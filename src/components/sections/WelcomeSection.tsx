@@ -1,37 +1,41 @@
+import Image from "next/image";
+
 interface WelcomeSectionProps {
-  /** Estado de ánimo actual (opcional) */
-  mood?: string;
   /** Canción que se está escuchando (opcional) */
   listening?: string;
 }
 
 /**
- * WelcomeSection — Bloque de bienvenida con mood y canción actual.
- * Se muestra al inicio de la página principal.
- */
+  * WelcomeSection — Bloque de bienvenida con canción actual.
+  * Se muestra al inicio de la página principal.
+  */
 export default function WelcomeSection({
-  mood      = "nostálgica y con café",
-  listening = "Paramore - Misery Business",
+  listening = "Muñecas - Dillom",
 }: WelcomeSectionProps) {
   return (
     <section aria-label="Bienvenida">
       <div className="retro-box">
         <div className="retro-box__header">
-          <span className="retro-box__title">✨ ¡Bienvenidx al blog!</span>
+          <span className="retro-box__title">★ ¡Buenas! Bienvenidx a mi blog ★</span>
         </div>
         <div className="retro-box__body">
           <p className="welcome-text" style={{ color: "var(--color-text-secondary)" }}>
-            Este es mi rincón personal en la web. Escribo sobre videojuegos, manga GL,
-            software libre, filosofía anarquista y lo que se me ocurra. ¡Espero que
-            encuentres algo que te guste! 🦇✦
+            ✦ ¡Bienvenidx a mi Blog :D! Acá vas a encontrar posts sobre Videojuegos, GL/Yuri, 
+            y cosas random que se me ocurren en el día. Pásale y ponte cómodx 🦇✦
           </p>
-          <p style={{ marginTop: "0.6rem", fontSize: "var(--fs-xs)", color: "var(--color-text-muted)", fontStyle: "italic" }}>
-            <span>💭 Mood actual:</span> <strong>{mood}</strong>
-            {" · "}
-            <span>🎵 Escuchando:</span> <strong>{listening}</strong>
-          </p>
+          <div style={{ marginTop: "0.8rem", display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "var(--fs-xs)", color: "var(--color-text-muted)" }}>
+            <Image
+              src="/dillom_por_cesarea.png"
+              alt="Portada Por Cesárea - Dillom"
+              width={22}
+              height={22}
+              style={{ borderRadius: "3px", objectFit: "cover", display: "inline-block" }}
+            />
+            <span>Escuchando: <strong style={{ color: "var(--color-text-primary)" }}>{listening}</strong></span>
+          </div>
         </div>
       </div>
     </section>
   );
 }
+
