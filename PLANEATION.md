@@ -7,6 +7,10 @@ Este archivo contiene el registro de características, funciones y mejoras plani
 > 1. Cada vez que se solicite o elabore una planeación técnica o de diseño para una nueva funcionalidad, las notas, arquitectura y plan de acción deben registrarse en este archivo.
 > 2. **LA IA NO TIENE PERMITIDO BORRAR O ELIMINAR SECCIONES DE ESTE ARCHIVO.** La única persona autorizada para borrar o remover una sección es el **programador/usuario humano** (por ejemplo, cuando se decida descartar una idea o cuando una característica se haya implementado por completo y no se requiera mantener la planeación).
 
+> [!NOTE]
+> **ESTADO ACTUAL DEL PROYECTO (FASE ACTIVA):**
+> Se ha ingresado oficialmente a la **Fase de Solución de Errores y Afinamiento de la Implementación**. Esta etapa está enfocada en corregir bugs, pulir la experiencia de usuario (UX/UI), optimizar el comportamiento de los componentes existentes (Firebase Auth, Firestore, Notificaciones, Perfiles, RSS) y asegurar la estabilidad general antes del despliegue final.
+
 ---
 
 ## 📻 1. Futuro Cercano (Prioritario)
@@ -107,6 +111,24 @@ Implementación de un **JAMstack Híbrido** combinando la compilación estática
 7. **Route Handler RSS 2.0:** Creación de `src/app/feed.xml/route.ts` unificando Markdown local + Firestore (dinámico en Vercel).
 8. **Migración a Vercel:** Actualizar `next.config.ts` (quitar `output: 'export'`), configurar variables de entorno en Vercel Dashboard y desconectar GitHub Pages.
 9. **Pruebas y Verificación:** `npm run build` sin errores y comprobación del sitio en Vercel.
+
+---
+
+#### 🛠️ 6. Fase Activa: Solución de Errores y Afinamiento de la Implementación
+
+Con las características principales estructuradas, la atención del proyecto pasa formalmente a esta fase de pulido y verificación:
+
+- **🐞 Depuración y Corrección de Bugs:**
+  - Resolución de errores en manejo de imágenes externas e imágenes de perfil con Next.js `Image` (`remotePatterns`).
+  - Validación de estados de sesión y persistencia en Firebase Auth (`onAuthStateChanged`).
+  - Manejo de excepciones en escrituras/lecturas de Cloud Firestore y Firebase Storage.
+- **🎨 Afinamiento Estético y de UX:**
+  - Pulido de la interfaz visual retro Emo/Scene 2000s en modales, widgets y avisos toast.
+  - Verificación de responsividad en móviles y pantallas de diferentes tamaños.
+  - Asegurar mensajes de error claros y amigables para el usuario.
+- **⚡ Optimización y Verificación:**
+  - Revisión estricta de tipos TypeScript y cero advertencias de compilación (`npm run build`).
+  - Verificación de rendimiento y prevención de renders innecesarios.
 
 ---
 
