@@ -110,6 +110,9 @@ body {
   overflow-x: hidden;
   background-color: var(--color-bg-page);
 
+  overflow-wrap: anywhere; /* Prevent long words from breaking layout */
+  word-break: break-word;
+
   /* Fondo Emo Scene */
   background-image: url('/backgrounds/emo_scene_pink_bg_256px.png');
   background-repeat: repeat; /* Para que se repita como mosaico si es un patrón */
@@ -843,7 +846,8 @@ body::before {
       "content"
       "sidebar-left"
       "sidebar-right";
-    grid-template-columns: 1fr;
+    /* Usar minmax(0, 1fr) evita que el contenido largo desborde el contenedor cortándose a la derecha */
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .sidebar-left,
