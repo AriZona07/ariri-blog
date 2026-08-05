@@ -20,6 +20,7 @@
   margin-left: auto;
   padding: 0 0.75rem;
   flex-shrink: 0;
+  z-index: 200;
 }
 
 /* Contenedor del menú desplegable de usuario */

@@ -16,7 +16,7 @@
   padding: 2rem 2rem 1.6rem;
   text-align: center;
   position: relative;
-  overflow: hidden;
+  z-index: 100;
 
   /* Flex para ubicar el botón de auth en la esquina sin romper el centrado */
   display: flex;

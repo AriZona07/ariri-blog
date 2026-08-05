@@ -26,17 +26,19 @@ import { auth } from "@/lib/firebase";
 /* --- Tipos del contexto --- */
 
 interface AuthContextValue {
-  user:    User | null;
-  isAdmin: boolean;
-  loading: boolean;
+  user:       User | null;
+  isAdmin:    boolean;
+  loading:    boolean;
+  reloadUser: () => Promise<void>;
 }
 
 /* --- Creación del contexto con valores por defecto seguros --- */
 
 const AuthContext = createContext<AuthContextValue>({
-  user:    null,
-  isAdmin: false,
-  loading: true,
+  user:       null,
+  isAdmin:    false,
+  loading:    true,
+  reloadUser: async () => {},
 });
 
 /* --- Provider: envuelve la app en layout.tsx --- */
@@ -45,6 +47,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user,    setUser]    = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Recarga el objeto de usuario desde Firebase Auth para actualizar photoURL, displayName, etc. en tiempo real
+  async function reloadUser() {
+    if (auth.currentUser) {
+      await auth.currentUser.reload();
+      // Forzar una nueva referencia del objeto user para actualizar los componentes dependientes
+      setUser(Object.assign(Object.create(Object.getPrototypeOf(auth.currentUser)), auth.currentUser));
+    }
+  }
 
   useEffect(() => {
     // onAuthStateChanged dispara en login, logout y recarga de página
@@ -66,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAdmin, loading }}>
+    <AuthContext.Provider value={{ user, isAdmin, loading, reloadUser }}>
       {children}
     </AuthContext.Provider>
   );

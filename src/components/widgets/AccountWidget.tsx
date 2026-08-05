@@ -25,7 +25,7 @@ import { storage }                           from "@/lib/firebase";
 import { useAuth }                           from "@/lib/auth-context";
 
 export default function AccountWidget() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, reloadUser } = useAuth();
 
   // Campos del formulario
   const [displayName, setDisplayName] = useState(user?.displayName ?? "");
@@ -62,8 +62,10 @@ export default function AccountWidget() {
         displayName: displayName.trim() || currentUser.displayName,
         photoURL:    photoURL.trim()    || undefined,
       });
+      await reloadUser();
       setSuccess("Perfil actualizado correctamente.");
-    } catch {
+    } catch (err) {
+      console.error("Error al actualizar perfil:", err);
       setError("No se pudo actualizar el perfil.");
     } finally {
       setSaving(false);
@@ -76,13 +78,21 @@ export default function AccountWidget() {
     if (!file) return;
     setUploading(true);
     setError(null);
+    setSuccess(null);
     try {
       // Ruta: avatars/{uid}/{filename}
       const storageRef = ref(storage, `avatars/${currentUser.uid}/${file.name}`);
       const snapshot   = await uploadBytes(storageRef, file);
       const url        = await getDownloadURL(snapshot.ref);
       setPhotoURL(url);
-    } catch {
+      await updateProfile(currentUser, {
+        displayName: displayName.trim() || currentUser.displayName,
+        photoURL:    url,
+      });
+      await reloadUser();
+      setSuccess("Imagen subida y perfil actualizado con éxito.");
+    } catch (err) {
+      console.error("Error al subir imagen:", err);
       setError("No se pudo subir la imagen.");
     } finally {
       setUploading(false);
