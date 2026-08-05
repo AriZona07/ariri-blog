@@ -305,7 +305,7 @@ body::before {
 .site-body {
   display: grid;
   grid-template-areas: "sidebar-left content sidebar-right";
-  grid-template-columns: 1fr minmax(0, 3fr) 1fr;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 3fr) minmax(0, 1.65fr);
   gap: 0;
   align-items: stretch;
   min-height: 400px;
@@ -441,6 +441,9 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: var(--gap-lg);
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 /* 12. CAJAS RETRO — borde Hot Pink + fondo oscuro */
@@ -450,6 +453,10 @@ body::before {
   background: var(--color-bg-box);
   box-shadow: var(--shadow-heavy);
   overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .retro-box__header {
@@ -672,6 +679,11 @@ body::before {
   padding: 0.75rem;
   border: 2px solid var(--color-accent-pink);
   box-shadow: 2px 2px 0px #000000;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .music-player__screen {
@@ -686,6 +698,10 @@ body::before {
   flex-direction: row;      /* portada a la izquierda, texto a la derecha */
   align-items: stretch;
   overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Contenedor de la portada — izquierda del recuadro */
@@ -711,6 +727,9 @@ body::before {
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
+  min-width: 0; /* Previene desbordamiento en flexbox */
+  width: 0;     /* Fuerza a flexbox a no calcular min-content a partir del hijo */
+  max-width: 100%;
   padding: 0.5rem 0.5rem;
 }
 
@@ -727,9 +746,13 @@ body::before {
   font-family: var(--font-mono);
   font-size: var(--fs-sidebar-detail);
   font-weight: bold;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
+  display: inline-block;
+}
+
+/* Marquee independiente para el título: solo se activa cuando desborda */
+.music-player__track--marquee {
+  animation: title-marquee-scroll 12s linear infinite;
 }
 
 .music-player__controls {
@@ -856,6 +879,22 @@ body::before {
 @keyframes marquee-scroll {
   0%   { transform: translateX(100%); }
   100% { transform: translateX(-100%); }
+}
+
+/* Animación de marquee con pausa inicial de 2s para el título */
+@keyframes title-marquee-scroll {
+  0%, 16.66% {
+    transform: translateX(0);
+  }
+  58.33% {
+    transform: translateX(-100%);
+  }
+  58.34% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 

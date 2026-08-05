@@ -80,8 +80,11 @@ export default function MusicPlayer({
   const [isShuffled,   setIsShuffled]   = useState<boolean>(false);
   const [shuffleOrder,  setShuffleOrder]  = useState<number[]>([]);
   const [thumbnailUrl,  setThumbnailUrl]  = useState<string>("");
+  const [isTrackOverflowing, setIsTrackOverflowing] = useState<boolean>(false);
 
   const playerRef = useRef<YTPlayer | null>(null);
+  const screenTextRef = useRef<HTMLDivElement | null>(null);
+  const trackRef = useRef<HTMLSpanElement | null>(null);
 
   /* ─── Helpers ─────────────────────────────────────────────────────────── */
 
@@ -143,6 +146,21 @@ export default function MusicPlayer({
       console.log("Error al obtener títulos de la lista:", e);
     }
   }, []);
+
+  /* Detecta si el título excede el ancho disponible en la pantalla LCD */
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (trackRef.current && screenTextRef.current) {
+        setIsTrackOverflowing(
+          trackRef.current.scrollWidth > screenTextRef.current.clientWidth
+        );
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener("resize", checkOverflow);
+    return () => window.removeEventListener("resize", checkOverflow);
+  }, [songTitle, isReady]);
 
   /* ─── Inicialización del player ───────────────────────────────────────── */
 
@@ -330,13 +348,17 @@ export default function MusicPlayer({
           </div>
         )}
         {/* Estado y título de la pista */}
-        <div className="music-player__screen-text">
+        <div className="music-player__screen-text" ref={screenTextRef}>
           <span className="music-player__marquee">
             {isPlaying
               ? "♪ ♫ Reproduciendo audio de YouTube Music ♫ ♪"
               : "♪ ♫ Pausado — Presiona ▶ para reproducir ♫ ♪"}
           </span>
-          <span className="music-player__track">
+          <span
+            key={songTitle}
+            ref={trackRef}
+            className={`music-player__track${isTrackOverflowing ? " music-player__track--marquee" : ""}`}
+          >
             {isReady ? songTitle : "Cargando reproductor..."}
           </span>
         </div>
