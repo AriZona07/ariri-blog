@@ -58,40 +58,70 @@
   100% { transform: scale(1); }
 }
 
-/* ─── Panel Desplegable de Notificaciones ─── */
-.notification-dropdown {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  width: 310px;
-  max-height: 400px;
+/* ─── Modal Pop-up Global de Notificaciones ─── */
+.notification-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: auth-fade-in 0.18s ease;
+}
+
+.notification-modal {
+  width: 100%;
+  max-width: 440px;
+  max-height: 80vh;
   background: var(--color-bg-box);
   border: 2px solid var(--color-accent-pink);
   border-radius: var(--radius-md);
-  box-shadow: 4px 4px 0px #000;
-  z-index: 950;
+  box-shadow: 6px 6px 0px #000, 0 0 25px rgba(255, 20, 147, 0.35);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: auth-fade-in 0.15s ease;
+  position: relative;
+  z-index: 1001;
 }
 
-.notification-dropdown__header {
+.notification-modal__header {
   background: var(--color-bg-sidebar);
   border-bottom: 2px solid var(--color-border);
-  padding: 0.6rem 0.85rem;
+  padding: 0.75rem 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.notification-dropdown__title {
-  font-family: var(--font-main);
-  font-size: var(--fs-xs);
+.notification-modal__title {
+  font-family: var(--font-punk);
+  font-size: var(--fs-base);
   color: var(--color-accent-pink);
-  font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.notification-modal__close-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 0.2rem;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.notification-modal__close-btn:hover {
+  color: var(--color-accent-pink);
+}
+
+.notification-modal__list {
+  overflow-y: auto;
+  max-height: calc(80vh - 60px);
 }
 
 .notification-dropdown__clear-btn {
@@ -105,11 +135,6 @@
 }
 .notification-dropdown__clear-btn:hover {
   color: var(--color-accent-pink);
-}
-
-.notification-dropdown__list {
-  overflow-y: auto;
-  max-height: 320px;
 }
 
 .notification-dropdown__empty {

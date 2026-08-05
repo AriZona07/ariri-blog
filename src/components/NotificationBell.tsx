@@ -88,16 +88,27 @@ export default function NotificationBell() {
     return () => unsubscribe();
   }, [user, router]);
 
-  // Cerrar menú al hacer clic fuera
+  // Bloquear scroll del body cuando el modal de notificaciones está abierto
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+    if (!isOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isOpen]);
+
+  // Cerrar al presionar Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
         setIsOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
 
   // Calcular cantidad de no leídas
   const unreadCount = notifications.filter((n) => {
@@ -140,59 +151,80 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {/* Menú desplegable */}
+      {/* Modal Pop-up Global de Notificaciones */}
       {isOpen && (
-        <div className="notification-dropdown" role="menu">
-          <div className="notification-dropdown__header">
-            <span className="notification-dropdown__title">🔔 Notificaciones</span>
-            {notifications.length > 0 && (
-              <button
-                type="button"
-                className="notification-dropdown__clear-btn"
-                onClick={handleMarkAllRead}
-              >
-                Marcar leídas
-              </button>
-            )}
-          </div>
-
-          <div className="notification-dropdown__list">
-            {notifications.length === 0 ? (
-              <div className="notification-dropdown__empty">
-                No hay notificaciones recientes.
-              </div>
-            ) : (
-              notifications.map((item) => {
-                const itemTime = item.createdAt instanceof Date ? item.createdAt.getTime() : 0;
-                const isUnread = itemTime > lastReadTime;
-
-                return (
-                  <Link
-                    key={item.id}
-                    href={item.postSlug ? `/?post=${item.postSlug}` : "/"}
-                    className={`notification-item ${isUnread ? "notification-item--unread" : ""}`}
-                    onClick={() => setIsOpen(false)}
-                    role="menuitem"
+        <div
+          className="notification-modal-overlay"
+          onClick={() => setIsOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Notificaciones del blog"
+        >
+          <div
+            className="notification-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="notification-modal__header">
+              <span className="notification-modal__title">🔔 Notificaciones</span>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                {notifications.length > 0 && (
+                  <button
+                    type="button"
+                    className="notification-dropdown__clear-btn"
+                    onClick={handleMarkAllRead}
                   >
-                    <span className="notification-item__icon" aria-hidden>📰</span>
-                    <div className="notification-item__content">
-                      <div className="notification-item__title">{item.title}</div>
-                      <div className="notification-item__message">{item.message}</div>
-                      <div className="notification-item__date">
-                        {item.createdAt instanceof Date
-                          ? item.createdAt.toLocaleDateString("es-MX", {
-                              month: "short",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })
-                          : ""}
+                    Marcar leídas
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="notification-modal__close-btn"
+                  onClick={() => setIsOpen(false)}
+                  aria-label="Cerrar notificaciones"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <div className="notification-modal__list">
+              {notifications.length === 0 ? (
+                <div className="notification-dropdown__empty">
+                  No hay notificaciones recientes.
+                </div>
+              ) : (
+                notifications.map((item) => {
+                  const itemTime = item.createdAt instanceof Date ? item.createdAt.getTime() : 0;
+                  const isUnread = itemTime > lastReadTime;
+
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.postSlug ? `/?post=${item.postSlug}` : "/"}
+                      className={`notification-item ${isUnread ? "notification-item--unread" : ""}`}
+                      onClick={() => setIsOpen(false)}
+                      role="menuitem"
+                    >
+                      <span className="notification-item__icon" aria-hidden>📰</span>
+                      <div className="notification-item__content">
+                        <div className="notification-item__title">{item.title}</div>
+                        <div className="notification-item__message">{item.message}</div>
+                        <div className="notification-item__date">
+                          {item.createdAt instanceof Date
+                            ? item.createdAt.toLocaleDateString("es-MX", {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                            : ""}
+                        </div>
                       </div>
-                    </div>
-                  </Link>
-                );
-              })
-            )}
+                    </Link>
+                  );
+                })
+              )}
+            </div>
           </div>
         </div>
       )}
