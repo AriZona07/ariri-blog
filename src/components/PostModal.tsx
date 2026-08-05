@@ -111,7 +111,7 @@ export default function PostModal({ posts, currentIndex, onClose, onNavigate }: 
 
         {/* Cuerpo scrolleable */}
         <div className="post-modal__body">
-          <p className="welcome-text" style={{ color: "var(--color-text-secondary)", marginBottom: "1rem" }}>
+          <p className="welcome-text" style={{ color: "var(--color-text-secondary)", marginBottom: "1rem", whiteSpace: "pre-wrap" }}>
             {post.content || post.excerpt}
           </p>
 
