@@ -8,7 +8,7 @@ import SketchBoardWidget  from "@/components/widgets/SketchBoardWidget";
 export default function SidebarRight() {
   return (
     <aside className="sidebar-right" role="complementary" aria-label="Widgets interactivos">
-      <MusicPlayerWidget />
+      <MusicPlayerWidget playlistId="PLb_cyNEBFTVA" />
       <SketchBoardWidget />
     </aside>
   );
