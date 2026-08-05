@@ -1,0 +1,104 @@
+/**
+ * header.css — Estilos del Encabezado del Sitio
+ *
+ * Incluye título estilo punk, subtítulo con fondo semitransparente,
+ * franja decorativa punteada y símbolos de adorno.
+ */
+
+.site-header {
+  background-color: var(--color-bg-header);
+  /* Fondo Emo Scene */
+  background-image: url('/backgrounds/emo_scene_green_bg_256px.png');
+  background-repeat: repeat;
+  background-position: top left;
+
+  border-bottom: 4px solid var(--color-accent-pink);
+  padding: 2rem 2rem 1.6rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Franja decorativa punteada en la parte superior */
+.site-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    #ff1493 0px,
+    #ff1493 12px,
+    #000000 12px,
+    #000000 24px
+  );
+}
+
+/* Símbolos decorativos en esquina inferior derecha */
+.site-header::after {
+  content: "★彡 ☠ 彡★";
+  position: absolute;
+  bottom: 0.5rem;
+  right: 1.2rem;
+  font-size: 1.2rem;
+  color: var(--color-accent-pink);
+  font-weight: bold;
+  letter-spacing: 0.25em;
+}
+
+/* Título: Hot Pink con sombra 3D */
+.site-header__title {
+  font-family: var(--font-punk);
+  font-size: 4rem;
+  color: var(--color-accent-pink);
+  line-height: 1.1;
+  text-shadow:
+    3px 3px 0px #000000,
+    -1px -1px 0px #000000,
+    1px -1px 0px #000000,
+    -1px 1px 0px #000000,
+    1px 1px 0px #000000;
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.02em;
+}
+
+/* Subtítulo */
+.site-header__subtitle {
+  font-size: 1.5rem;
+  color: #ffffff;
+  font-style: italic;
+  letter-spacing: 0.08em;
+  font-weight: bold;
+
+  /* Fondo negro con opacidad para contraste */
+  background-color: rgba(0, 0, 0, 0.75);
+  padding: 0.2rem 0.8rem;
+  border-radius: 8px;
+  display: inline-block;
+
+  /* Sombra de texto 3D Hot Pink */
+  text-shadow:
+    -1px -1px 0 #ff1493,
+     1px -1px 0 #ff1493,
+    -1px  1px 0 #ff1493,
+     1px  1px 0 #ff1493;
+}
+
+/* Responsive Header */
+@media (max-width: 768px) {
+  .site-header__title {
+    font-size: 2.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .site-header {
+    padding: 1.25rem 1rem 1rem;
+  }
+
+  .site-header__title {
+    font-size: 2.2rem;
+  }
+}

@@ -1,0 +1,353 @@
+/**
+ * posts.css — Publicaciones, Tarjetas, Modal Popup y Paginación
+ *
+ * Estilos para la presentación de los artículos en la lista principal,
+ * el recuadramiento/clamp con fade gradiente, la ventana modal de lectura completa
+ * y los controles de paginación estilo manga.
+ */
+
+/* --- 1. TEXTO DE CUERPO DE LAS PUBLICACIONES --- */
+.welcome-text,
+.post-content p {
+  font-size: 1.4rem;
+  line-height: 1.75;
+}
+
+/* Fondo verde emo scene para el texto en el modal de lectura */
+.post-modal .welcome-text {
+  background-color: rgba(0, 55, 28, 0.88);
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+}
+
+
+/* --- 2. TARJETAS DE POST (.post-card) --- */
+.post-card {
+  border: 2px solid var(--color-accent-pink);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-box);
+  box-shadow: var(--shadow-heavy);
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.95);
+}
+
+.post-card__header {
+  background: linear-gradient(90deg, #32122b 0%, #1c0a18 100%);
+  padding: 0.9rem 1.2rem;
+  border-bottom: 2px solid var(--color-accent-pink);
+}
+
+.post-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.post-card__meta-item {
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-weight: 600;
+}
+
+.post-card__meta-icon {
+  margin-right: 0.2rem;
+}
+
+.post-card__title {
+  font-family: var(--font-punk);
+  font-size: 2.2rem;
+  color: var(--color-accent-pink);
+  line-height: 1.2;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.post-card__title a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.post-card__title a:hover {
+  color: #ffffff;
+  background-color: var(--color-accent-pink);
+  padding: 0 4px;
+}
+
+.post-card__body {
+  padding: 1.1rem;
+}
+
+.post-card__excerpt {
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin-bottom: 1.1rem;
+}
+
+/* Botón "Leer más" con bisel 3D */
+.post-card__read-more {
+  display: inline-block;
+  padding: 0.45rem 1.2rem;
+  background: linear-gradient(180deg, #ff1493 0%, #b80058 100%);
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  font-weight: bold;
+  border: 1px solid #ffffff;
+  box-shadow: 2px 2px 0px #000000;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.post-card__read-more:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px #000000;
+  color: #ffffff;
+  background: linear-gradient(180deg, #ff3399 0%, #d6006e 100%);
+  text-decoration: none;
+}
+
+.post-card__read-more:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px #000000;
+}
+
+/* Clamp de contenido con gradiente de desvanecimiento */
+.post-card__content-clamp {
+  max-height: 14rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.post-card__content-clamp::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 5rem;
+  background: linear-gradient(to bottom, transparent 0%, var(--color-bg-box) 100%);
+  pointer-events: none;
+}
+
+
+/* --- 3. MODAL POPUP DE LECTURA (.post-modal) --- */
+.post-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.post-modal {
+  position: relative;
+  width: 100%;
+  max-width: 820px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  background: var(--color-bg-container);
+  background-image: url('/backgrounds/emo_scene_gray_bg_horizontal.png');
+  background-repeat: repeat;
+  border: 4px double var(--color-accent-pink);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-heavy), 0 0 0 4px #000000;
+}
+
+.post-modal__close {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.6rem;
+  z-index: 2;
+
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: transparent;
+  border: 2px solid var(--color-accent-pink);
+  border-radius: var(--radius-sm);
+  color: var(--color-accent-pink);
+  font-size: var(--fs-base);
+  font-weight: bold;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.post-modal__close:hover {
+  background: var(--color-accent-pink);
+  color: #ffffff;
+}
+
+.post-modal__header {
+  background: linear-gradient(90deg, #32122b 0%, #1c0a18 100%);
+  padding: 0.9rem 3rem 0.9rem 1.2rem;
+  border-bottom: 2px solid var(--color-accent-pink);
+  flex-shrink: 0;
+}
+
+.post-modal__title {
+  font-family: var(--font-punk);
+  font-size: 2.6rem;
+  color: var(--color-accent-pink);
+  line-height: 1.2;
+  text-shadow: 1px 1px 0 #000;
+  margin-top: 0.4rem;
+}
+
+.post-modal__body {
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent-pink) #0c0a10;
+}
+
+.post-modal__body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.post-modal__body::-webkit-scrollbar-track {
+  background: #0c0a10;
+}
+
+.post-modal__body::-webkit-scrollbar-thumb {
+  background: var(--color-accent-pink);
+  border-radius: 3px;
+}
+
+.post-modal__nav {
+  flex-shrink: 0;
+  border-top: 2px solid var(--color-border);
+}
+
+
+/* --- 4. PAGINACIÓN RETRO (.pagination-nav) --- */
+.pagination-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.1rem 1rem 1.4rem;
+  border-top: 2px solid var(--color-border);
+  background: linear-gradient(180deg, #1a1226 0%, #110e17 100%);
+}
+
+.pagination-nav__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 36px;
+  padding: 0 0.75rem;
+
+  background: linear-gradient(180deg, #ff1493 0%, #b80058 100%);
+  color: #ffffff;
+  font-size: var(--fs-base);
+  font-weight: bold;
+  font-family: var(--font-main);
+
+  border: 2px solid #000000;
+  border-radius: var(--radius-sm);
+  box-shadow: 2px 2px 0px #000000, inset 0 1px 0 rgba(255,255,255,0.25);
+
+  cursor: pointer;
+  text-shadow: 1px 1px 0 #000000;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.12s ease;
+  user-select: none;
+}
+
+.pagination-nav__btn:not(:disabled):hover {
+  background: linear-gradient(180deg, #ff3399 0%, #d6006e 100%);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px #000000, inset 0 1px 0 rgba(255,255,255,0.25);
+  color: #ffffff;
+}
+
+.pagination-nav__btn:not(:disabled):active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px #000000;
+}
+
+.pagination-nav__btn:disabled {
+  background: linear-gradient(180deg, #3a1030 0%, #220b1d 100%);
+  color: #6b3355;
+  border-color: #3a1030;
+  box-shadow: 1px 1px 0px #000000;
+  cursor: not-allowed;
+  text-shadow: none;
+}
+
+.pagination-nav__selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #0c0a10;
+  border: 2px solid var(--color-accent-pink);
+  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.6rem 0.2rem 0.5rem;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.7), 0 0 0 1px #000000;
+}
+
+.pagination-nav__input {
+  width: 3ch;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ff66b2;
+  font-family: var(--font-mono);
+  font-size: var(--fs-base);
+  font-weight: bold;
+  text-align: center;
+  caret-color: #ff1493;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.pagination-nav__input:focus {
+  color: #ffffff;
+}
+
+.pagination-nav__total {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* Responsive Modal y Paginación */
+@media (max-width: 480px) {
+  .pagination-nav__btn {
+    min-width: 44px;
+    height: 40px;
+  }
+
+  .post-modal-overlay {
+    padding: 0.75rem;
+  }
+
+  .post-modal__body {
+    padding: 1rem;
+  }
+
+  .post-modal__title {
+    font-size: var(--fs-lg);
+  }
+}

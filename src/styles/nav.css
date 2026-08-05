@@ -1,0 +1,38 @@
+/**
+ * nav.css — Estilos de la Barra de Navegación
+ *
+ * Barra principal con gradiente rosa Hot Pink y enlaces interactivos.
+ */
+
+.site-nav {
+  background: linear-gradient(90deg, #d6006e 0%, #b80058 50%, #990049 100%);
+  border-bottom: 3px solid #000000;
+  padding: 0 1rem;
+}
+
+.site-nav__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+}
+
+.site-nav__link {
+  display: inline-block;
+  padding: 0.65rem 1.2rem;
+  color: var(--color-text-nav);
+  text-decoration: none;
+  font-size: var(--fs-sm);
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+  text-shadow: 1px 1px 0 #000;
+}
+
+.site-nav__link:hover,
+.site-nav__link.active {
+  background-color: #000000;
+  color: var(--color-accent-pink);
+  text-decoration: none;
+  padding-top: 0.65rem;
+}

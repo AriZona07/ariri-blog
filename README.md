@@ -66,7 +66,7 @@ El diseño busca replicar la experiencia retro de blogs de los años 2000 (Blogg
   - **Paleta de Colores:** Uso agresivo de fondos oscuros (Negro absoluto ![#000000](https://placehold.co/15x15/000000/000000.png), Carbón ![#16131d](https://placehold.co/15x15/16131d/16131d.png)) fuertemente contrastados con acentos vibrantes en **Hot Pink (#ff1493)** ![#ff1493](https://placehold.co/15x15/ff1493/ff1493.png), **Magenta (#b80058)** ![#b80058](https://placehold.co/15x15/b80058/b80058.png) y **Verdes** oscuros/neón ![#006644](https://placehold.co/15x15/006644/006644.png).
   - **Patrones y Texturas:** Cuadrículas (checkerboards) combinando negros, rosas y verdes, texturas de rayas diagonales y capas de pequeños puntos.
   - **Elementos UI:** Sombras de texto sólidas (efecto 3D tipo MySpace), contenedores flotantes con bordes gruesos y dobles, botones con bisel marcado y contornos (strokes) en las tipografías.
-- **Archivos de Estilo:** CSS Puro estándar (sin `.module.css`), gestionado centralmente en `src/styles/retro.css`.
+- **Archivos de Estilo:** CSS Puro estándar (sin `.module.css`), gestionado en `src/styles/globals.css` e importando módulos por categoría (`header.css`, `nav.css`, `layout.css`, `widgets.css`, `posts.css`, `footer.css`).
 - **Temática e Intereses Personales:**
   - 🎮 **Videojuegos:** Minecraft, Roblox, Hollow Knight.
   - 📖 **Manga / GL:** *"El Chico Que Me Gusta No Es Un Chico"*, contenido GL / Sáficos en general.
@@ -86,9 +86,14 @@ src/
 │   ├── page.tsx
 │   └── sitemap.ts
 │
-├── styles/               <-- Tu CSS organizado
-│   ├── globals.css       (Mueves globals.css aquí)
-│   └── retro.css         (Tus estilos 2000s)
+├── styles/               <-- CSS organizado por categorías
+│   ├── globals.css       (Variables, reset, mouse, scrollbar y wrapper global)
+│   ├── header.css        (Estilos del encabezado)
+│   ├── nav.css           (Barra de navegación)
+│   ├── layout.css        (Grid 3 columnas, sidebars y contenedores retro)
+│   ├── widgets.css       (Perfil, redes, badges, reproductor de música y pizarrón)
+│   ├── posts.css         (Tarjetas de post, recortes, modal de lectura y paginación)
+│   └── footer.css        (Pie de página y banners 88x31)
 │
 ├── components/           <-- Tus componentes React (Widgets, Navbar, etc.)
 │   ├── Guestbook.tsx

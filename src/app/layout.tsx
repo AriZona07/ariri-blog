@@ -8,7 +8,6 @@
 
 import type { Metadata } from "next";
 import "@/styles/globals.css";
-import "@/styles/retro.css";
 
 import SiteHeader   from "@/components/SiteHeader";
 import SidebarLeft  from "@/components/SidebarLeft";

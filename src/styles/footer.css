@@ -1,0 +1,55 @@
+/**
+ * footer.css — Estilos del Pie de Página (Site Footer)
+ *
+ * Incluye créditos, información de copyright y tiras de banners 88x31 retro.
+ */
+
+.site-footer {
+  background: var(--color-bg-footer);
+  border-top: 4px solid var(--color-accent-pink);
+  padding: 1.25rem 2rem;
+  text-align: center;
+}
+
+.site-footer__text {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+
+.banner-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+}
+
+/* Banners 88x31 estilo web 2000s / MySpace */
+.banner-88x31 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 31px;
+  border: 1px solid #000000;
+  border-radius: 2px;
+  overflow: hidden;
+  font-size: 9px;
+  background: linear-gradient(135deg, #b80058, #4a0023);
+  color: #ffffff;
+  font-weight: bold;
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  box-shadow: 1px 1px 0px #000;
+  transition: transform 0.15s ease, background 0.15s ease;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.banner-88x31:hover {
+  background: #ff1493;
+  color: #ffffff;
+  text-decoration: none;
+}

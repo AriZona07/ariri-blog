@@ -1,17 +1,329 @@
 /**
- * globals.css — Estilos base de Next.js
+ * globals.css — Estilos Globales del Sitio
  *
- * Rol mínimo: retro.css se encarga del reset completo y los estilos visuales.
- * Nota: El sitio está diseñado para un tema oscuro.
- *
- * El orden de importación en layout.tsx:
- *   1. globals.css  ← este archivo
- *   2. retro.css    ← estilos retro (sobreescribe en caso de conflicto)
+ * Incluye variables del sistema de diseño, fuentes, reset HTML/CSS,
+ * estilos de puntero, scrollbars, selecciones y contenedor principal (.page-wrapper).
+ * Importa los archivos de estilos modulares específicos para cada sección.
  */
 
-/* Indica al navegador que el sitio está diseñado para un tema oscuro
-   (afecta scrollbars, inputs y elementos nativos) */
+/* Importación de módulos CSS por categoría */
+@import "./header.css";
+@import "./nav.css";
+@import "./layout.css";
+@import "./widgets.css";
+@import "./posts.css";
+@import "./footer.css";
+
+
+/* --- 1. CONFIGURACIÓN DEL TEMA Y TIPOGRAFÍAS --- */
 :root {
   color-scheme: dark;
+
+  /* --- Paleta Emo Scene Maximalista (Negro & Hot Pink) --- */
+  --color-bg-page:         #0c0b10;   /* Negro noche profundo */
+  --color-bg-container:    #16131d;   /* Carbón oscuro — contenedor principal */
+  --color-bg-sidebar:      #1c1726;   /* Violeta-gris oscuro — sidebars */
+  --color-bg-box:          #221b2e;   /* Fondo de cajas widget */
+  --color-bg-header:       #110e17;   /* Fondo del header */
+  --color-bg-nav:          #d6006e;   /* Hot Pink sólido */
+  --color-bg-footer:       #110e17;   /* Footer */
+
+  /* --- Colores de Texto --- */
+  --color-text-primary:    #f5ebfa;   /* Blanco lavanda */
+  --color-text-secondary:  #d8bfdf;   /* Rosa lila */
+  --color-text-muted:      #a482b5;   /* Fechas y meta */
+  --color-text-header:     #ff1493;   /* Hot Pink clásico */
+  --color-text-nav:        #ffffff;   /* Blanco navegación */
+  --color-text-link:       #ff66b2;   /* Rosa intenso — enlaces */
+  --color-text-link-hover: #ffffff;   /* Blanco sobre fondo magenta al hover */
+
+  /* --- Acentos Emo Scene --- */
+  --color-accent-pink:     #ff1493;   /* Hot Pink */
+  --color-accent-magenta:  #b80058;   /* Magenta profundo */
+  --color-accent-purple:   #7b1fa2;   /* Morado intensivo */
+  --color-accent-dark:     #000000;   /* Negro sólido para sombras 3D */
+
+  /* --- Bordes Táctiles (Sin Neón) --- */
+  --color-border:          #4a203b;   /* Borde vinoso */
+  --color-border-strong:   #ff1493;   /* Borde Hot Pink */
+  --color-border-accent:   #b80058;   /* Borde magenta */
+  --shadow-heavy:          0 8px 32px rgba(0, 0, 0, 0.9);
+  --shadow-inset:          inset 0 2px 4px rgba(0, 0, 0, 0.6);
+
+  /* --- Tipografía --- */
+  --font-main:  "SimpleJapan", "Trebuchet MS", sans-serif;
+  --font-punk:  "SpecialPunk", "Impact", fantasy, sans-serif;
+  --font-mono:  "Courier New", "Lucida Console", monospace;
+
+  /* --- Tamaños de Fuente Generales --- */
+  --fs-xs:   0.75rem;   /* 12px */
+  --fs-sm:   0.875rem;  /* 14px */
+  --fs-base: 1rem;      /* 16px */
+  --fs-md:   1.125rem;  /* 18px */
+  --fs-lg:   1.375rem;  /* 22px */
+  --fs-xl:   1.75rem;   /* 28px */
+  --fs-xxl:  2.6rem;    /* 41px */
+
+  /* --- Tamaños Específicos para Secciones Clave --- */
+  --fs-header-subtitle: 1.25rem;
+  --fs-sidebar-detail:  1.05rem;
+  --fs-main-content:    1.2rem;
+
+  /* --- Radios y Espaciados --- */
+  --radius-sm:   3px;
+  --radius-md:   6px;
+  --radius-lg:   10px;
+  --radius-pill: 999px;
+  --gap-sm:  0.75rem;
+  --gap-md:  1rem;
+  --gap-lg:  1.5rem;
 }
 
+/* Fuente general */
+@font-face {
+  font-family: "SimpleJapan";
+  src: url("/fonts/simple-japan.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Fuente de títulos punk */
+@font-face {
+  font-family: "SpecialPunk";
+  src: url("/fonts/special-punk.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+/* --- 2. RESET Y ESTILOS BASE --- */
+
+/* Puntero del mouse global Pink Skull Crossbones */
+* {
+  cursor: url('https://cdn.cursors-4u.net/previews/pink-skull-crossbones-a2339adf-32.webp') 32 32, auto !important;
+
+  /* Scrollbar global — Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent-pink) #0c0b10;
+}
+
+/* Scrollbar global personalizada — Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0c0b10;
+  border-left: 1px solid #1c1726;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-accent-pink);
+  border-radius: var(--radius-sm);
+  border: 1px solid #000000;
+  box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.4), 0 0 6px rgba(255, 20, 147, 0.6);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff66b2;
+  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.8), 0 0 10px rgba(255, 20, 147, 0.9);
+}
+
+::-webkit-scrollbar-corner {
+  background: #0c0b10;
+}
+
+/* Resaltado de texto global */
+::selection {
+  background-color: #ff1493;
+  color: #00ff66;
+  text-shadow: 1px 1px 0px #000000;
+}
+
+::-moz-selection {
+  background-color: #ff1493;
+  color: #00ff66;
+  text-shadow: 1px 1px 0px #000000;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-main);
+  font-size: var(--fs-base);
+  line-height: 1.65;
+  color: var(--color-text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: var(--color-bg-page);
+
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  /* Fondo Emo Scene */
+  background-image: url('/backgrounds/emo_scene_pink_bg_256px.png');
+  background-repeat: repeat;
+  background-attachment: fixed;
+  background-position: top left;
+}
+
+/* Enfoque e inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+textarea,
+select {
+  border: 2px inset var(--color-accent-pink);
+  background-color: #110d17;
+  color: var(--color-text-primary);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, outline 0.15s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px dashed #00ff66 !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 8px rgba(255, 20, 147, 0.7);
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px dashed #00ff66 !important;
+  outline-offset: 3px;
+  box-shadow: 0 0 8px var(--color-accent-pink);
+}
+
+/* Tooltips retro globales */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::before,
+[data-tooltip]::after {
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease-in-out, transform 0.15s ease-in-out;
+  z-index: 1000;
+}
+
+[data-tooltip]::before {
+  content: "";
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  border: 5px solid transparent;
+  border-top-color: var(--color-accent-pink);
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  bottom: calc(100% + 5px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: #221b2e;
+  color: #f5ebfa;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--color-accent-pink);
+  border-radius: var(--radius-sm);
+  box-shadow: 2px 2px 0px #000000, 0 0 8px rgba(255, 20, 147, 0.5);
+  white-space: nowrap;
+}
+
+[data-tooltip]:hover::before,
+[data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Enlaces globales */
+a {
+  color: var(--color-text-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 600;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+a:hover {
+  color: var(--color-text-link-hover);
+  background-color: var(--color-accent-magenta);
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+
+/* --- 3. ELEMENTOS DE LAYOUT GLOBAL Y DECORATIVOS --- */
+
+/* Capa de puntos decorativa sobre el fondo */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(255, 20, 147, 0.12) 1px, transparent 1px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-position: 0 0, 16px 16px;
+  background-size: 32px 32px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Contenedor principal flotante (.page-wrapper) */
+.page-wrapper {
+  width: 90%;
+  max-width: 1200px;
+  margin: 1.5rem auto 3rem auto;
+  min-height: calc(100vh - 3rem);
+
+  background: var(--color-bg-container);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-heavy), 0 0 0 4px #000000;
+  border: 4px double var(--color-accent-pink);
+
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .page-wrapper {
+    width: calc(100% - 1.5rem); 
+    margin: 0.75rem auto; 
+    border-radius: var(--radius-md);
+  }
+}

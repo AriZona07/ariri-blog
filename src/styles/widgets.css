@@ -1,0 +1,439 @@
+/**
+ * widgets.css — Componentes y Widgets de las Sidebars
+ *
+ * Contiene el widget de perfil, enlaces a redes sociales, badges de rol,
+ * el reproductor de música retro Winamp y el pizarrón interactivo de dibujo.
+ */
+
+/* --- 1. WIDGET DE PERFIL --- */
+.profile-section {
+  text-align: center;
+}
+
+.profile-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 3px solid var(--color-accent-pink);
+  box-shadow: 0 0 0 2px #000000, 0 4px 10px rgba(0,0,0,0.8);
+  margin: 0 auto var(--gap-sm);
+  object-fit: cover;
+}
+
+.profile-avatar-placeholder {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 3px solid var(--color-accent-pink);
+  box-shadow: 0 0 0 2px #000000, 0 4px 10px rgba(0,0,0,0.8);
+  margin: 0 auto var(--gap-sm);
+  background: linear-gradient(135deg, #b80058, #4a0023);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+}
+
+.profile-name {
+  font-family: var(--font-punk);
+  font-size: var(--fs-xxl);
+  color: var(--color-accent-pink);
+  text-shadow: 2px 2px 0 #000000;
+  margin-bottom: 0.25rem;
+}
+
+.profile-bio {
+  font-size: var(--fs-sidebar-detail);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+
+/* --- 2. ENLACES A REDES SOCIALES --- */
+.social-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: #14101d;
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-accent-pink);
+  font-size: var(--fs-sm);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.social-link:hover {
+  background: var(--color-accent-pink);
+  color: #ffffff;
+  border-left-color: #000000;
+  text-decoration: none;
+}
+
+.social-link__icon {
+  font-size: var(--fs-md);
+}
+
+
+/* --- 3. BADGES DE ROLES Y AFICIONES --- */
+.role-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-xs);
+  font-weight: bold;
+  letter-spacing: 0.03em;
+  border: 1px solid #000000;
+  box-shadow: 1px 1px 0px #000000;
+  cursor: default;
+}
+
+.role-badge--gaming {
+  background-color: #006644;
+  color: #ffffff;
+  border-color: #003322;
+}
+
+.role-badge--manga {
+  background-color: #ff1493;
+  color: #ffffff;
+  border-color: #8b0046;
+}
+
+.role-badge--punk {
+  background-color: #000000;
+  color: #ff1493;
+  border-color: #ff1493;
+}
+
+.role-badge--linux {
+  background-color: #1a4971;
+  color: #ffffff;
+  border-color: #0d273e;
+}
+
+.role-badge--vampire {
+  background-color: #660033;
+  color: #ffffff;
+  border-color: #330019;
+}
+
+.role-badge--anarchy {
+  background-color: #222222;
+  color: #ff3366;
+  border-color: #ff3366;
+}
+
+.role-badge--roblox {
+  background-color: #c92a2a;
+  color: #ffffff;
+  border-color: #801818;
+}
+
+.role-badge--minecraft {
+  background-color: #2b7238;
+  color: #ffffff;
+  border-color: #17421f;
+}
+
+.role-badge--hollow-knight {
+  background-color: #2d233d;
+  color: #e0d0f0;
+  border-color: #9c6bb0;
+}
+
+
+/* --- 4. REPRODUCTOR DE MÚSICA RETRO --- */
+.music-player {
+  background: #110d17;
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  border: 2px solid var(--color-accent-pink);
+  box-shadow: 2px 2px 0px #000000;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.music-player__screen {
+  background: #08060a;
+  border-radius: var(--radius-sm);
+  padding: 0;
+  margin-bottom: 0.6rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-inset);
+  min-height: 52px;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.music-player__thumb {
+  flex-shrink: 0;
+  width: 18%;
+  padding: 0.3rem 0 0.3rem 0.3rem;
+  overflow: hidden;
+}
+
+.music-player__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 2px;
+  display: block;
+}
+
+.music-player__screen-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  min-width: 0;
+  width: 0;
+  max-width: 100%;
+  padding: 0.5rem 0.5rem;
+}
+
+.music-player__marquee {
+  color: #ff66b2;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+  animation: marquee-scroll 12s linear infinite;
+}
+
+.music-player__track {
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sidebar-detail);
+  font-weight: bold;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.music-player__track--marquee {
+  animation: title-marquee-scroll 12s linear infinite;
+}
+
+.music-player__controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.music-player__btn {
+  background: linear-gradient(180deg, #d6006e, #8b0046);
+  border: 1px solid #000000;
+  border-radius: var(--radius-sm);
+  color: #ffffff;
+  cursor: pointer;
+  padding: 0.3rem 0.6rem;
+  font-size: var(--fs-md);
+  line-height: 1;
+  box-shadow: 1px 1px 0px #000;
+  transition: background-color 0.15s ease;
+}
+
+.music-player__btn:hover {
+  background: #ff1493;
+}
+
+.music-player__mode-btn {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.75rem;
+  line-height: 1;
+  transition: color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.music-player__mode-btn--active {
+  color: var(--color-accent-pink);
+  border-color: var(--color-accent-pink);
+  box-shadow: 0 0 4px var(--color-accent-pink);
+}
+
+.music-player__mode-btn:hover {
+  border-color: #ff66b2;
+  color: #ff66b2;
+}
+
+.music-player__mode-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.music-player__volume {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  padding: 0 0.1rem;
+}
+
+.music-player__volume-icon {
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  width: 1.2rem;
+  text-align: center;
+}
+
+.music-player__volume-value {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+  min-width: 1.8rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.music-player__volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 8px;
+  background: #08060a;
+  border: 1px solid var(--color-accent-pink);
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.9);
+  outline: none;
+  cursor: pointer;
+}
+
+.music-player__volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #ff66b2 0%, #d6006e 100%);
+  border: 1px solid #000000;
+  box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.7), 0 0 6px #00ff66;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.music-player__volume-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #ff66b2 0%, #d6006e 100%);
+  border: 1px solid #000000;
+  box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.7), 0 0 6px #00ff66;
+  cursor: pointer;
+}
+
+.music-player__volume-slider:hover::-webkit-slider-thumb {
+  transform: scale(1.15);
+  box-shadow: inset 1px 1px 0px #ffffff, 0 0 10px #00ff66, 0 0 4px #ff1493;
+}
+
+.music-player__volume-slider:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@keyframes marquee-scroll {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+@keyframes title-marquee-scroll {
+  0%, 16.66% {
+    transform: translateX(0);
+  }
+  58.33% {
+    transform: translateX(-100%);
+  }
+  58.34% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+
+/* --- 5. PIZARRÓN INTERACTIVO --- */
+.sketch-board {
+  background: #16121e;
+  border: 2px solid var(--color-accent-pink);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.sketch-board__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  background: #281427;
+  border-bottom: 2px solid #000000;
+  flex-wrap: wrap;
+}
+
+.sketch-board__tool-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #000000;
+  cursor: pointer;
+}
+
+.sketch-board__tool-btn.selected {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 2px #ff1493;
+}
+
+.sketch-board__canvas {
+  display: block;
+  width: 100%;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.sketch-board__hint {
+  padding: 0.35rem 0.6rem;
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+  font-style: italic;
+  background: #281427;
+  border-top: 1px solid #000000;
+}
+
+/* Responsive para widgets */
+@media (max-width: 480px) {
+  .role-badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+  }
+}
