@@ -371,24 +371,24 @@ export default function MusicPlayer({
           className={`music-player__mode-btn${isShuffled ? " music-player__mode-btn--active" : ""}`}
           onClick={toggleShuffle}
           aria-label="Aleatorio"
-          title={isShuffled ? "Aleatorio: Activado" : "Aleatorio: Desactivado"}
+          data-tooltip={isShuffled ? "Aleatorio: Activado" : "Aleatorio: Desactivado"}
           disabled={!isReady}
         >
           🔀
         </button>
 
-        <button className="music-player__btn" onClick={prevTrack}  aria-label="Anterior"  title="Anterior"  disabled={!isReady}>⏮</button>
-        <button className="music-player__btn" onClick={togglePlay} aria-label={isPlaying ? "Pausa" : "Reproducir"} title={isPlaying ? "Pausa" : "Play"} disabled={!isReady}>
+        <button className="music-player__btn" onClick={prevTrack}  aria-label="Anterior"  data-tooltip="Anterior"  disabled={!isReady}>⏮</button>
+        <button className="music-player__btn" onClick={togglePlay} aria-label={isPlaying ? "Pausa" : "Reproducir"} data-tooltip={isPlaying ? "Pausar" : "Reproducir"} disabled={!isReady}>
           {isPlaying ? "⏸" : "▶"}
         </button>
-        <button className="music-player__btn" onClick={nextTrack}  aria-label="Siguiente" title="Siguiente" disabled={!isReady}>⏭</button>
+        <button className="music-player__btn" onClick={nextTrack}  aria-label="Siguiente" data-tooltip="Siguiente" disabled={!isReady}>⏭</button>
 
         {/* Loop — cicla entre none / playlist / track */}
         <button
           className={`music-player__mode-btn${loopMode !== "none" ? " music-player__mode-btn--active" : ""}`}
           onClick={cycleLoopMode}
           aria-label={loopTitle}
-          title={loopTitle}
+          data-tooltip={loopTitle}
           disabled={!isReady}
         >
           {loopLabel}
