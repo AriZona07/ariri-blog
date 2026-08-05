@@ -1,71 +1,79 @@
 # 📦 Guía de Dependencias — Blog Retro 2000s
 
-Este documento detalla todas las dependencias recomendadas para construir un blog estático con estética de los años 2000 utilizando **Next.js**, **TypeScript** y **CSS puro**.
+Este documento detalla todas las dependencias del proyecto, clasificadas entre **dependencias activas e instaladas** y **dependencias propuestas / evaluables para el futuro**.
 
 ---
 
-## 🛠️ 1. Procesamiento de Contenido (Markdown & Metadata)
+## 🟢 1. Dependencias Actualmente Instaladas y En Uso
 
 ### `gray-matter`
-- **Comando de instalación:** `npm install gray-matter`
-- **¿Qué hace?:** Lee y extrae los metadatos escritos en formato YAML al inicio de los archivos Markdown (el bloque conocido como *frontmatter*).
-- **¿Para qué sirve en este blog?:** Permite definir propiedades como el título del post, fecha de publicación, etiquetas, y metadatos retro como el estado de ánimo (*Mood*) o la música que estabas escuchando al escribir (*Listening to*).
-- **Ejemplo de uso:**
-  ```markdown
-  ---
-  title: "Mi primer post en el blog"
-  date: "2004-05-18"
-  mood: "nostalgic"
-  music: "Green Day - Boulevard of Broken Dreams"
-  ---
-  ¡Hola a todos! Bienvenidos a mi rincón en la web...
-  ```
+- **Estado:** ✅ Instalada (`^4.0.3`)
+- **Comando:** `npm install gray-matter`
+- **¿Qué hace?:** Extrae los metadatos YAML (*frontmatter*) al inicio de las entradas en Markdown.
+- **¿Para qué sirve en este blog?:** Utilizado en `src/app/page.tsx` para obtener `title`, `date`, `mood`, `song`, `songCover`, `cover` y `excerpt` de cada archivo `.md` en `/src/content/`.
+
+### `next`, `react`, `react-dom`
+- **Estado:** ✅ Instaladas (`next@16.3.0`, `react@19.2.8`, `react-dom@19.2.8`)
+- **¿Qué hace?:** Núcleo del framework para la generación estática (SSG) y la renderización de componentes React.
+
+### `typescript` & `@types/*`
+- **Estado:** ✅ Instaladas (`typescript@^5`, `@types/node`, `@types/react`, `@types/react-dom`)
+- **¿Qué hace?:** Tipado estático y autocompletado en todo el código base.
 
 ---
+
+## 🟡 2. Dependencias Propuestas / Opcionales para el Futuro
 
 ### `next-mdx-remote`
+- **Estado:** ⏳ Opcional (No requerida actualmente)
 - **Comando de instalación:** `npm install next-mdx-remote`
-- **¿Qué hace?:** Permite cargar y renderizar archivos Markdown (`.md`) o MDX (`.mdx`) de forma dinámica en páginas creadas con Next.js (App Router).
-- **¿Para qué sirve en este blog?:** Transforma el texto plano de tus artículos en HTML y componentes de React interactivos de manera eficiente durante la generación estática (SSG).
+- **¿Qué hace?:** Permite renderizar archivos MDX (`.mdx`) con componentes React dinámicos dentro de los artículos.
+- **Evaluación actual:** El blog renderiza texto plano y HTML estándar directamente desde `.md` sin necesidad de la sobrecarga de MDX. Se instalará solo si en el futuro se requiere incrustar widgets interactivos de React directamente dentro del cuerpo de un post.
 
 ---
-
-## 🎨 2. Resaltado de Sintaxis para Bloques de Código
 
 ### `rehype-highlight` & `highlight.js`
+- **Estado:** ⏳ Propuesta para Posts Técnicos
 - **Comando de instalación:** `npm install rehype-highlight highlight.js`
-- **¿Qué hace?:** Un plugin de procesamiento de HTML (`rehype`) junto con la librería de coloreado de código `highlight.js`.
-- **¿Para qué sirve en este blog?:** Detecta los bloques de código dentro de tus posts (por ejemplo, ```javascript ... ```) y les aplica clases CSS para que se vean con sintaxis resaltada estilo retro o terminal.
+- **¿Qué hace?:** Analizador HTML (`rehype`) y motor de resaltado de código en sintaxis retro / terminal (`highlight.js`).
+- **Evaluación actual:** Útil cuando se escriban artículos de programación o tutoriales de Linux en el blog para colorear bloques de código (```javascript ... ```).
 
 ---
 
-## 📻 3. Sindicación RSS (Lector de Noticias)
-
-### `rss` (y sus tipos para TypeScript)
+### `rss` (y `@types/rss`)
+- **Estado:** ⏳ Propuesta para Feed de Suscripción
 - **Comando de instalación:** 
   ```bash
   npm install rss
   npm install --save-dev @types/rss
   ```
-- **¿Qué hace?:** Generador de archivos de feed XML estándar RSS 2.0.
-- **¿Para qué sirve en este blog?:** Un blog de los 2000s no está completo sin un feed RSS. Genera un archivo `feed.xml` durante el build para que la gente se suscriba a tus publicaciones mediante lectores RSS.
+- **¿Qué hace?:** Generador de feeds RSS 2.0 XML en formato estándar.
+- **Evaluación actual:** El blog actualmente utiliza un sitemap nativo estático (`src/app/sitemap.ts`). `rss` se añadirá cuando se implemente la ruta `/feed.xml` para lectores de noticias retro.
 
 ---
-
-## 🕹️ 4. Estilos y Librerías Retro (Opcionales)
 
 ### `98.css` *(Opcional)*
+- **Estado:** ⏳ Opcional / Referencia de Estilos
 - **Comando de instalación:** `npm install 98.css`
-- **¿Qué hace?:** Un archivo CSS puro que imita fielmente la apariencia visual de los controles e interfaces de **Windows 98**.
-- **¿Para qué sirve en este blog?:** Si deseas componentes instantáneos con estilo retro (ventanas con barra de título azul, botones biselados en 3D, cajas de diálogo) sin escribir todo el CSS desde cero.
+- **¿Qué hace?:** Archivo CSS puro que imita la apariencia de controles de **Windows 98**.
+- **Evaluación actual:** Actualmente el blog utiliza su propio sistema de estilos CSS retro en `src/styles/` (temática Emo/Scene 2000s con `.retro-box`). Solo se instalará si se decide agregar diálogos o ventanas flotantes imitando el sistema operativo Windows 98.
 
 ---
 
-## 📋 Resumen de Instalación Rápida
+## 📋 Resumen de Comandos de Instalación
 
-Para instalar las dependencias principales de una sola vez, ejecuta en tu terminal:
-
+### Instalación de dependencias activas (ya presentes en `package.json`):
 ```bash
-npm install gray-matter next-mdx-remote rehype-highlight highlight.js rss
+npm install
+```
+
+### Comandos para incorporar dependencias futuras (cuando sean necesarias):
+```bash
+# Para resaltado de sintaxis en código:
+npm install rehype-highlight highlight.js
+
+# Para feed RSS:
+npm install rss
 npm install --save-dev @types/rss
 ```
+

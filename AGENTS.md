@@ -20,6 +20,8 @@ La edición y gestión de código está delimitada por las siguientes directrice
 - **Restricción creativa y de diseño:** La IA **NO tiene permitido meterse en la parte creativa ni innovar en el diseño** por cuenta propia. Debe respetar estrictamente la temática y los estilos descritos en el `README.md`.
 - **Refactorización y Reorganización:** La refactorización de código y la reorganización de la estructura del proyecto **están permitidas** bajo la misma cláusula de ser consideradas tareas de configuración y mantenimiento técnico.
 - **Solución de Bugs:** Se permite la edición o corrección de código cuando el usuario solicite explícitamente solucionar un error o bug.
+- **Reutilización de Componentes (Widgets):** Dentro de lo posible, todos los widgets y componentes deben ser fácilmente reutilizables en otras áreas. Por ejemplo, si se crea un widget de reproductor MP3, debe poder reutilizarse pasándole diferentes listas de reproducción (playlists) a través de sus propiedades (props). Esta filosofía debe aplicarse a cualquier widget donde sea pertinente.
+- **Registro de Planeaciones (`PLANEATION.md`):** Toda planeación de características o funciones (a corto o largo plazo) debe ser documentada en `PLANEATION.md`. **La IA NO TIENE PERMITIDO BORRAR O ELIMINAR SECCIONES de `PLANEATION.md`**; la eliminación de secciones es facultad exclusiva del usuario/programador (cuando se descarta una idea o se concluye su implementación).
 
 ---
 
@@ -38,10 +40,11 @@ La IA tiene autorización para crear o modificar directamente los siguientes tip
 2. **Código Fuente (bajo solicitud de ideas/bugs del usuario):**
    - Archivos `.tsx`, `.ts`, `.css` (respetando la temática del `README.md` y sin tomar iniciativas creativas unilaterales).
 
-3. **Archivos de Documentación:**
+3. **Archivos de Documentación y Planeación:**
    - `README.md`
    - `DEPENDENCIES.md`
    - `AGENTS.md`
+   - `PLANEATION.md`
    - Guías teóricas o notas en formato Markdown (`.md`).
 
 ---
@@ -61,5 +64,5 @@ La IA tiene autorización para crear o modificar directamente los siguientes tip
 | **Código (`.tsx` / `.ts` / `.css`)** | **SÍ** | Solo para plasmar ideas del usuario o arreglar bugs. Prohibido innovar creativamente en diseño (respetar `README.md`). |
 | **Refactorización / Reorganización** | **SÍ** | Permitida bajo la cláusula de configuración y mantenimiento del proyecto. |
 | **Archivos de Configuración** | **SÍ** | Cuando sea necesario configurar o ajustar el entorno del proyecto. |
-| **Documentación (`README.md`, `*.md`)** | **SÍ** | Para mantener actualizada la información técnica del repositorio. |
+| **Documentación y Planeación** | **SÍ** | Para actualizar `README.md`, `DEPENDENCIES.md`, `AGENTS.md` y agregar notas a `PLANEATION.md` (**prohibido a la IA borrar secciones de `PLANEATION.md`**). |
 | **Generación de Multimedia (IA)** | **NO** | **Totalmente prohibido** generar imágenes, audio o video con IA. Extraer de la web o usar originales del usuario. |
