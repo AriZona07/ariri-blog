@@ -832,8 +832,9 @@ body::before {
 @media (max-width: 768px) {
 
   .page-wrapper {
-    width: 96%;
-    margin: 0.5rem auto 1.5rem;
+    /* Margen pequeño e igual en los 4 lados para que se aprecie el background */
+    width: calc(100% - 1.5rem); 
+    margin: 0.75rem auto; 
     border-radius: var(--radius-md);
   }
 
@@ -863,13 +864,7 @@ body::before {
 
 @media (max-width: 480px) {
 
-  .page-wrapper {
-    width: 100%;
-    margin: 0;
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-  }
+  /* Se elimina la regla de .page-wrapper para heredar el margen y bordes de 768px */
 
   .site-header {
     padding: 1.25rem 1rem 1rem;
