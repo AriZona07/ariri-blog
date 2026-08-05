@@ -1,0 +1,256 @@
+/**
+ * comments.css — Estilos del sistema de comentarios y libro de visitas
+ *
+ * Reutiliza variables de globals.css y el patrón .retro-box del proyecto.
+ * Para ajustar la paleta, ver las variables CSS en globals.css.
+ */
+
+/* ─── Widget de Comentarios ─────────────────────────── */
+
+.comments-widget {
+  margin-top: 1.5rem;
+  border-top: 2px dashed var(--color-border);
+  padding-top: 1rem;
+}
+
+.comments-widget__title {
+  font-family: var(--font-punk);
+  font-size: var(--fs-md);
+  color: var(--color-accent-pink);
+  margin-bottom: 1rem;
+  text-shadow: 1px 1px 0px #000;
+}
+
+/* Lista de comentarios */
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+/* Entrada de comentario individual */
+.comment-item {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  background: var(--color-bg-box);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--color-accent-pink);
+  padding: 0.6rem 0.75rem;
+}
+
+.comment-item__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.comment-item__avatar-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-bg-sidebar);
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.comment-item__body { flex: 1; min-width: 0; }
+
+.comment-item__header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.comment-item__author {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--color-accent-pink);
+}
+
+.comment-item__date {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+.comment-item__text {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  word-break: break-word;
+}
+
+/* Formulario de nuevo comentario */
+.comments-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.comments-form__textarea {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  background: #110d17;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-family: var(--font-main);
+  font-size: var(--fs-sm);
+  resize: none;
+  min-height: 68px;
+  transition: border-color 0.15s;
+}
+.comments-form__textarea:focus {
+  border-color: var(--color-accent-pink);
+  outline: none;
+}
+
+.comments-form__submit {
+  align-self: flex-end;
+  padding: 0.45rem 1.1rem;
+  background: var(--color-accent-pink);
+  border: 2px solid #000;
+  border-radius: var(--radius-sm);
+  color: #000;
+  font-family: var(--font-main);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  box-shadow: 2px 2px 0px #000;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.comments-form__submit:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px #000;
+}
+.comments-form__submit:disabled { opacity: 0.5; }
+
+/* Aviso cuando no hay sesión */
+.comments-login-prompt {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 0.75rem;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+}
+.comments-login-prompt button {
+  background: none;
+  border: none;
+  color: var(--color-accent-pink);
+  text-decoration: underline;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+/* ─── Widget de Libro de Visitas ─────────────────────── */
+
+/* Usa .retro-box del proyecto como contenedor principal */
+
+.guestbook-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 0.85rem;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.guestbook-item {
+  background: var(--color-bg-box);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent-magenta);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.75rem;
+}
+
+.guestbook-item__header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.2rem;
+  flex-wrap: wrap;
+}
+
+.guestbook-item__author {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--color-accent-pink);
+}
+
+.guestbook-item__date {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+.guestbook-item__message {
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+  word-break: break-word;
+}
+
+/* Formulario de firma */
+.guestbook-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.guestbook-form__input {
+  width: 100%;
+  padding: 0.45rem 0.65rem;
+  background: #110d17;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-family: var(--font-main);
+  font-size: var(--fs-xs);
+  transition: border-color 0.15s;
+}
+.guestbook-form__input:focus {
+  border-color: var(--color-accent-pink);
+  outline: none;
+}
+
+.guestbook-form__submit {
+  align-self: flex-end;
+  padding: 0.4rem 1rem;
+  background: var(--color-accent-magenta);
+  border: 2px solid #000;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-family: var(--font-main);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  box-shadow: 2px 2px 0px #000;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.guestbook-form__submit:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px #000;
+}
+.guestbook-form__submit:disabled { opacity: 0.5; }
+
+.guestbook-empty {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 0.75rem;
+}

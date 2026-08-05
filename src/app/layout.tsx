@@ -8,11 +8,16 @@
 
 import type { Metadata } from "next";
 import "@/styles/globals.css";
+import "@/styles/auth.css";
+import "@/styles/account.css";
+import "@/styles/admin.css";
+import "@/styles/comments.css";
 
-import SiteHeader   from "@/components/SiteHeader";
-import SidebarLeft  from "@/components/SidebarLeft";
-import SidebarRight from "@/components/SidebarRight";
-import SiteFooter  from "@/components/SiteFooter";
+import { AuthProvider }  from "@/lib/auth-context";
+import SiteHeader        from "@/components/SiteHeader";
+import SidebarLeft       from "@/components/SidebarLeft";
+import SidebarRight      from "@/components/SidebarRight";
+import SiteFooter        from "@/components/SiteFooter";
 
 /* Metadatos SEO: title, description, Open Graph y Twitter Card */
 export const metadata: Metadata = {
@@ -47,26 +52,38 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="es">
+      <head>
+        {/* Autodescubrimiento del feed RSS para lectores y agregadores */}
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="Ariri Blog — Feed RSS"
+          href="/feed.xml"
+        />
+      </head>
       <body>
-        <div className="page-wrapper">
+        {/* AuthProvider provee el estado de sesión a todo el árbol de componentes */}
+        <AuthProvider>
+          <div className="page-wrapper">
 
-          <SiteHeader />
+            <SiteHeader />
 
-          {/* Layout de 3 columnas: sidebar izquierda | contenido | sidebar derecha */}
-          <div className="site-body">
-            <SidebarLeft />
+            {/* Layout de 3 columnas: sidebar izquierda | contenido | sidebar derecha */}
+            <div className="site-body">
+              <SidebarLeft />
 
-            {/* children = la página activa (page.tsx de la ruta actual) */}
-            <main className="site-content" id="main-content" role="main">
-              {children}
-            </main>
+              {/* children = la página activa (page.tsx de la ruta actual) */}
+              <main className="site-content" id="main-content" role="main">
+                {children}
+              </main>
 
-            <SidebarRight />
+              <SidebarRight />
+            </div>
+
+            <SiteFooter />
+
           </div>
-
-          <SiteFooter />
-
-        </div>
+        </AuthProvider>
       </body>
     </html>
   );

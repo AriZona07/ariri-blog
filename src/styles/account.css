@@ -1,0 +1,129 @@
+/**
+ * account.css — Estilos de la página de gestión de cuenta (/account)
+ *
+ * Reutiliza el sistema de cajas .retro-box del proyecto.
+ * Para ajustar el aspecto de los formularios, ver también auth.css.
+ */
+
+/* --- Contenedor principal de la página --- */
+.account-page {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 1.5rem 0;
+}
+
+/* --- Sección de avatar --- */
+.account-avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed var(--color-border);
+}
+
+.account-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid var(--color-accent-pink);
+  object-fit: cover;
+  box-shadow: 3px 3px 0px #000, 0 0 12px rgba(255, 20, 147, 0.4);
+  flex-shrink: 0;
+}
+
+.account-avatar-placeholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid var(--color-border);
+  background: var(--color-bg-sidebar);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.account-user-info__name {
+  font-size: var(--fs-md);
+  color: var(--color-accent-pink);
+  font-weight: 700;
+}
+
+.account-user-info__email {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+}
+
+.account-user-info__badge {
+  display: inline-block;
+  margin-top: 0.3rem;
+  background: #00ff66;
+  color: #000;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* --- Grupos de campos reutilizando auth.css --- */
+/* Los .auth-field / .auth-field__input / .auth-btn-primary se reutilizan aquí */
+
+/* --- Separador de sección --- */
+.account-section-title {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.3rem;
+  margin: 1.25rem 0 0.85rem;
+}
+
+/* --- Mensaje de éxito --- */
+.account-success {
+  background: rgba(0, 255, 102, 0.12);
+  border: 1px solid #00ff66;
+  border-radius: var(--radius-sm);
+  color: #00ff66;
+  font-size: var(--fs-xs);
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+}
+
+/* --- Botón de acceso al panel Admin --- */
+.account-admin-link {
+  display: block;
+  width: 100%;
+  padding: 0.7rem;
+  background: transparent;
+  border: 2px solid #00ff66;
+  border-radius: var(--radius-sm);
+  color: #00ff66;
+  font-family: var(--font-main);
+  font-size: var(--fs-sm);
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  box-shadow: 3px 3px 0px #000;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+  margin-top: 0.5rem;
+}
+.account-admin-link:hover {
+  background: #00ff66;
+  color: #000;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #000;
+}
+
+/* Carga skeleton */
+.account-loading {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  text-align: center;
+  padding: 2rem;
+}

@@ -1,0 +1,202 @@
+/**
+ * admin.css — Estilos del panel de administración (/admin, /admin/new-post)
+ *
+ * Mantiene la estética Emo/Scene 2000s pero con acentos en verde neón
+ * para indicar visualmente la zona de acceso exclusivo del admin.
+ */
+
+/* --- Layout de la página admin --- */
+.admin-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1.5rem 0;
+}
+
+.admin-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #00ff66;
+}
+
+.admin-page__title {
+  font-family: var(--font-punk);
+  font-size: var(--fs-xl);
+  color: #00ff66;
+  text-shadow: 2px 2px 0px #000;
+}
+
+/* Botón "Nueva Entrada" */
+.admin-btn-new {
+  padding: 0.5rem 1.1rem;
+  background: #00ff66;
+  border: 2px solid #000;
+  border-radius: var(--radius-sm);
+  color: #000;
+  font-family: var(--font-main);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  box-shadow: 3px 3px 0px #000;
+  text-decoration: none;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.admin-btn-new:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #000;
+  background: #33ff88;
+  color: #000;
+}
+
+/* --- Lista de posts en el panel --- */
+.admin-post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.admin-post-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.65rem 0.9rem;
+  background: var(--color-bg-box);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid #00ff66;
+  flex-wrap: wrap;
+}
+
+.admin-post-item__title {
+  font-size: var(--fs-sm);
+  color: var(--color-text-primary);
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-post-item__date {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* Mensaje vacío */
+.admin-empty {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  text-align: center;
+  padding: 2rem;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+/* --- Formulario de nueva entrada (/admin/new-post) --- */
+.new-post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.new-post-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.new-post-form__label {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.new-post-form__input,
+.new-post-form__textarea {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  background: #110d17;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: var(--fs-sm);
+  transition: border-color 0.15s;
+}
+.new-post-form__input:focus,
+.new-post-form__textarea:focus {
+  border-color: #00ff66;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 255, 102, 0.2);
+}
+
+.new-post-form__textarea {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  resize: vertical;
+  min-height: 320px;
+  line-height: 1.55;
+}
+
+/* Row de metadatos (mood, song, etc.) */
+.new-post-form__meta-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+/* Botón de publicar */
+.new-post-form__submit {
+  padding: 0.75rem;
+  background: #00ff66;
+  border: 2px solid #000;
+  border-radius: var(--radius-sm);
+  color: #000;
+  font-family: var(--font-main);
+  font-size: var(--fs-base);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  box-shadow: 4px 4px 0px #000;
+  transition: transform 0.1s, box-shadow 0.1s;
+  margin-top: 0.5rem;
+}
+.new-post-form__submit:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000;
+}
+.new-post-form__submit:disabled { opacity: 0.5; }
+
+/* Mensaje de éxito al publicar */
+.new-post-success {
+  background: rgba(0, 255, 102, 0.12);
+  border: 1px solid #00ff66;
+  border-radius: var(--radius-sm);
+  color: #00ff66;
+  font-size: var(--fs-sm);
+  padding: 0.65rem 0.9rem;
+}
+
+/* Acceso denegado */
+.admin-access-denied {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--color-text-muted);
+}
+.admin-access-denied__icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+@media (max-width: 600px) {
+  .new-post-form__meta-row { grid-template-columns: 1fr; }
+}

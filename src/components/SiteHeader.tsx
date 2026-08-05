@@ -1,22 +1,119 @@
+"use client";
+
+/**
+ * SiteHeader.tsx — Encabezado global del blog
+ *
+ * Muestra el título, subtítulo y el botón de autenticación.
+ * El botón cambia según el estado de sesión:
+ *   - Sin sesión: abre el AuthModal (login/registro)
+ *   - Con sesión: muestra avatar + nombre y enlace a /account
+ *   - Admin: también muestra acceso rápido a /admin
+ */
+
+import { useState }  from "react";
+import Link          from "next/link";
+import Image         from "next/image";
+import { signOut }   from "firebase/auth";
+import { auth }      from "@/lib/firebase";
+import { useAuth }   from "@/lib/auth-context";
+import AuthModal     from "@/components/auth/AuthModal";
+
 interface SiteHeaderProps {
-  /** Título principal del sitio */
-  title?: string;
-  /** Subtítulo o tagline */
+  title?:    string;
   subtitle?: string;
 }
 
-/**
- * SiteHeader — Encabezado global del blog.
- * Acepta título y subtítulo como props para poder reutilizarse en distintos sitios.
- */
 export default function SiteHeader({
-  title = "aRIRI BLOG",
+  title    = "aRIRI BLOG",
   subtitle = "videojuegos · manga · punk",
 }: SiteHeaderProps) {
+  const { user, isAdmin, loading } = useAuth();
+  const [showAuth,    setShowAuth]    = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  async function handleSignOut() {
+    setShowUserMenu(false);
+    await signOut(auth);
+  }
+
   return (
-    <header className="site-header" role="banner">
-      <h1 className="site-header__title">{title}</h1>
-      <p className="site-header__subtitle">{subtitle}</p>
-    </header>
+    <>
+      <header className="site-header" role="banner">
+        <div className="site-header__content">
+          <h1 className="site-header__title">{title}</h1>
+          <p  className="site-header__subtitle">{subtitle}</p>
+        </div>
+
+        {/* --- Zona de autenticación (esquina derecha del header) --- */}
+        <div className="site-header__auth">
+          {loading ? null : !user ? (
+            /* Botón visible cuando no hay sesión */
+            <button
+              className="header-auth-btn"
+              onClick={() => setShowAuth(true)}
+              id="header-login-btn"
+            >
+              ★ Entrar
+            </button>
+          ) : (
+            /* Menú desplegable cuando hay sesión */
+            <div className="header-user-menu">
+              <button
+                className="header-auth-btn"
+                onClick={() => setShowUserMenu((v) => !v)}
+                id="header-user-menu-btn"
+                aria-haspopup="true"
+                aria-expanded={showUserMenu}
+              >
+                {user.photoURL && (
+                  <Image
+                    src={user.photoURL}
+                    alt="avatar"
+                    width={22}
+                    height={22}
+                    className="header-auth-btn__avatar"
+                  />
+                )}
+                {user.displayName?.split(" ")[0] ?? "Cuenta"} ▾
+              </button>
+
+              {showUserMenu && (
+                <div className="header-user-menu__dropdown" role="menu">
+                  <Link
+                    href="/account"
+                    className="header-user-menu__item"
+                    onClick={() => setShowUserMenu(false)}
+                    role="menuitem"
+                  >
+                    👤 Mi Cuenta
+                  </Link>
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      className="header-user-menu__item header-user-menu__item--admin"
+                      onClick={() => setShowUserMenu(false)}
+                      role="menuitem"
+                    >
+                      ⚙️ Panel Admin
+                    </Link>
+                  )}
+                  <button
+                    className="header-user-menu__item header-user-menu__item--danger"
+                    onClick={handleSignOut}
+                    role="menuitem"
+                    id="header-signout-btn"
+                  >
+                    ✕ Cerrar Sesión
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Modal de auth (fuera del header para evitar problemas de z-index) */}
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+    </>
   );
 }

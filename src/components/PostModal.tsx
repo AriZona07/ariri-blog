@@ -13,10 +13,11 @@
  * - Barra de navegación (PaginationNavWidget) que navega entre TODOS los posts.
  */
 
-import { useEffect } from "react";
-import Image from "next/image";
+import { useEffect }    from "react";
+import Image            from "next/image";
 import PaginationNavWidget from "@/components/widgets/PaginationNavWidget";
-import type { Post } from "@/app/page";
+import CommentsWidget   from "@/components/widgets/CommentsWidget";
+import type { Post }    from "@/app/page";
 
 interface PostModalProps {
   /** Array completo de posts (para navegar entre ellos) */
@@ -130,6 +131,9 @@ export default function PostModal({ posts, currentIndex, onClose, onNavigate }: 
               />
             </footer>
           )}
+          {/* Sección de comentarios del post */}
+          <CommentsWidget postSlug={post.slug ?? post.title} />
+
         </div>
 
         {/* Navegación entre posts (reutiliza PaginationNavWidget con idPrefix distinto) */}

@@ -69,22 +69,35 @@ Implementación de un **JAMstack Híbrido** combinando la compilación estática
 #### 🛰️ 4. Sindicación RSS 2.0 Unificada (`/feed.xml`)
 
 - **Procesamiento de Fuentes:** El generador de RSS 2.0 unificará tanto las publicaciones locales en archivos Markdown (`src/content/`) como las publicaciones dinámicas almacenadas en Cloud Firestore.
-- **Modo de Salida:** Creación del XML en `src/app/feed.xml/route.ts` manteniendo compatibilidad estática y autodescubrimiento en `<head>` (`src/app/layout.tsx`).
+- **Modo de Salida:** Route Handler dinámico `src/app/feed.xml/route.ts` — requiere servidor Node.js (Vercel).
+- **Autodescubrimiento:** `<link rel="alternate" type="application/rss+xml" href="/feed.xml" />` en `src/app/layout.tsx`.
+
+---
+
+#### 🏗️ Decisiones de Arquitectura (Confirmadas)
+
+| Aspecto | Decisión |
+| :--- | :--- |
+| **Hosting** | Migrar de GitHub Pages → **Vercel** (plan gratuito, necesario para Route Handlers y SSR parcial) |
+| **RSS** | Dinámico y **unificado**: Markdown local + posts de Firestore en tiempo real |
+| **Slug de posts (Admin)** | **Manual** — campo editable en el formulario de `/admin/new-post` |
+| **Foto de perfil** | URL externa + subida a **Firebase Storage** |
 
 ---
 
 #### 📋 Plan de Acción Integrado
 
-1. **Configuración de Firebase:** Inicializar proyecto en Google Firebase Console, configurar Firestore y Firebase Auth (Email/Google).
-2. **Módulo Cliente (`src/lib/firebase.ts`):** Variables de entorno `.env.local` y conexión de Firebase SDK.
+1. **Configuración de Firebase:** Inicializar proyecto en Google Firebase Console, configurar Firestore, Firebase Auth (Email/Google) y Firebase Storage.
+2. **Módulo Cliente (`src/lib/firebase.ts`):** Variables de entorno `.env.local` y conexión de Firebase SDK (cliente + Admin SDK para el servidor).
 3. **Módulo de Autenticación & Perfil:**
    - Componentes `AuthModal.tsx` / `LoginForm.tsx` / `RegisterForm.tsx`.
    - Vista de gestión de cuenta `AccountWidget.tsx`.
 4. **Protección de Rutas & Roles Admin:** Implementación de guardia de rutas en `/admin` y configuración de *Firestore Security Rules*.
-5. **Panel Admin de Posts:** Formulario `/admin/new-post` para redactar y guardar artículos en Firestore.
+5. **Panel Admin de Posts:** Formulario `/admin/new-post` para redactar y guardar artículos en Firestore (slug manual).
 6. **Sistema de Comentarios & Libro de Visitas:** Componentes `CommentsWidget.tsx` y `GuestbookWidget.tsx`.
-7. **Route Handler RSS 2.0:** Creación de `src/app/feed.xml/route.ts` unificando Markdown local + Firestore.
-8. **Pruebas y Verificación:** `npm run build` y comprobación en GitHub Pages.
+7. **Route Handler RSS 2.0:** Creación de `src/app/feed.xml/route.ts` unificando Markdown local + Firestore (dinámico en Vercel).
+8. **Migración a Vercel:** Actualizar `next.config.ts` (quitar `output: 'export'`), configurar variables de entorno en Vercel Dashboard y desconectar GitHub Pages.
+9. **Pruebas y Verificación:** `npm run build` sin errores y comprobación del sitio en Vercel.
 
 ---
 

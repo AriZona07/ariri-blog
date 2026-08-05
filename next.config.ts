@@ -1,9 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export', // Genera la carpeta /out en el build
+  // Se eliminó `output: 'export'` para habilitar Route Handlers (RSS dinámico)
+  // y SSR parcial en Vercel. En desarrollo local sigue funcionando con `next dev`.
   images: {
-    unoptimized: true, // Necesario para sitios estáticos sin servidor de Node
+    // Dominios permitidos para Next/Image (Firebase Storage + avatars externos)
+    remotePatterns: [
+      { protocol: "https", hostname: "firebasestorage.googleapis.com" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" }, // Avatars de Google
+    ],
   },
 };
 
-export default nextConfig; 
+export default nextConfig;

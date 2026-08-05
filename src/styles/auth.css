@@ -1,0 +1,317 @@
+/**
+ * auth.css — Estilos del sistema de autenticación (AuthModal, LoginForm, RegisterForm)
+ *
+ * Sigue la estética Emo/Scene 2000s del proyecto:
+ * variables de globals.css, bordes retro y tipografía simple-japan.
+ *
+ * Para ajustar colores, modifica las variables en globals.css:
+ *   --color-accent-pink, --color-bg-box, --color-border, etc.
+ */
+
+/* ─── Header Auth zone ───────────────────────────────── */
+
+/* Zona derecha del header que contiene el botón de sesión */
+.site-header__content { flex: 1; }
+
+.site-header__auth {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  padding: 0 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Contenedor del menú desplegable de usuario */
+.header-user-menu { position: relative; }
+
+.header-user-menu__dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 170px;
+  background: var(--color-bg-box);
+  border: 2px solid var(--color-accent-pink);
+  border-radius: var(--radius-sm);
+  box-shadow: 3px 3px 0px #000;
+  z-index: 800;
+  overflow: hidden;
+  animation: auth-fade-in 0.15s ease;
+}
+
+.header-user-menu__item {
+  display: block;
+  width: 100%;
+  padding: 0.55rem 0.9rem;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  font-family: var(--font-main);
+  font-size: var(--fs-xs);
+  text-align: left;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: background 0.12s, color 0.12s;
+}
+.header-user-menu__item:last-child { border-bottom: none; }
+.header-user-menu__item:hover { background: var(--color-bg-sidebar); color: var(--color-accent-pink); }
+
+.header-user-menu__item--admin { color: #00ff66; }
+.header-user-menu__item--admin:hover { color: #00ff66; background: #0d1f14; }
+
+.header-user-menu__item--danger { color: #ff6b6b; }
+.header-user-menu__item--danger:hover { background: #1f0d0d; color: #ff4444; }
+
+
+/* --- Overlay oscuro que cubre toda la pantalla --- */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(3px);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: auth-fade-in 0.2s ease;
+}
+
+@keyframes auth-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* --- Contenedor principal del modal --- */
+.auth-modal {
+  width: 100%;
+  max-width: 420px;
+  background: var(--color-bg-box);
+  border: 3px solid var(--color-accent-pink);
+  border-radius: var(--radius-md);
+  box-shadow: 4px 4px 0px #000, 0 0 32px rgba(255, 20, 147, 0.35);
+  overflow: hidden;
+  animation: auth-slide-up 0.25s ease;
+}
+
+@keyframes auth-slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* --- Encabezado del modal (barra rosa tipo retro-box) --- */
+.auth-modal__header {
+  background: var(--color-accent-pink);
+  padding: 0.5rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--color-accent-magenta);
+}
+
+.auth-modal__title {
+  font-family: var(--font-main);
+  font-size: var(--fs-sm);
+  color: #000;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Botón cerrar (×) */
+.auth-modal__close {
+  background: none;
+  border: none;
+  color: #000;
+  font-size: 1.2rem;
+  font-weight: 900;
+  line-height: 1;
+  padding: 0 0.2rem;
+  transition: color 0.15s;
+}
+.auth-modal__close:hover { color: var(--color-bg-container); }
+
+/* --- Tabs Login / Registro --- */
+.auth-modal__tabs {
+  display: flex;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.auth-modal__tab {
+  flex: 1;
+  padding: 0.6rem 0;
+  background: var(--color-bg-container);
+  border: none;
+  border-right: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-family: var(--font-main);
+  font-size: var(--fs-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: background 0.15s, color 0.15s;
+}
+.auth-modal__tab:last-child { border-right: none; }
+.auth-modal__tab:hover { background: var(--color-bg-sidebar); color: var(--color-text-primary); }
+
+.auth-modal__tab--active {
+  background: var(--color-bg-box);
+  color: var(--color-accent-pink);
+  border-bottom: 2px solid var(--color-accent-pink);
+  margin-bottom: -2px;
+}
+
+/* --- Cuerpo del formulario --- */
+.auth-modal__body {
+  padding: 1.25rem 1.25rem 1.5rem;
+}
+
+/* --- Grupos de campo: label + input --- */
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+}
+
+.auth-field__label {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.auth-field__input {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  background: #110d17;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: var(--fs-sm);
+  transition: border-color 0.15s;
+}
+.auth-field__input:focus {
+  border-color: var(--color-accent-pink);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 20, 147, 0.25);
+}
+
+/* --- Mensaje de error --- */
+.auth-error {
+  background: rgba(184, 0, 88, 0.18);
+  border: 1px solid var(--color-accent-magenta);
+  border-radius: var(--radius-sm);
+  color: #ff66b2;
+  font-size: var(--fs-xs);
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+}
+
+/* --- Botón primario (acción principal del formulario) --- */
+.auth-btn-primary {
+  width: 100%;
+  padding: 0.65rem;
+  background: var(--color-accent-pink);
+  border: 2px solid #000;
+  border-radius: var(--radius-sm);
+  color: #000;
+  font-family: var(--font-main);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  box-shadow: 3px 3px 0px #000;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
+  margin-bottom: 0.75rem;
+}
+.auth-btn-primary:hover {
+  background: #ff66b2;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #000;
+}
+.auth-btn-primary:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px #000;
+}
+.auth-btn-primary:disabled {
+  opacity: 0.5;
+  transform: none;
+  box-shadow: 3px 3px 0px #000;
+}
+
+/* --- Separador "o" entre métodos --- */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* --- Botón secundario (Google Sign-In) --- */
+.auth-btn-google {
+  width: 100%;
+  padding: 0.6rem;
+  background: #1e1a28;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-family: var(--font-main);
+  font-size: var(--fs-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: border-color 0.15s, background 0.15s;
+}
+.auth-btn-google:hover {
+  border-color: var(--color-accent-pink);
+  background: #271f35;
+}
+
+/* Ícono SVG de Google dentro del botón */
+.auth-btn-google__icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* --- Botón del header (Login / nombre de usuario) --- */
+.header-auth-btn {
+  background: transparent;
+  border: 2px solid var(--color-accent-pink);
+  border-radius: var(--radius-sm);
+  color: var(--color-accent-pink);
+  font-family: var(--font-main);
+  font-size: var(--fs-xs);
+  padding: 0.3rem 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.header-auth-btn:hover {
+  background: var(--color-accent-pink);
+  color: #000;
+}
+
+/* Avatar pequeño en el header cuando hay sesión iniciada */
+.header-auth-btn__avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--color-accent-pink);
+  object-fit: cover;
+  vertical-align: middle;
+  margin-right: 0.35rem;
+}
