@@ -3,10 +3,12 @@
 /**
  * /settings/terms/page.tsx — Página de Términos y Condiciones
  *
- * Estructura limpia preparada para agregar los términos en el futuro.
+ * Muestra el documento legal completo en una tarjeta estéticamente adaptada
+ * para máxima legibilidad.
  */
 
 import Link from "next/link";
+import { TERMS_AND_CONDITIONS_HTML } from "@/lib/terms-html";
 
 export default function TermsPage() {
   return (
@@ -18,40 +20,32 @@ export default function TermsPage() {
           <Link
             href="/settings/account"
             style={{
-              fontSize: "0.8rem",
-              color: "var(--color-text-muted)",
+              fontSize: "0.85rem",
+              color: "var(--color-accent-pink)",
               textDecoration: "none",
               display: "inline-flex",
               alignItems: "center",
               gap: "0.4rem",
+              fontWeight: 600,
             }}
           >
             ← Volver a Cuenta
           </Link>
         </div>
 
-        <h2 style={{
-          color: "var(--color-accent-pink)",
-          fontSize: "1.2rem",
-          marginBottom: "1rem",
-          fontFamily: "var(--font-main)",
-        }}>
-          📜 Términos y Condiciones de Uso
-        </h2>
-
-        <div className="terms-content" style={{
-          fontSize: "0.9rem",
-          color: "var(--color-text-secondary)",
-          lineHeight: "1.6",
-          border: "1px dashed var(--color-border)",
-          padding: "1.25rem",
-          borderRadius: "var(--radius-sm)",
-          background: "rgba(0, 0, 0, 0.2)",
-        }}>
-          <p>
-            <em>Sección preparada. Próximamente se detallarán los términos y condiciones de uso del blog.</em>
-          </p>
-        </div>
+        {/* Tarjeta de papel oficial para el documento de Términos y Condiciones */}
+        <div
+          className="terms-paper-container"
+          style={{
+            background: "#ffffff",
+            color: "#111111",
+            padding: "2rem 1.5rem",
+            borderRadius: "var(--radius-sm)",
+            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5), 0 0 0 2px #000000",
+            overflowX: "auto",
+          }}
+          dangerouslySetInnerHTML={{ __html: TERMS_AND_CONDITIONS_HTML }}
+        />
 
       </div>
     </div>
