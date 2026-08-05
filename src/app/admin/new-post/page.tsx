@@ -200,7 +200,7 @@ export default function NewPostPage() {
       console.error("Error al publicar post:", err);
       const errMsg = err instanceof Error ? err.message : String(err);
       if (errMsg.includes("CORS") || errMsg.toLowerCase().includes("failed to fetch") || errMsg.toLowerCase().includes("network")) {
-        setError("🚫 Error de CORS al subir imagen a Firebase Storage. Usa la opción 'Enlace URL Externo', o aplica cors.json en tu proyecto Firebase.");
+        setError("🚫 Error de CORS al subir imagen. Usa la opción 'Enlace URL Externo', o revisa la configuración de CORS.");
       } else {
         setError(`Error al publicar: ${errMsg || "Verifica tu conexión y permisos de admin."}`);
       }
@@ -464,7 +464,7 @@ export default function NewPostPage() {
                           checked={coverMode === "file"}
                           onChange={() => { setCoverMode("file"); setCoverUrl(""); }}
                         />
-                        📁 Archivo Local (Subir a Firebase)
+                        📁 Archivo Local
                       </label>
                     </div>
 

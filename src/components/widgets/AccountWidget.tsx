@@ -11,7 +11,7 @@
  *   - Acceso a /admin (solo si isAdmin === true)
  */
 
-import { useState, useRef, useEffect }        from "react";
+import { useState, useEffect }           from "react";
 import Image                              from "next/image";
 import Link                               from "next/link";
 import {
@@ -34,7 +34,9 @@ export default function AccountWidget() {
 
   // Campos del formulario
   const [displayName, setDisplayName] = useState(user?.displayName ?? "");
+  const [photoMode,   setPhotoMode]   = useState<"url" | "file">("url");
   const [photoURL,    setPhotoURL]    = useState(user?.photoURL   ?? "");
+  const [photoFile,   setPhotoFile]   = useState<File | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [currentPass, setCurrentPass] = useState("");
 
@@ -48,12 +50,10 @@ export default function AccountWidget() {
   });
 
   // Estado de UI
-  const [saving,   setSaving]   = useState(false);
-  const [success,  setSuccess]  = useState<string | null>(null);
-  const [error,    setError]    = useState<string | null>(null);
+  const [saving,    setSaving]    = useState(false);
+  const [success,   setSuccess]   = useState<string | null>(null);
+  const [error,     setError]     = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -100,16 +100,32 @@ export default function AccountWidget() {
     (p) => p.providerId === "password"
   );
 
-  /* --- Guardar cambios de perfil (nombre + foto URL) --- */
+  /* --- Guardar cambios de perfil (nombre + foto URL o archivo local) --- */
   async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setError(null);
     setSuccess(null);
     try {
+      let finalPhotoURL: string | undefined = currentUser.photoURL ?? undefined;
+
+      if (photoMode === "file") {
+        if (photoFile) {
+          setUploading(true);
+          const storageRef = ref(storage, `avatars/${currentUser.uid}/${photoFile.name}`);
+          const snapshot   = await uploadBytes(storageRef, photoFile);
+          finalPhotoURL    = await getDownloadURL(snapshot.ref);
+          setPhotoURL(finalPhotoURL);
+        } else if (!photoURL) {
+          finalPhotoURL = undefined;
+        }
+      } else {
+        finalPhotoURL = photoURL.trim() || undefined;
+      }
+
       await updateProfile(currentUser, {
         displayName: displayName.trim() || currentUser.displayName,
-        photoURL:    photoURL.trim()    || undefined,
+        photoURL:    finalPhotoURL,
       });
       await reloadUser();
       setSuccess("Perfil actualizado correctamente.");
@@ -118,32 +134,6 @@ export default function AccountWidget() {
       setError("No se pudo actualizar el perfil.");
     } finally {
       setSaving(false);
-    }
-  }
-
-  /* --- Subir imagen a Firebase Storage y obtener URL --- */
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    setError(null);
-    setSuccess(null);
-    try {
-      // Ruta: avatars/{uid}/{filename}
-      const storageRef = ref(storage, `avatars/${currentUser.uid}/${file.name}`);
-      const snapshot   = await uploadBytes(storageRef, file);
-      const url        = await getDownloadURL(snapshot.ref);
-      setPhotoURL(url);
-      await updateProfile(currentUser, {
-        displayName: displayName.trim() || currentUser.displayName,
-        photoURL:    url,
-      });
-      await reloadUser();
-      setSuccess("Imagen subida y perfil actualizado con éxito.");
-    } catch (err) {
-      console.error("Error al subir imagen:", err);
-      setError("No se pudo subir la imagen.");
-    } finally {
       setUploading(false);
     }
   }
@@ -217,48 +207,76 @@ export default function AccountWidget() {
         </div>
 
         <div className="auth-field">
-          <label htmlFor="acc-photo" className="auth-field__label">URL de Foto de Perfil</label>
-          <input
-            id="acc-photo"
-            type="url"
-            className="auth-field__input"
-            value={photoURL}
-            onChange={(e) => setPhotoURL(e.target.value)}
-            placeholder="https://ejemplo.com/mi-foto.png"
-          />
-        </div>
+          <label className="auth-field__label">Foto de Perfil</label>
 
-        {/* Subida directa a Firebase Storage */}
-        <div className="auth-field">
-          <label className="auth-field__label">
-            — O sube una imagen —
-          </label>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            style={{ display: "none" }}
-            id="acc-upload"
-            onChange={handleImageUpload}
-          />
-          <button
-            type="button"
-            className="auth-btn-primary"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            id="acc-upload-btn"
-          >
-            {uploading ? "Subiendo..." : "Subir imagen desde mi PC"}
-          </button>
+          <div style={{ display: "flex", gap: "1.25rem", marginBottom: "0.75rem", marginTop: "0.4rem" }}>
+            <label style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8rem", color: "var(--color-text-primary)", cursor: "pointer" }}>
+              <input
+                type="radio"
+                name="photoMode"
+                value="url"
+                checked={photoMode === "url"}
+                onChange={() => {
+                  setPhotoMode("url");
+                  setPhotoFile(null);
+                }}
+              />
+              🔗 Enlace URL Externo
+            </label>
+
+            <label style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8rem", color: "#00ff66", cursor: "pointer" }}>
+              <input
+                type="radio"
+                name="photoMode"
+                value="file"
+                checked={photoMode === "file"}
+                onChange={() => {
+                  setPhotoMode("file");
+                  setPhotoURL("");
+                }}
+              />
+              📁 Subir imagen desde mi dispositivo
+            </label>
+          </div>
+
+          {photoMode === "url" ? (
+            <input
+              id="acc-photo"
+              type="url"
+              className="auth-field__input"
+              value={photoURL}
+              onChange={(e) => setPhotoURL(e.target.value)}
+              placeholder="https://ejemplo.com/mi-foto.png"
+            />
+          ) : (
+            <div>
+              <input
+                id="acc-upload"
+                type="file"
+                accept="image/*"
+                className="auth-field__input"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setPhotoFile(e.target.files[0]);
+                  }
+                }}
+              />
+              {photoFile && (
+                <p style={{ fontSize: "0.75rem", color: "#00ff66", marginTop: "0.4rem" }}>
+                  ✓ Archivo seleccionado: <strong>{photoFile.name}</strong> ({Math.round(photoFile.size / 1024)} KB)
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         <button
           type="submit"
           className="auth-btn-primary"
-          disabled={saving}
+          disabled={saving || uploading}
           id="acc-save-profile-btn"
         >
-          {saving ? "Guardando..." : "Guardar Cambios"}
+          {saving || uploading ? "Guardando..." : "Guardar Cambios"}
         </button>
       </form>
 
