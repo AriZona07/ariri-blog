@@ -15,10 +15,12 @@
   min-height: 400px;
 }
 
-/* Grid adaptativo de 2 columnas cuando la sidebar derecha está oculta en /settings/* */
-.site-body.site-body--no-right-sidebar {
-  grid-template-areas: "sidebar-left content";
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 4.65fr);
+/* Grid adaptativo de 2 columnas cuando la sidebar derecha está oculta en /settings/* (Solo Escritorio) */
+@media (min-width: 769px) {
+  .site-body.site-body--no-right-sidebar {
+    grid-template-areas: "sidebar-left content";
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 4.65fr);
+  }
 }
 
 /* Sidebar izquierda */
@@ -125,13 +127,29 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  /* Oculta la sidebar izquierda en móvil dentro de las páginas de ajustes /settings/* */
-  .site-body--no-right-sidebar .sidebar-left {
+  /* Oculta al 100% la sidebar izquierda y derecha en móvil dentro de las páginas de ajustes /settings/* */
+  .site-body.site-body--no-right-sidebar {
+    display: block !important;
+    width: 100% !important;
+    grid-template-areas: "content" !important;
+    grid-template-columns: 100% !important;
+  }
+
+  .site-body--no-right-sidebar .sidebar-left,
+  .site-body--no-right-sidebar .sidebar-right {
     display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
   }
 
   .site-body--no-right-sidebar .site-content {
-    padding-bottom: 5.5rem;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1rem 1rem 5.5rem 1rem !important;
+    box-sizing: border-box !important;
   }
 
   .sidebar-left,

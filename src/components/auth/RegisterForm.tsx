@@ -4,6 +4,7 @@
  * RegisterForm.tsx — Formulario de creación de cuenta
  *
  * Crea la cuenta con Email + Contraseña y asigna el displayName inicial.
+ * Requiere la aceptación obligatoria de los Términos y Condiciones antes de registrarse.
  * También ofrece registro rápido con Google.
  *
  * Props:
@@ -11,6 +12,7 @@
  */
 
 import { useState } from "react";
+import Link         from "next/link";
 import {
   createUserWithEmailAndPassword,
   updateProfile,
@@ -26,18 +28,23 @@ interface RegisterFormProps {
 const googleProvider = new GoogleAuthProvider();
 
 export default function RegisterForm({ onSuccess }: RegisterFormProps) {
-  const [name,     setName]     = useState("");
-  const [email,    setEmail]    = useState("");
-  const [password, setPassword] = useState("");
-  const [confirm,  setConfirm]  = useState("");
-  const [error,    setError]    = useState<string | null>(null);
-  const [loading,  setLoading]  = useState(false);
+  const [name,          setName]          = useState("");
+  const [email,         setEmail]         = useState("");
+  const [password,      setPassword]      = useState("");
+  const [confirm,       setConfirm]       = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [error,         setError]         = useState<string | null>(null);
+  const [loading,       setLoading]       = useState(false);
 
   /* --- Registro con Email/Password --- */
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
+    if (!acceptedTerms) {
+      setError("Debes aceptar los Términos y Condiciones para poder registrarte.");
+      return;
+    }
     if (password !== confirm) {
       setError("Las contraseñas no coinciden.");
       return;
@@ -63,6 +70,11 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   /* --- Registro rápido con Google --- */
   async function handleGoogleRegister() {
     setError(null);
+    if (!acceptedTerms) {
+      setError("Debes aceptar los Términos y Condiciones para poder registrarte.");
+      return;
+    }
+
     setLoading(true);
     try {
       await signInWithPopup(auth, googleProvider);
@@ -134,10 +146,35 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         />
       </div>
 
+      {/* Casilla obligatoria de Términos y Condiciones */}
+      <div className="auth-terms-checkbox-field">
+        <label className="auth-terms-label">
+          <input
+            type="checkbox"
+            className="auth-terms-checkbox"
+            checked={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+            id="register-terms-checkbox"
+            required
+          />
+          <span>
+            He leído y acepto los{" "}
+            <Link
+              href="/settings/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="auth-terms-link"
+            >
+              Términos y Condiciones
+            </Link>
+          </span>
+        </label>
+      </div>
+
       <button
         type="submit"
         className="auth-btn-primary"
-        disabled={loading}
+        disabled={loading || !acceptedTerms}
         id="register-submit-btn"
       >
         {loading ? "Creando cuenta..." : "Crear Cuenta"}
@@ -149,7 +186,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         type="button"
         className="auth-btn-google"
         onClick={handleGoogleRegister}
-        disabled={loading}
+        disabled={loading || !acceptedTerms}
         id="register-google-btn"
       >
         <svg className="auth-btn-google__icon" viewBox="0 0 48 48" aria-hidden="true">

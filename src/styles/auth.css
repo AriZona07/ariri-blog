@@ -319,3 +319,36 @@
   object-fit: cover;
   flex-shrink: 0;
 }
+
+/* --- Casilla de verificación de Términos y Condiciones --- */
+.auth-terms-checkbox-field {
+  margin-bottom: 1rem;
+}
+
+.auth-terms-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.auth-terms-checkbox {
+  accent-color: var(--color-accent-pink);
+  margin-top: 0.15rem;
+  cursor: pointer;
+}
+
+.auth-terms-link {
+  color: var(--color-accent-pink);
+  text-decoration: underline;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+
+.auth-terms-link:hover {
+  color: #ff66b2;
+}
+
