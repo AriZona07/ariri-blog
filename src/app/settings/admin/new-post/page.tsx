@@ -19,7 +19,7 @@
  * Seguridad: Firestore Rules bloquea escritura si el token no tiene claim `admin: true`.
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense }   from "react";
 import { useRouter, useSearchParams }        from "next/navigation";
 import Link                                  from "next/link";
 import {
@@ -36,7 +36,7 @@ import { db, storage }      from "@/lib/firebase";
 import { useAuth }          from "@/lib/auth-context";
 import { extractYouTubePlaylistId, processSongCoverUrl } from "@/lib/youtube";
 
-export default function SettingsNewPostPage() {
+function SettingsNewPostForm() {
   const { user, isAdmin, loading } = useAuth();
   const router       = useRouter();
   const searchParams = useSearchParams();
@@ -538,5 +538,20 @@ export default function SettingsNewPostPage() {
         </div>
       )}
     </>
+  );
+}
+
+export default function SettingsNewPostPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="retro-box">
+          <div className="retro-box__header">⚙ Publicaciones y Borradores</div>
+          <div className="account-loading">Cargando formulario…</div>
+        </div>
+      }
+    >
+      <SettingsNewPostForm />
+    </Suspense>
   );
 }

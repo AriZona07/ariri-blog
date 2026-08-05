@@ -22,7 +22,7 @@ export default function SettingsSidebarWidget() {
   const { isAdmin } = useAuth();
 
   const navItems: SettingsNavItem[] = [
-    { href: "/settings/account",       icon: "👤", label: "Mi Cuenta y Perfil" },
+    { href: "/settings/account",       icon: "👤", label: "Cuenta" },
     { href: "/settings/notifications", icon: "🔔", label: "Notificaciones" },
   ];
 

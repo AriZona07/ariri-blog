@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-
 /**
  * /admin/new-post/page.tsx — Redirección de compatibilidad hacia /settings/admin/new-post
  */
-export default function LegacyNewPostRedirectPage() {
+
+import { Suspense, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+
+function LegacyRedirectContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -24,5 +25,20 @@ export default function LegacyNewPostRedirectPage() {
       <div className="retro-box__header">Redirigiendo…</div>
       <div className="account-loading">Redirigiendo al formulario de publicaciones en Ajustes…</div>
     </div>
+  );
+}
+
+export default function LegacyNewPostRedirectPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="retro-box">
+          <div className="retro-box__header">Redirigiendo…</div>
+          <div className="account-loading">Cargando…</div>
+        </div>
+      }
+    >
+      <LegacyRedirectContent />
+    </Suspense>
   );
 }

@@ -203,3 +203,73 @@
   background: rgba(255, 20, 147, 0.15);
 }
 
+/* --- Botón de Eliminación de Cuenta --- */
+.account-delete-btn {
+  display: block;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  background: rgba(255, 0, 0, 0.12);
+  border: 1px solid #ff4444;
+  border-radius: var(--radius-sm);
+  color: #ff4444;
+  font-family: var(--font-main);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px #000;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+
+.account-delete-btn:hover {
+  background: #ff4444;
+  color: #ffffff;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px #000;
+}
+
+/* --- Enlace a Términos y Condiciones --- */
+.account-terms-link {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  text-decoration: underline;
+  transition: color 0.15s;
+}
+
+.account-terms-link:hover {
+  color: var(--color-accent-pink);
+}
+
+/* --- Toast emergente de cancelación automática de eliminación --- */
+.account-deletion-restored-toast {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 9999;
+  background: rgba(18, 10, 24, 0.95);
+  backdrop-filter: blur(8px);
+  border: 2px solid #00ff66;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.8), 3px 3px 0px #000;
+  color: #00ff66;
+  font-size: 0.85rem;
+  padding: 0.85rem 1.1rem;
+  max-width: 420px;
+  animation: slideInToast 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInToast {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+

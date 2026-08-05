@@ -7,19 +7,24 @@
  *   - Editar apodo (displayName)
  *   - Actualizar foto de perfil (URL externa o subir imagen a Firebase Storage)
  *   - Cambiar contraseña (solo usuarios registrados con Email/Password)
+ *   - Solicitud de eliminación de cuenta con período de gracia de 15 días
+ *   - Enlace a Términos y Condiciones (/settings/terms)
  */
 
 import { useState }                         from "react";
 import Image                                from "next/image";
+import Link                                 from "next/link";
 import {
   updateProfile,
   updatePassword,
   EmailAuthProvider,
   reauthenticateWithCredential,
+  signOut,
 } from "firebase/auth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage }                           from "@/lib/firebase";
-import { useAuth }                           from "@/lib/auth-context";
+import { doc, setDoc, serverTimestamp }     from "firebase/firestore";
+import { auth, storage, db }                from "@/lib/firebase";
+import { useAuth }                          from "@/lib/auth-context";
 
 export default function AccountWidget() {
   const { user, isAdmin, reloadUser } = useAuth();
@@ -31,6 +36,10 @@ export default function AccountWidget() {
   const [photoFile,   setPhotoFile]   = useState<File | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [currentPass, setCurrentPass] = useState("");
+
+  // Estado de eliminación de cuenta
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   // Estado de UI
   const [saving,    setSaving]    = useState(false);
@@ -103,6 +112,27 @@ export default function AccountWidget() {
       setError("La contraseña actual es incorrecta o la nueva es muy débil.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  /* --- Confirmar solicitud de eliminación de cuenta --- */
+  async function handleConfirmDeleteAccount() {
+    setDeletingAccount(true);
+    try {
+      // Registrar la propiedad eliminar_cuenta: true y marca de tiempo en Firestore
+      await setDoc(doc(db, "users", currentUser.uid), {
+        eliminar_cuenta:    true,
+        eliminar_cuenta_at: serverTimestamp(),
+        email:              currentUser.email,
+      }, { merge: true });
+
+      // Cerrar sesión
+      await signOut(auth);
+    } catch (err) {
+      console.error("Error al solicitar eliminación de cuenta:", err);
+      setError("No se pudo procesar la solicitud de eliminación de cuenta.");
+      setDeletingAccount(false);
+      setShowDeleteModal(false);
     }
   }
 
@@ -266,6 +296,124 @@ export default function AccountWidget() {
             {saving ? "Actualizando..." : "Actualizar Contraseña"}
           </button>
         </form>
+      )}
+
+      {/* ─── Sección: Borrado de Cuenta (Zona de Peligro) ─ */}
+      <div style={{ marginTop: "2rem" }}>
+        <p className="account-section-title" style={{ color: "#ff4444", borderColor: "#ff4444" }}>
+          ⚠️ Zona de Peligro
+        </p>
+
+        <button
+          type="button"
+          className="account-delete-btn"
+          onClick={() => setShowDeleteModal(true)}
+          id="acc-delete-account-btn"
+        >
+          🗑️ Eliminar mi cuenta
+        </button>
+      </div>
+
+      {/* ─── Enlace a Términos y Condiciones (al final) ── */}
+      <div style={{ marginTop: "2rem", textTransform: "center", textAlign: "center" }}>
+        <Link href="/settings/terms" className="account-terms-link" id="acc-terms-link">
+          📜 Términos y Condiciones
+        </Link>
+      </div>
+
+      {/* ─── Modal Pop-up de Confirmación de Eliminación de Cuenta ─ */}
+      {showDeleteModal && (
+        <div
+          className="drafts-modal-overlay"
+          onClick={() => setShowDeleteModal(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Confirmar eliminación de cuenta"
+        >
+          <div
+            className="drafts-modal"
+            style={{ maxWidth: "520px" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="drafts-modal__header" style={{ background: "linear-gradient(90deg, #8b0000 0%, #4a0000 100%)" }}>
+              <span className="drafts-modal__title">⚠️ Eliminar Cuenta</span>
+              <button
+                type="button"
+                className="drafts-modal__close"
+                onClick={() => setShowDeleteModal(false)}
+                aria-label="Cerrar modal"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="drafts-modal__body" style={{ padding: "1.25rem" }}>
+              <div style={{ fontSize: "0.85rem", color: "var(--color-text-primary)", lineHeight: "1.5" }}>
+                <p style={{ fontWeight: "bold", color: "#ff4444", marginBottom: "0.75rem" }}>
+                  ¿Estás seguro de que deseas solicitar la eliminación de tu cuenta?
+                </p>
+
+                <div style={{
+                  background: "rgba(255, 0, 0, 0.1)",
+                  border: "1px dashed #ff4444",
+                  padding: "0.85rem",
+                  borderRadius: "var(--radius-sm)",
+                  marginBottom: "1rem"
+                }}>
+                  <p style={{ margin: "0 0 0.5rem 0", fontWeight: "bold" }}>
+                    🔒 Información sobre la eliminación y privacidad de tus datos:
+                  </p>
+                  <ul style={{ paddingLeft: "1.2rem", margin: 0 }}>
+                    <li>
+                      Toda tu información personal, perfil y configuraciones serán eliminados definitivamente <strong>después de 15 días</strong>.
+                    </li>
+                    <li>
+                      Este periodo de 15 días evita la sobrecarga en servidores y te brinda tiempo por si decides regresar.
+                    </li>
+                  </ul>
+                </div>
+
+                <div style={{
+                  background: "rgba(0, 255, 102, 0.08)",
+                  border: "1px solid #00ff66",
+                  padding: "0.85rem",
+                  borderRadius: "var(--radius-sm)",
+                  marginBottom: "1rem"
+                }}>
+                  <p style={{ margin: "0 0 0.4rem 0", color: "#00ff66", fontWeight: "bold" }}>
+                    💡 ¿Cómo cancelar la eliminación y recuperar tu cuenta?
+                  </p>
+                  <p style={{ margin: 0, fontSize: "0.8rem", color: "var(--color-text-secondary)" }}>
+                    Si en algún momento dentro de los próximos 15 días vuelves a <strong>iniciar sesión</strong>, la solicitud de eliminación se cancelará automáticamente y tu cuenta permanecerá 100% activa.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.25rem", justifyContent: "flex-end" }}>
+                <button
+                  type="button"
+                  className="auth-btn-primary"
+                  style={{ background: "#333", color: "#fff", flex: 1 }}
+                  onClick={() => setShowDeleteModal(false)}
+                  disabled={deletingAccount}
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  type="button"
+                  className="account-delete-btn"
+                  style={{ flex: 1.5, marginTop: 0 }}
+                  onClick={handleConfirmDeleteAccount}
+                  disabled={deletingAccount}
+                  id="acc-confirm-delete-btn"
+                >
+                  {deletingAccount ? "Procesando…" : "Confirmar (15 días)"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
     </div>
