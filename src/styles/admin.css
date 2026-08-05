@@ -30,7 +30,7 @@
   text-shadow: 2px 2px 0px #000;
 }
 
-/* Botón "Nueva Entrada" */
+/* Botón "Nuevo post" */
 .admin-btn-new {
   padding: 0.5rem 1.1rem;
   background: #00ff66;
@@ -44,6 +44,7 @@
   letter-spacing: 0.06em;
   box-shadow: 3px 3px 0px #000;
   text-decoration: none;
+  cursor: pointer;
   transition: transform 0.1s, box-shadow 0.1s;
 }
 .admin-btn-new:hover {
@@ -51,6 +52,44 @@
   box-shadow: 4px 4px 0px #000;
   background: #33ff88;
   color: #000;
+}
+
+/* Botón "Borradores" — acento en cian */
+.admin-btn-drafts {
+  padding: 0.5rem 1.1rem;
+  background: transparent;
+  border: 2px solid #00f0ff;
+  border-radius: var(--radius-sm);
+  color: #00f0ff;
+  font-family: var(--font-main);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  box-shadow: 3px 3px 0px #000;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.12s;
+}
+.admin-btn-drafts:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #000;
+  background: rgba(0, 240, 255, 0.12);
+}
+/* Badge de contador de borradores sobre el botón */
+.admin-btn-drafts__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  margin-left: 0.4rem;
+  background: #00f0ff;
+  color: #000;
+  border-radius: 9px;
+  font-size: 0.7rem;
+  font-weight: 900;
+  line-height: 1;
 }
 
 /* --- Lista de posts en el panel --- */
@@ -197,6 +236,240 @@
   margin-bottom: 0.75rem;
 }
 
+/* --- Fila de botones de acción del formulario (publicar / guardar / eliminar) --- */
+.new-post-form__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+/* Botón "Guardar borrador" — amarillo */
+.new-post-form__save-draft {
+  flex: 1;
+  min-width: 160px;
+  padding: 0.75rem;
+  background: #ffff00;
+  border: 2px solid #000;
+  border-radius: var(--radius-sm);
+  color: #000;
+  font-family: var(--font-main);
+  font-size: var(--fs-base);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  box-shadow: 4px 4px 0px #000;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.new-post-form__save-draft:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000;
+  background: #ffff33;
+}
+.new-post-form__save-draft:disabled { opacity: 0.5; }
+
+/* Botón "Eliminar borrador" — magenta/rojo */
+.new-post-form__delete-draft {
+  padding: 0.75rem 1.1rem;
+  background: transparent;
+  border: 2px solid var(--color-accent-pink);
+  border-radius: var(--radius-sm);
+  color: var(--color-accent-pink);
+  font-family: var(--font-main);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  box-shadow: 3px 3px 0px #000;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.12s;
+}
+.new-post-form__delete-draft:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #000;
+  background: rgba(255, 20, 147, 0.15);
+}
+.new-post-form__delete-draft:disabled { opacity: 0.4; }
+
+/* Botón "Publicar post" — verde (reutiliza .new-post-form__submit pero ocupa el flex) */
+.new-post-form__actions .new-post-form__submit {
+  flex: 2;
+  min-width: 200px;
+  margin-top: 0;
+}
+
+/* Toast de feedback al guardar borrador */
+.draft-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  padding: 0.6rem 1.4rem;
+  background: #ffff00;
+  color: #000;
+  font-family: var(--font-main);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  border: 2px solid #000;
+  border-radius: var(--radius-sm);
+  box-shadow: 4px 4px 0px #000;
+  z-index: 9999;
+  white-space: nowrap;
+  animation: draftToastIn 0.2s ease, draftToastOut 0.3s ease 2.2s forwards;
+}
+@keyframes draftToastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@keyframes draftToastOut {
+  to   { opacity: 0; transform: translateX(-50%) translateY(20px); }
+}
+
+/* --- Modal de lista de borradores (popup en /admin) --- */
+.drafts-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.drafts-modal {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-bg-container);
+  border: 4px double #00f0ff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-heavy), 0 0 0 4px #000;
+}
+
+.drafts-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.2rem;
+  background: linear-gradient(90deg, #06223a 0%, #031018 100%);
+  border-bottom: 2px solid #00f0ff;
+  flex-shrink: 0;
+}
+
+.drafts-modal__title {
+  font-family: var(--font-punk);
+  font-size: var(--fs-xl);
+  color: #00f0ff;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.drafts-modal__close {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 2px solid #00f0ff;
+  border-radius: var(--radius-sm);
+  color: #00f0ff;
+  font-size: var(--fs-base);
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.drafts-modal__close:hover {
+  background: #00f0ff;
+  color: #000;
+}
+
+.drafts-modal__body {
+  padding: 1rem 1.2rem;
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: #00f0ff #0c0a10;
+}
+.drafts-modal__body::-webkit-scrollbar { width: 6px; }
+.drafts-modal__body::-webkit-scrollbar-track { background: #0c0a10; }
+.drafts-modal__body::-webkit-scrollbar-thumb { background: #00f0ff; border-radius: 3px; }
+
+.drafts-modal__empty {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  text-align: center;
+  padding: 2rem;
+  border: 1px dashed #00f0ff;
+  border-radius: var(--radius-sm);
+  opacity: 0.7;
+}
+
+/* Fila de borrador en el popup — igual que .admin-post-item pero con acento cian */
+.draft-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.65rem 0.9rem;
+  background: var(--color-bg-box);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid #00f0ff;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+  margin-bottom: 0.5rem;
+}
+.draft-item:hover {
+  background: rgba(0, 240, 255, 0.08);
+  border-color: #00f0ff;
+}
+
+.draft-item__title {
+  font-size: var(--fs-sm);
+  color: var(--color-text-primary);
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.draft-item__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  flex-shrink: 0;
+}
+
+.draft-item__date {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.draft-item__badge {
+  font-size: 0.65rem;
+  color: #00f0ff;
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid #00f0ff;
+  border-radius: 4px;
+  padding: 0 5px;
+  white-space: nowrap;
+}
+
 @media (max-width: 600px) {
   .new-post-form__meta-row { grid-template-columns: 1fr; }
+  .new-post-form__actions { flex-direction: column; }
+  .new-post-form__actions .new-post-form__submit { min-width: unset; }
+  .new-post-form__save-draft { min-width: unset; }
 }

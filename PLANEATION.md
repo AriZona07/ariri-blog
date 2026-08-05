@@ -132,7 +132,20 @@ Con las características principales estructuradas, la atención del proyecto pa
 
 ---
 
-## 🔮 2. Futuro Lejano / En Evaluación
+#### 🗒️ 7. Sistema de Borradores (Drafts) — **Implementado**
+
+- **Colección Firestore:** `drafts` — separada de `posts` para que la lista pública nunca los muestre.
+- **Panel Admin (`/admin`):** Botón "📄 Borradores" con badge de contador. Popup modal con lista de borradores (acento cian). Click en borrador → navega al formulario con el borrador cargado.
+- **Formulario (`/admin/new-post`):**
+  - Query param `?draft=<id>` carga el borrador al montar.
+  - **"💾 Guardar borrador"** → crea o actualiza en `drafts`. Si es nuevo, actualiza la URL con `?draft=<id>` para evitar duplicados.
+  - **"★ Publicar post ★"** → publica en `posts` y elimina el borrador si existe.
+  - **"🗑 Eliminar borrador"** → solo visible con borrador activo; elimina y redirige al panel.
+  - Toast visual amarillo de confirmación al guardar.
+
+---
+
+
 
 ### 🎨 Resaltado de Sintaxis en Bloques de Código
 - **Concepto:** Coloreado de código para artículos técnicos o tutoriales.
