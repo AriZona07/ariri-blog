@@ -9,7 +9,7 @@ import GuestbookWidget   from "@/components/widgets/GuestbookWidget";
 export default function SidebarRight() {
   return (
     <aside className="sidebar-right" role="complementary" aria-label="Widgets interactivos">
-      <MusicPlayerWidget playlistId="PLb_cyNEBFTVA" />
+      <MusicPlayerWidget playlistId="PLRUBc5sTzob8" />
       <SketchBoardWidget />
       <GuestbookWidget />
     </aside>

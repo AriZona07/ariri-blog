@@ -41,6 +41,37 @@ declare global {
   }
 }
 
+/* ─── Gestor Global para la IFrame API de YouTube ─────────────────────── */
+const ytCallbacks: Array<() => void> = [];
+
+function registerYouTubeApiReady(onReady: () => void) {
+  if (typeof window === "undefined") return;
+
+  if (window.YT && window.YT.Player) {
+    onReady();
+    return;
+  }
+
+  ytCallbacks.push(onReady);
+
+  if (!document.getElementById("yt-iframe-api-script")) {
+    const tag = document.createElement("script");
+    tag.id  = "yt-iframe-api-script";
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScript = document.getElementsByTagName("script")[0];
+    firstScript?.parentNode?.insertBefore(tag, firstScript);
+
+    const prevOnReady = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      if (prevOnReady) prevOnReady();
+      while (ytCallbacks.length > 0) {
+        const cb = ytCallbacks.shift();
+        if (cb) cb();
+      }
+    };
+  }
+}
+
 interface PlaylistItem {
   id: string;
   title: string;
@@ -127,16 +158,17 @@ export default function MusicPlayer({
     try {
       if (typeof player.getPlaylist !== "function") return;
       const ids: string[] = player.getPlaylist() || [];
-      if (ids.length === 0) return;
+      if (!ids || ids.length === 0) return;
 
       const items: PlaylistItem[] = await Promise.all(
-        ids.map(async (id) => {
+        ids.map(async (id, idx) => {
           try {
             const res  = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${id}`);
+            if (!res.ok) throw new Error("Fetch error");
             const data = await res.json();
-            return { id, title: data.title || `Pista ${id}` };
+            return { id, title: data.title || `Pista ${idx + 1}` };
           } catch {
-            return { id, title: `Pista ${id}` };
+            return { id, title: `Pista ${idx + 1}` };
           }
         })
       );
@@ -165,74 +197,95 @@ export default function MusicPlayer({
   /* ─── Inicialización del player ───────────────────────────────────────── */
 
   useEffect(() => {
-    if (!window.YT) {
-      const tag = document.createElement("script");
-      tag.src   = "https://www.youtube.com/iframe_api";
-      const firstScript = document.getElementsByTagName("script")[0];
-      firstScript?.parentNode?.insertBefore(tag, firstScript);
-    }
+    let isCancelled = false;
 
     const initPlayer = () => {
-      if (!window.YT) return;
-      playerRef.current = new window.YT.Player(playerId, {
-        height: "0",
-        width:  "0",
-        playerVars: {
-          listType: "playlist",
-          list:     playlistId,
-          autoplay: 0,
-          controls: 0,
-        },
-        events: {
-          onReady: (event: YTEvent) => {
-            setIsReady(true);
-            event.target.setVolume(50); // volumen inicial
-            updateTrackInfo(event.target);
-            loadPlaylistTitles(event.target);
-          },
-          onStateChange: (event: YTEvent) => {
-            // YT.PlayerState: PLAYING = 1, PAUSED = 2, ENDED = 0
-            if (event.data === 1) {
-              setIsPlaying(true);
-              updateTrackInfo(event.target);
-              // Notifica a otras instancias del widget para que se pausen
-              window.dispatchEvent(
-                new CustomEvent("music-player:activated", { detail: { id: playerId } })
-              );
-            } else if (event.data === 2) {
-              setIsPlaying(false);
-            } else if (event.data === 0) {
-              // Canción terminó — loop de track se gestiona aquí
-              setIsPlaying(false);
-              setLoopMode((currentLoop) => {
-                if (currentLoop === "track") {
-                  setCurrentIndex((ci) => {
-                    event.target.playVideoAt(ci);
-                    return ci;
-                  });
-                }
-                return currentLoop;
-              });
-            }
-          },
-        },
-      });
-    };
+      if (isCancelled || !window.YT || !window.YT.Player) return;
 
-    if (window.YT?.Player) {
-      initPlayer();
-    } else {
-      window.onYouTubeIframeAPIReady = initPlayer;
-    }
+      if (playerRef.current && typeof playerRef.current.destroy === "function") {
+        try { playerRef.current.destroy(); } catch {}
+      }
 
-    return () => {
-      if (typeof playerRef.current?.destroy === "function") {
-        playerRef.current.destroy();
+      try {
+        const originUrl = typeof window !== "undefined" ? window.location.origin : undefined;
+
+        playerRef.current = new window.YT.Player(playerId, {
+          height: "1",
+          width:  "1",
+          host:   "https://www.youtube.com",
+          playerVars: {
+            listType:    "playlist",
+            list:        playlistId,
+            autoplay:    0,
+            controls:    0,
+            enablejsapi: 1,
+            origin:      originUrl,
+          },
+          events: {
+            onReady: (event: YTEvent) => {
+              if (isCancelled) return;
+              setIsReady(true);
+              try {
+                event.target.setVolume(50);
+                updateTrackInfo(event.target);
+                loadPlaylistTitles(event.target);
+              } catch (e) {
+                console.error("Error en onReady de YT Player:", e);
+              }
+            },
+            onStateChange: (event: YTEvent) => {
+              if (isCancelled) return;
+              if (event.data === 1) {
+                setIsPlaying(true);
+                updateTrackInfo(event.target);
+                window.dispatchEvent(
+                  new CustomEvent("music-player:activated", { detail: { id: playerId } })
+                );
+              } else if (event.data === 2) {
+                setIsPlaying(false);
+              } else if (event.data === 0) {
+                setIsPlaying(false);
+                setLoopMode((currentLoop) => {
+                  if (currentLoop === "track") {
+                    setCurrentIndex((ci) => {
+                      event.target.playVideoAt(ci);
+                      return ci;
+                    });
+                  }
+                  return currentLoop;
+                });
+              }
+            },
+            onError: (event: YTEvent) => {
+              console.warn("YouTube Player error code:", event.data);
+              setIsReady(true);
+              const errCode = event.data;
+              if (errCode === 150 || errCode === 101) {
+                setSongTitle("⚠️ Playlist de YouTube privada o con reproducción incrustada desactivada");
+              } else if (errCode === 100) {
+                setSongTitle("⚠️ Playlist no encontrada o eliminada de YouTube");
+              } else if (errCode === 2) {
+                setSongTitle("⚠️ ID de playlist de YouTube no válido");
+              } else {
+                setSongTitle("⚠️ No se pudo reproducir la playlist de YouTube");
+              }
+            },
+          },
+        });
+      } catch (err) {
+        console.error("Error instanciando YT.Player:", err);
       }
     };
-  // playerId es estable por useId, no necesita ser dependencia
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playlistId, updateTrackInfo, loadPlaylistTitles]);
+
+    registerYouTubeApiReady(initPlayer);
+
+    return () => {
+      isCancelled = true;
+      if (typeof playerRef.current?.destroy === "function") {
+        try { playerRef.current.destroy(); } catch {}
+      }
+    };
+  }, [playlistId, playerId, updateTrackInfo, loadPlaylistTitles]);
 
   /* Sincroniza el loop de playlist con la API de YouTube */
   useEffect(() => {
@@ -336,8 +389,8 @@ export default function MusicPlayer({
 
   return (
     <div className="music-player">
-      {/* IFrame de YouTube completamente oculto (solo audio) */}
-      <div id={playerId} style={{ display: "none" }} />
+      {/* IFrame de YouTube oculto posicionalmente para permitir ejecuciones del navegador */}
+      <div id={playerId} style={{ position: "absolute", width: "1px", height: "1px", opacity: 0, pointerEvents: "none", overflow: "hidden", left: "-9999px" }} />
 
       {/* Pantalla LCD retro */}
       <div className="music-player__screen">
