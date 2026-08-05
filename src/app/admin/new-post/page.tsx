@@ -72,6 +72,16 @@ export default function NewPostPage() {
         authorUid:  user!.uid,
         createdAt:  serverTimestamp(),
       });
+
+      // Crear registro de notificación para avisar a los suscriptores del blog
+      await addDoc(collection(db, "notifications"), {
+        title:     "¡Nueva entrada de blog!",
+        message:   title.trim(),
+        postSlug:  slug.trim(),
+        createdAt: serverTimestamp(),
+        type:      "new_post",
+      });
+
       setSuccess(true);
     } catch {
       setError("Error al publicar. Verifica tu conexión y permisos.");

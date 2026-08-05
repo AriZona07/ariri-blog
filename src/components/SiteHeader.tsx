@@ -17,6 +17,7 @@ import { signOut }   from "firebase/auth";
 import { auth }      from "@/lib/firebase";
 import { useAuth }   from "@/lib/auth-context";
 import AuthModal     from "@/components/auth/AuthModal";
+import NotificationBell from "@/components/NotificationBell";
 
 interface SiteHeaderProps {
   title?:    string;
@@ -44,8 +45,10 @@ export default function SiteHeader({
           <p  className="site-header__subtitle">{subtitle}</p>
         </div>
 
-        {/* --- Zona de autenticación (esquina derecha del header) --- */}
-        <div className="site-header__auth">
+        {/* --- Zona de autenticación y notificaciones (esquina derecha del header) --- */}
+        <div className="site-header__auth" style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          <NotificationBell />
+
           {loading ? null : !user ? (
             /* Botón visible cuando no hay sesión */
             <button
@@ -69,8 +72,8 @@ export default function SiteHeader({
                   <Image
                     src={user.photoURL}
                     alt="avatar"
-                    width={22}
-                    height={22}
+                    width={28}
+                    height={28}
                     className="header-auth-btn__avatar"
                   />
                 )}

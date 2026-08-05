@@ -11,7 +11,7 @@
  *   - Acceso a /admin (solo si isAdmin === true)
  */
 
-import { useState, useRef }               from "react";
+import { useState, useRef, useEffect }        from "react";
 import Image                              from "next/image";
 import Link                               from "next/link";
 import {
@@ -23,6 +23,11 @@ import {
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage }                           from "@/lib/firebase";
 import { useAuth }                           from "@/lib/auth-context";
+import {
+  getUserNotificationPrefs,
+  setUserNotificationPrefs,
+  requestBrowserNotificationPermission,
+} from "@/lib/notifications";
 
 export default function AccountWidget() {
   const { user, isAdmin, reloadUser } = useAuth();
@@ -33,6 +38,15 @@ export default function AccountWidget() {
   const [newPassword, setNewPassword] = useState("");
   const [currentPass, setCurrentPass] = useState("");
 
+  // Notificaciones
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [browserPerm, setBrowserPerm] = useState<string>(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      return Notification.permission;
+    }
+    return "default";
+  });
+
   // Estado de UI
   const [saving,   setSaving]   = useState(false);
   const [success,  setSuccess]  = useState<string | null>(null);
@@ -40,6 +54,41 @@ export default function AccountWidget() {
   const [uploading, setUploading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    if (user) {
+      getUserNotificationPrefs(user.uid).then((pref) => {
+        if (isMounted) setNotificationsEnabled(pref);
+      });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
+
+  async function handleToggleNotifications(enabled: boolean) {
+    if (!user) return;
+    setNotificationsEnabled(enabled);
+    setSuccess(null);
+    setError(null);
+    try {
+      await setUserNotificationPrefs(user.uid, enabled);
+      setSuccess(`Notificaciones ${enabled ? "activadas" : "desactivadas"} correctamente.`);
+    } catch {
+      setError("No se pudieron guardar las preferencias de notificaciones.");
+    }
+  }
+
+  async function handleRequestBrowserPerm() {
+    const perm = await requestBrowserNotificationPermission();
+    setBrowserPerm(perm);
+    if (perm === "granted") {
+      setSuccess("Permisos de notificación del navegador concedidos.");
+    } else if (perm === "denied") {
+      setError("Permisos de notificación bloqueados en el navegador.");
+    }
+  }
 
   if (!user) return null;
 
@@ -254,6 +303,48 @@ export default function AccountWidget() {
           </button>
         </form>
       )}
+
+      {/* ─── Sección: Configuración de Notificaciones ──── */}
+      <div>
+        <p className="account-section-title">🔔 Configuración de Notificaciones</p>
+        <div className="notification-settings-card">
+          <label className="notification-toggle-label">
+            <input
+              type="checkbox"
+              className="notification-toggle-checkbox"
+              checked={notificationsEnabled}
+              onChange={(e) => handleToggleNotifications(e.target.checked)}
+              id="acc-notifications-toggle"
+            />
+            <span className="notification-toggle-text">
+              Recibir notificaciones cuando haya un nuevo post / publicación
+            </span>
+          </label>
+
+          <div className="notification-browser-status">
+            <span>
+              Avisos del navegador:{" "}
+              <strong>
+                {browserPerm === "granted"
+                  ? "Permitidos ✅"
+                  : browserPerm === "denied"
+                  ? "Bloqueados ❌"
+                  : "Sin solicitar"}
+              </strong>
+            </span>
+            {browserPerm !== "granted" && (
+              <button
+                type="button"
+                className="notification-perm-btn"
+                onClick={handleRequestBrowserPerm}
+                id="acc-request-notifications-btn"
+              >
+                Activar avisos
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* ─── Acceso Admin (solo para administradores) ── */}
       {isAdmin && (

@@ -1,0 +1,270 @@
+/**
+ * notifications.css — Estilos del sistema de notificaciones
+ * Estética Emo/Scene 2000s acorde a la paleta retro del blog.
+ */
+
+/* ─── Botón de la Campana de Notificaciones en el Header ─── */
+.notification-bell-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.notification-bell-btn {
+  background: transparent;
+  border: 2px solid var(--color-accent-pink);
+  border-radius: var(--radius-sm);
+  color: var(--color-accent-pink);
+  font-size: 1.1rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: background 0.15s, color 0.15s;
+}
+
+.notification-bell-btn:hover {
+  background: var(--color-accent-pink);
+  color: #000;
+}
+
+/* Badge de notificaciones no leídas */
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #ff0055;
+  color: #ffffff;
+  font-family: var(--font-main);
+  font-size: 0.65rem;
+  font-weight: 900;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 1.5px solid #000;
+  box-shadow: 0 0 6px rgba(255, 0, 85, 0.8);
+  animation: pulse-badge 1.8s infinite;
+}
+
+@keyframes pulse-badge {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* ─── Panel Desplegable de Notificaciones ─── */
+.notification-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 310px;
+  max-height: 400px;
+  background: var(--color-bg-box);
+  border: 2px solid var(--color-accent-pink);
+  border-radius: var(--radius-md);
+  box-shadow: 4px 4px 0px #000;
+  z-index: 950;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: auth-fade-in 0.15s ease;
+}
+
+.notification-dropdown__header {
+  background: var(--color-bg-sidebar);
+  border-bottom: 2px solid var(--color-border);
+  padding: 0.6rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.notification-dropdown__title {
+  font-family: var(--font-main);
+  font-size: var(--fs-xs);
+  color: var(--color-accent-pink);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.notification-dropdown__clear-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+.notification-dropdown__clear-btn:hover {
+  color: var(--color-accent-pink);
+}
+
+.notification-dropdown__list {
+  overflow-y: auto;
+  max-height: 320px;
+}
+
+.notification-dropdown__empty {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background 0.12s;
+  text-decoration: none;
+  color: inherit;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item:hover {
+  background: var(--color-bg-sidebar);
+}
+
+.notification-item--unread {
+  background: rgba(255, 20, 147, 0.08);
+  border-left: 3px solid var(--color-accent-pink);
+}
+
+.notification-item__icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.notification-item__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-item__title {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notification-item__message {
+  font-size: 0.75rem;
+  color: var(--color-accent-green);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notification-item__date {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+/* ─── Toast Flotante de Nueva Notificación ─── */
+.notification-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--color-bg-box);
+  border: 2px solid var(--color-accent-pink);
+  border-radius: var(--radius-md);
+  box-shadow: 4px 4px 0px #000, 0 0 20px rgba(255, 20, 147, 0.4);
+  padding: 0.85rem 1.1rem;
+  max-width: 340px;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  animation: toast-slide-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes toast-slide-in {
+  from { transform: translateY(50px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.notification-toast__close {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+.notification-toast__close:hover { color: var(--color-accent-pink); }
+
+/* ─── Sección de Notificaciones en Ajustes de Cuenta ─── */
+.notification-settings-card {
+  background: var(--color-bg-sidebar);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.notification-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.notification-toggle-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-accent-pink);
+  cursor: pointer;
+}
+
+.notification-toggle-text {
+  font-size: var(--fs-xs);
+  font-weight: bold;
+  color: var(--color-text-primary);
+}
+
+.notification-browser-status {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.notification-perm-btn {
+  background: transparent;
+  border: 1px solid var(--color-accent-pink);
+  color: var(--color-accent-pink);
+  font-family: var(--font-main);
+  font-size: 0.7rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.notification-perm-btn:hover {
+  background: var(--color-accent-pink);
+  color: #000;
+}

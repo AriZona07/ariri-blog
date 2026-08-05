@@ -289,13 +289,17 @@
 
 /* --- Botón del header (Login / nombre de usuario) --- */
 .header-auth-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   background: transparent;
   border: 2px solid var(--color-accent-pink);
   border-radius: var(--radius-sm);
   color: var(--color-accent-pink);
   font-family: var(--font-main);
-  font-size: var(--fs-xs);
-  padding: 0.3rem 0.75rem;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  padding: 0.6rem 1.25rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   transition: background 0.15s, color 0.15s;
@@ -308,11 +312,10 @@
 
 /* Avatar pequeño en el header cuando hay sesión iniciada */
 .header-auth-btn__avatar {
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  border: 1px solid var(--color-accent-pink);
+  border: 1.5px solid var(--color-accent-pink);
   object-fit: cover;
-  vertical-align: middle;
-  margin-right: 0.35rem;
+  flex-shrink: 0;
 }

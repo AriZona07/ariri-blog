@@ -74,6 +74,15 @@ Implementación de un **JAMstack Híbrido** combinando la compilación estática
 
 ---
 
+#### 🔔 5. Sistema de Notificaciones & Preferencias de Usuario (Firestore + Web Push)
+
+- **Emisión de Notificaciones:** Al publicar una nueva entrada en `/admin/new-post`, se crea automáticamente un registro en la colección `notifications` de Cloud Firestore.
+- **Campana & Avisos en Tiempo Real:** Icono de campana 🔔 en el encabezado con contador badge de no leídas, panel desplegable de publicaciones recientes y avisos toast flotantes.
+- **Notificaciones Web Push:** Integración opcional con la API nativa de notificaciones del navegador (`Notification.requestPermission()`).
+- **Control en Cuenta (`/account`):** Sección "Configuración de Notificaciones" en `AccountWidget.tsx` que permite activar/desactivar el envío de alertas y gestionar permisos del navegador.
+
+---
+
 #### 🏗️ Decisiones de Arquitectura (Confirmadas)
 
 | Aspecto | Decisión |

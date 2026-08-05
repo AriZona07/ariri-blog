@@ -31,5 +31,18 @@ service cloud.firestore {
       allow delete: if request.auth != null
         && resource.data.authorId == request.auth.uid;
     }
+
+    // ─── Notificaciones ─────────────────────────────────────
+    // Lectura pública/autenticada; creación por administradores
+    match /notifications/{notificationId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null && request.auth.token.admin == true;
+    }
+
+    // ─── Preferencias de Usuario ────────────────────────────
+    // Cada usuario solo puede leer y actualizar sus propias configuraciones
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
   }
 }
