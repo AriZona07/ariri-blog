@@ -18,18 +18,14 @@ import PostModal           from "@/components/PostModal";
 import { extractYouTubePlaylistId } from "@/lib/youtube";
 import type { Post } from "@/app/page";
 
-interface PostListProps {
-  posts?: Post[];
-}
-
 /** Posts visibles por página */
 const POSTS_PER_PAGE = 3;
 
-export default function PostList({ posts = [] }: PostListProps) {
-  const [allPosts, setAllPosts]         = useState<Post[]>(posts);
-  const [currentPage, setCurrentPage]   = useState(1);
+export default function PostList() {
+  const [allPosts, setAllPosts]       = useState<Post[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
   /* null = cerrado; número = índice global del post abierto en el modal */
-  const [openIndex, setOpenIndex]       = useState<number | null>(null);
+  const [openIndex, setOpenIndex]     = useState<number | null>(null);
 
   /* Suscripción en tiempo real a la colección `posts` de Firestore */
   useEffect(() => {
@@ -57,17 +53,7 @@ export default function PostList({ posts = [] }: PostListProps) {
           };
         });
 
-        // Combinar posts de Firestore con los posts de Markdown iniciales (evitando duplicados por slug)
-        const fsSlugs = new Set(fsPosts.map((p) => p.slug));
-        const uniqueMarkdownPosts = posts.filter((p) => !fsSlugs.has(p.slug));
-        const merged = [...fsPosts, ...uniqueMarkdownPosts].sort((a, b) => {
-          if (!a.date && !b.date) return 0;
-          if (!a.date) return 1;
-          if (!b.date) return -1;
-          return b.date.localeCompare(a.date);
-        });
-
-        setAllPosts(merged);
+        setAllPosts(fsPosts);
       },
       (err) => {
         console.error("Error al obtener publicaciones de Firestore:", err);
@@ -75,7 +61,7 @@ export default function PostList({ posts = [] }: PostListProps) {
     );
 
     return () => unsub();
-  }, [posts]);
+  }, []);
 
   if (allPosts.length === 0) {
     return (

@@ -15,9 +15,6 @@
  */
 
 import { NextResponse } from "next/server";
-import path             from "path";
-import fs               from "fs";
-import matter           from "gray-matter";
 
 /* --- Tipos internos --- */
 interface FeedItem {
@@ -25,7 +22,6 @@ interface FeedItem {
   slug:    string;
   date:    string;
   excerpt: string;
-  source:  "markdown" | "firestore";
 }
 
 /* URL base del sitio */
@@ -36,57 +32,36 @@ const SITE_DESC = "Blog personal de Ariri — videojuegos, manga, linux, punk y 
 export async function GET() {
   const items: FeedItem[] = [];
 
-  /* ── 1. Leer posts Markdown locales ──────────────────── */
-  const contentDir = path.join(process.cwd(), "src", "content");
-  if (fs.existsSync(contentDir)) {
-    const files = fs.readdirSync(contentDir).filter((f) => f.endsWith(".md"));
-    for (const file of files) {
-      const raw = fs.readFileSync(path.join(contentDir, file), "utf-8");
-      const { data, content } = matter(raw);
-      items.push({
-        title:   String(data.title   ?? file.replace(".md", "")),
-        slug:    file.replace(".md", ""),
-        date:    String(data.date    ?? ""),
-        excerpt: String(data.excerpt ?? content.slice(0, 200).replace(/\n/g, " ")),
-        source:  "markdown",
-      });
+  /* ── 1. Leer publicaciones desde la API REST pública de Firestore ─ */
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  if (projectId) {
+    try {
+      const res = await fetch(
+        `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/posts`,
+        { next: { revalidate: 3600 } }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data.documents && Array.isArray(data.documents)) {
+          for (const doc of data.documents) {
+            const fields = doc.fields || {};
+            const title   = fields.title?.stringValue   || "(Sin título)";
+            const slug    = fields.slug?.stringValue    || doc.name.split("/").pop() || "";
+            const date    = fields.date?.stringValue    || "";
+            const content = fields.content?.stringValue || "";
+            items.push({
+              title,
+              slug,
+              date,
+              excerpt: content.slice(0, 200).replace(/\n/g, " "),
+            });
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error al obtener publicaciones para el feed RSS:", err);
     }
   }
-
-  /* ── 2. Leer posts de Firestore (con Firebase Admin SDK) ─
-   *
-   * NOTA: Esta sección requiere instalar `firebase-admin` y configurar
-   * las variables de entorno de la Service Account en Vercel.
-   * Mientras no estén configuradas, solo se incluyen los posts Markdown.
-   *
-   * Para activarlo en el futuro, descomenta el bloque de abajo e instala:
-   *   npm install firebase-admin
-   *
-   * import { initializeApp, getApps, cert } from "firebase-admin/app";
-   * import { getFirestore }                 from "firebase-admin/firestore";
-   *
-   * if (!getApps().length) {
-   *   initializeApp({
-   *     credential: cert({
-   *       projectId:   process.env.FIREBASE_PROJECT_ID,
-   *       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-   *       privateKey:  process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-   *     }),
-   *   });
-   * }
-   * const adminDb   = getFirestore();
-   * const snapshot  = await adminDb.collection("posts").orderBy("date", "desc").get();
-   * for (const doc of snapshot.docs) {
-   *   const d = doc.data();
-   *   items.push({
-   *     title:   d.title   ?? "(Sin título)",
-   *     slug:    d.slug    ?? doc.id,
-   *     date:    d.date    ?? "",
-   *     excerpt: d.content?.slice(0, 200).replace(/\n/g, " ") ?? "",
-   *     source:  "firestore",
-   *   });
-   * }
-   ────────────────────────────────────────────────────── */
 
   /* Ordenar todo por fecha descendente */
   items.sort((a, b) => {

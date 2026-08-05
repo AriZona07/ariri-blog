@@ -124,7 +124,7 @@ function SettingsNewPostForm() {
     return existingCoverUrl;
   }
 
-  /* Construye el objeto de datos formateado */
+  /* Construye el objeto de datos formateado (sin valores undefined incompatibles con Firestore) */
   async function buildPostData(finalCover: string) {
     const cleanSlug = (slug.trim() || title.trim())
       .toLowerCase()
@@ -136,26 +136,51 @@ function SettingsNewPostForm() {
     const extractedPlaylist = extractYouTubePlaylistId(playlist);
     const resolvedSongCover = processSongCoverUrl(songCover);
 
-    return {
-      title:     title.trim()     || "(Sin título)",
-      slug:      cleanSlug        || `post-${Date.now()}`,
+    const rawData = {
+      title:     title.trim()      || "(Sin título)",
+      slug:      cleanSlug         || `post-${Date.now()}`,
       content:   content.trim(),
       date,
-      author:    user?.displayName || "Ariri",
-      authorUid: user?.uid,
-      mood:      mood.trim()      || undefined,
-      song:      song.trim()      || undefined,
-      songCover: resolvedSongCover || undefined,
-      playlist:  extractedPlaylist || undefined,
-      cover:     finalCover       || undefined,
+      author:    user?.displayName  || "Ariri",
+      authorUid: user?.uid         || "",
+      mood:      mood.trim()       || null,
+      song:      song.trim()       || null,
+      songCover: resolvedSongCover || null,
+      playlist:  extractedPlaylist || null,
+      cover:     finalCover        || null,
     };
+
+    // Firestore rechaza valores 'undefined'. Garantizamos que solo se envíen valores válidos.
+    return Object.fromEntries(
+      Object.entries(rawData).filter(([, val]) => val !== undefined)
+    );
+  }
+
+  /* Parsea y personaliza errores de Firestore / Storage para la interfaz */
+  function formatFirestoreError(err: unknown, contextMsg: string): string {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("permission-denied")) {
+      return "Acceso denegado: tu cuenta no tiene permisos de administrador en Firestore.";
+    }
+    if (msg.includes("Unsupported field value") || msg.includes("invalid data")) {
+      const fieldMatch = msg.match(/found in field ([a-zA-Z0-9_-]+)/);
+      const fieldInfo = fieldMatch ? ` (campo con problema: '${fieldMatch[1]}')` : "";
+      return `Error en los datos: hay un campo no válido o mal formateado${fieldInfo}.`;
+    }
+    if (msg.includes("storage/")) {
+      return "Error al subir la imagen a Firebase Storage. Verifica la conexión o el archivo.";
+    }
+    return `${contextMsg}: ${msg || "Verifica tu conexión y permisos."}`;
   }
 
   /* Publicar post en `posts` */
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim() || !content.trim()) {
-      setError("El título y el contenido son obligatorios.");
+      const missing = [];
+      if (!title.trim()) missing.push("Título");
+      if (!content.trim()) missing.push("Contenido");
+      setError(`Campo(s) obligatorio(s) faltante(s): ${missing.join(", ")}.`);
       return;
     }
 
@@ -195,12 +220,7 @@ function SettingsNewPostForm() {
       setSuccess(true);
     } catch (err: unknown) {
       console.error("Error al guardar post:", err);
-      const errMsg = err instanceof Error ? err.message : String(err);
-      if (errMsg.includes("permission-denied")) {
-        setError("Acceso denegado: tu cuenta no tiene permisos de administrador en Firestore.");
-      } else {
-        setError(`Error al publicar: ${errMsg || "Verifica tu conexión y permisos de admin."}`);
-      }
+      setError(formatFirestoreError(err, "Error al publicar"));
     } finally {
       setSaving(false);
     }
@@ -209,7 +229,7 @@ function SettingsNewPostForm() {
   /* Guardar borrador en `drafts` */
   async function handleSaveDraft() {
     if (!title.trim() && !content.trim()) {
-      setError("Escribe al menos el título o contenido antes de guardar el borrador.");
+      setError("Faltan datos: Escribe al menos el título o el contenido antes de guardar el borrador.");
       return;
     }
 
@@ -239,8 +259,7 @@ function SettingsNewPostForm() {
       setTimeout(() => setDraftToast(null), 2600);
     } catch (err: unknown) {
       console.error("Error al guardar borrador:", err);
-      const errMsg = err instanceof Error ? err.message : String(err);
-      setError(`Error al guardar borrador: ${errMsg || "Verifica tu conexión."}`);
+      setError(formatFirestoreError(err, "Error al guardar borrador"));
     } finally {
       setSavingDraft(false);
     }
@@ -258,8 +277,7 @@ function SettingsNewPostForm() {
       router.push("/settings/admin");
     } catch (err: unknown) {
       console.error("Error al eliminar borrador:", err);
-      const errMsg = err instanceof Error ? err.message : String(err);
-      setError(`Error al eliminar borrador: ${errMsg}`);
+      setError(formatFirestoreError(err, "Error al eliminar borrador"));
       setDeletingDraft(false);
     }
   }

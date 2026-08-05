@@ -6,12 +6,6 @@ Este documento detalla todas las dependencias del proyecto, clasificadas entre *
 
 ## 🟢 1. Dependencias Actualmente Instaladas y En Uso
 
-### `gray-matter`
-- **Estado:** ✅ Instalada (`^4.0.3`)
-- **Comando:** `npm install gray-matter`
-- **¿Qué hace?:** Extrae los metadatos YAML (*frontmatter*) al inicio de las entradas en Markdown.
-- **¿Para qué sirve en este blog?:** Utilizado en `src/app/page.tsx` para obtener `title`, `date`, `mood`, `song`, `songCover`, `cover` y `excerpt` de cada archivo `.md` en `/src/content/`.
-
 ### `next`, `react`, `react-dom`
 - **Estado:** ✅ Instaladas (`next@16.3.0`, `react@19.2.8`, `react-dom@19.2.8`)
 - **¿Qué hace?:** Núcleo del framework para la generación estática (SSG) y la renderización de componentes React.

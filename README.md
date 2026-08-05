@@ -15,7 +15,7 @@ Este documento sirve como **guía técnica y de diseño** tanto para desarrollad
   - **Framework:** Next.js 16 (App Router, Exportación Estática SSG)
   - **Lenguaje:** TypeScript 5
   - **Estilos:** CSS Puro Modular (`src/styles/`), sin Tailwind ni frameworks CSS externos.
-  - **Contenido:** Markdown con `gray-matter` para extracción de frontmatter y lectura dinámica en servidor.
+  - **Contenido:** Gestión dinámica desde Firestore mediante el panel de administración (/settings/admin).
 - **Licencia & Código Abierto:** Software libre bajo la [Licencia MIT](/LICENSE.md).
 
 ---
@@ -91,36 +91,8 @@ El sitio evoca la nostalgia web de los años 2000 con un contenedor central flot
 src/
 ├── app/                      <-- Rutas del App Router de Next.js
 │   ├── layout.tsx            (Layout raíz con HTML, Metadatos y estructura general)
-│   ├── page.tsx              (Server Component que lee .md con gray-matter)
+│   ├── page.tsx              (Página principal conectada dinámicamente a Firestore)
 │   └── sitemap.ts            (Generador de sitemap XML estático)
-│
-├── components/               <-- Componentes de React
-│   ├── MusicPlayer.tsx       (Reproductor retro de audio con YouTube IFrame API)
-│   ├── PostList.tsx          (Lista de posts con paginación y modal de lectura)
-│   ├── PostModal.tsx         (Modal para leer la entrada completa)
-│   ├── SidebarLeft.tsx       (Barra lateral izquierda: Perfil, Redes, Badges)
-│   ├── SidebarRight.tsx      (Barra lateral derecha: Música, Pizarrón)
-│   ├── SiteHeader.tsx        (Encabezado principal del blog)
-│   ├── SiteFooter.tsx        (Pie de página con banners 88x31)
-│   └── widgets/              <-- Widgets modulares reutilizables
-│       ├── MusicPlayerWidget.tsx
-│       ├── PaginationNavWidget.tsx
-│       ├── ProfileWidget.tsx
-│       ├── RoleBadgesWidget.tsx
-│       ├── SketchBoardWidget.tsx
-│       └── SocialLinksWidget.tsx
-│
-├── styles/                   <-- CSS Puro organizado por categoría
-│   ├── globals.css           (Variables CSS, reset, fonts, cursor, scrollbar y wrapper)
-│   ├── header.css            (Estilos del encabezado)
-│   ├── nav.css               (Barra de navegación)
-│   ├── layout.css            (Grid 3 columnas, responsive y sidebars)
-│   ├── widgets.css           (Cajas .retro-box, reproductor MP3 y pizarrón canvas)
-│   ├── posts.css             (Tarjetas de post, metadatos, clamp, fade y modal)
-│   └── footer.css            (Banners 88x31 y pie de página)
-│
-└── content/                  <-- Publicaciones en Markdown (.md)
-    └── bienvenida.md
 ```
 
 ---
@@ -142,8 +114,7 @@ Cualquier edición de código en este repositorio **debe cumplir estrictamente**
 Para la descripción detallada de cada paquete, consulta la [Guía de Dependencias](/DEPENDENCIES.md).
 
 - **Instaladas y Activas:**
-  - `gray-matter`: Lectura y procesamiento del frontmatter YAML en las publicaciones en Markdown.
-  - `next` (16.x), `react` (19.x), `typescript` (5.x).
+  - `next` (16.x), `react` (19.x), `typescript` (5.x), `firebase` (11.x).
 - **Propuestas / Evaluables para el Futuro:**
   - `next-mdx-remote`: Si se requiere renderizar componentes de React directamente dentro de los posts.
   - `rehype-highlight` + `highlight.js`: Para coloreado de bloques de código en los artículos.
