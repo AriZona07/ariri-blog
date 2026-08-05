@@ -62,12 +62,15 @@ El diseño busca replicar la experiencia retro de blogs de los años 2000 (Blogg
 
 ### 🎨 Estilos Visuales, Temática & Personalidad
 
-- **Estética Base:** Blogger / Web 2.0 (2004-2008) — Bordes redondeados suaves, degradados pastel y brillantes, sombras ligeras (*soft glow*).
-- **Archivos de Estilo:** CSS Puro estándar (sin `.module.css`).
+- **Estética Base y Diseño Visual:** Profundamente inspirado en la cultura **Emo / Scene de los 2000s** (estilo MySpace y Blogger clásico).
+  - **Paleta de Colores:** Uso agresivo de fondos oscuros (Negro absoluto ![#000000](https://placehold.co/15x15/000000/000000.png), Carbón ![#16131d](https://placehold.co/15x15/16131d/16131d.png)) fuertemente contrastados con acentos vibrantes en **Hot Pink (#ff1493)** ![#ff1493](https://placehold.co/15x15/ff1493/ff1493.png), **Magenta (#b80058)** ![#b80058](https://placehold.co/15x15/b80058/b80058.png) y **Verdes** oscuros/neón ![#006644](https://placehold.co/15x15/006644/006644.png).
+  - **Patrones y Texturas:** Cuadrículas (checkerboards) combinando negros, rosas y verdes, texturas de rayas diagonales y capas de pequeños puntos.
+  - **Elementos UI:** Sombras de texto sólidas (efecto 3D tipo MySpace), contenedores flotantes con bordes gruesos y dobles, botones con bisel marcado y contornos (strokes) en las tipografías.
+- **Archivos de Estilo:** CSS Puro estándar (sin `.module.css`), gestionado centralmente en `src/styles/retro.css`.
 - **Temática e Intereses Personales:**
   - 🎮 **Videojuegos:** Minecraft, Roblox, Hollow Knight.
   - 📖 **Manga / GL:** *"El Chico Que Me Gusta No Es Un Chico"*, contenido GL / Sáficos en general.
-  - 🐧 **Filosofía & Cultura:** Anarquismo, estética Punk, Software Libre, Linux.
+  - 🐧 **Filosofía & Cultura:** Anarquismo, estética Punk.
   - 🦇 **Fantasía & Nicho:** Vampiros.
 - **Tipografía General ([`public/fonts/simple-japan.ttf`](/public/fonts/simple-japan.ttf)):** Fuente principal para títulos, subtítulos, cuerpo de texto y menús.
 - **Tipografía Especial ([`public/fonts/special-punk.ttf`](/public/fonts/special-punk.ttf)):** Fuente punk estilo letras recortadas de revista, reservada para detalles especiales o títulos decorativos.

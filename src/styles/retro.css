@@ -71,7 +71,7 @@
   --fs-xxl:  2.6rem;    /* 41px */
 
   /* --- Tamaños Específicos para Secciones Clave --- */
-  --fs-header-subtitle: 1.05rem; /* 1. Descripción del header */
+  --fs-header-subtitle: 1.25rem; /* 1. Descripción del header */
   --fs-sidebar-detail:  1.05rem; /* 2. Bio "Sobre mí" y títulos de canciones */
   --fs-main-content:    1.2rem;  /* 3. Cuerpo del texto principal (WelcomeSection, posts en markdown) */
 
@@ -109,14 +109,12 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   background-color: var(--color-bg-page);
-  /* Textura de rayas diagonales */
-  background-image: repeating-linear-gradient(
-    45deg,
-    #0c0b10 0px,
-    #0c0b10 12px,
-    #14111c 12px,
-    #14111c 24px
-  );
+
+  /* Fondo Emo Scene */
+  background-image: url('/emo_scene_pink_bg_256px.png');
+  background-repeat: repeat; /* Para que se repita como mosaico si es un patrón */
+  background-attachment: fixed; /* El fondo se queda quieto al hacer scroll */
+  background-position: top left;
 }
 
 /* Enlaces con fondo resaltado al hacer hover */
@@ -185,13 +183,11 @@ body::before {
 /* 6. ENCABEZADO — textura rayada, sombra 3D dura */
 .site-header {
   background-color: var(--color-bg-header);
-  background-image: repeating-linear-gradient(
-    -45deg,
-    #181222 0px,
-    #181222 10px,
-    #100c17 10px,
-    #100c17 20px
-  );
+  /* Fondo Emo Scene */
+  background-image: url('/emo_scene_green_bg_256px.png');
+  background-repeat: repeat; /* Para que se repita como mosaico si es un patrón */
+  background-position: top left;
+
   border-bottom: 4px solid var(--color-accent-pink);
   padding: 2rem 2rem 1.6rem;
   text-align: center;
@@ -222,7 +218,7 @@ body::before {
   position: absolute;
   bottom: 0.5rem;
   right: 1.2rem;
-  font-size: 0.75rem; /* Tamaño original mantenido para site header */
+  font-size: 1.2rem; /* Tamaño original mantenido para site header */
   color: var(--color-accent-pink);
   font-weight: bold;
   letter-spacing: 0.25em;
@@ -231,7 +227,7 @@ body::before {
 /* Título: Hot Pink con sombra 3D */
 .site-header__title {
   font-family: var(--font-punk);
-  font-size: 3.8rem;
+  font-size: 4rem;
   color: var(--color-accent-pink);
   line-height: 1.1;
   text-shadow:
@@ -245,11 +241,25 @@ body::before {
 }
 
 .site-header__subtitle {
-  font-size: var(--fs-header-subtitle);
-  color: var(--color-text-secondary);
+  font-size: 1.5rem;
+  color: #ffffff;
   font-style: italic;
   letter-spacing: 0.08em;
   font-weight: bold;
+
+  /* --- Fondo para el Texto --- */
+  background-color: rgba(0, 0, 0, 0.75); /* Fondo negro con 75% de opacidad para que medio se vea el patrón detrás */
+  padding: 0.2rem 0.8rem; /* Espaciado: poco arriba/abajo, más a los lados */
+  border-radius: 8px; /* Bordes redondeados tipo Instagram */
+  display: inline-block; /* Hace que la caja de fondo solo envuelva el ancho del texto */
+
+  /* Sombra de texto estilo MySpace (Hot Pink 3D) */
+  text-shadow:
+    -1px -1px 0 #ff1493,
+     1px -1px 0 #ff1493,
+    -1px  1px 0 #ff1493,
+     1px  1px 0 #ff1493;
+
 }
 
 
