@@ -145,9 +145,17 @@ Con las características principales estructuradas, la atención del proyecto pa
 
 ---
 
+#### ⚙️ 8. Arquitectura de Rutas `/settings/*` & Sidebars Dinámicas — **Implementado**
 
+- **Reestructuración de Rutas:** Migración de `/account` hacia la estructura base `/settings/*` con sub-rutas dedicadas (`/settings/account` para perfil y credenciales, `/settings/notifications` para preferencias de alertas).
+- **Redirección de Compatibilidad:** `/account` y `/settings` redirigen automáticamente a `/settings/account`.
+- **Sidebar Izquierda Dinámica (`SidebarLeft.tsx`):** Al navegar dentro de `/settings/*`, la barra lateral izquierda reemplaza los widgets de perfil por un menú de navegación de ajustes (`SettingsSidebarWidget.tsx`) con resalte de ruta activa.
+- **Ocultamiento de Sidebar Derecha (`SidebarRight.tsx`):** Al estar en `/settings/*`, la barra lateral derecha se oculta automáticamente para dar mayor espacio visual al panel de configuración.
+
+---
 
 ### 🎨 Resaltado de Sintaxis en Bloques de Código
 - **Concepto:** Coloreado de código para artículos técnicos o tutoriales.
 - **Dependencias a evaluar:** `rehype-highlight` + `highlight.js`.
 - **Condición:** Se implementará si se comienzan a redactar posts con contenido técnico/código frecuentemente.
+

@@ -96,7 +96,7 @@ export default function SiteHeader({
                     🏠 Inicio
                   </Link>
                   <Link
-                    href="/account"
+                    href="/settings/account"
                     className="header-user-menu__item"
                     onClick={() => setShowUserMenu(false)}
                     role="menuitem"
@@ -105,12 +105,12 @@ export default function SiteHeader({
                   </Link>
                   {isAdmin && (
                     <Link
-                      href="/admin"
+                      href="/settings/admin"
                       className="header-user-menu__item header-user-menu__item--admin"
                       onClick={() => setShowUserMenu(false)}
                       role="menuitem"
                     >
-                      ⚙️ Panel Admin
+                      ⚙️ Panel de Admin
                     </Link>
                   )}
                   <button

@@ -16,8 +16,7 @@ import "@/styles/notifications.css";
 
 import { AuthProvider }  from "@/lib/auth-context";
 import SiteHeader        from "@/components/SiteHeader";
-import SidebarLeft       from "@/components/SidebarLeft";
-import SidebarRight      from "@/components/SidebarRight";
+import SiteBody          from "@/components/SiteBody";
 import SiteFooter        from "@/components/SiteFooter";
 
 /* Metadatos SEO: title, description, Open Graph y Twitter Card */
@@ -69,17 +68,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
 
             <SiteHeader />
 
-            {/* Layout de 3 columnas: sidebar izquierda | contenido | sidebar derecha */}
-            <div className="site-body">
-              <SidebarLeft />
-
-              {/* children = la página activa (page.tsx de la ruta actual) */}
-              <main className="site-content" id="main-content" role="main">
-                {children}
-              </main>
-
-              <SidebarRight />
-            </div>
+            {/* Layout dinámico de columnas: adaptativo en rutas /settings/* */}
+            <SiteBody>
+              {children}
+            </SiteBody>
 
             <SiteFooter />
 

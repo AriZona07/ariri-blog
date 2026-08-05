@@ -15,6 +15,12 @@
   min-height: 400px;
 }
 
+/* Grid adaptativo de 2 columnas cuando la sidebar derecha está oculta en /settings/* */
+.site-body.site-body--no-right-sidebar {
+  grid-template-areas: "sidebar-left content";
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 4.65fr);
+}
+
 /* Sidebar izquierda */
 .sidebar-left {
   grid-area: sidebar-left;
@@ -119,6 +125,15 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* Oculta la sidebar izquierda en móvil dentro de las páginas de ajustes /settings/* */
+  .site-body--no-right-sidebar .sidebar-left {
+    display: none !important;
+  }
+
+  .site-body--no-right-sidebar .site-content {
+    padding-bottom: 5.5rem;
+  }
+
   .sidebar-left,
   .sidebar-right {
     border-right: none;
@@ -130,3 +145,61 @@
     padding: 1rem;
   }
 }
+
+/* --- Barra de navegación flotante fija inferior para móviles (/settings/*) --- */
+.mobile-settings-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(18, 10, 24, 0.96);
+  backdrop-filter: blur(10px);
+  border-top: 2px solid var(--color-accent-pink);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.8), 0 -2px 0px #000;
+  padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
+  justify-content: space-around;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .mobile-settings-nav {
+    display: flex;
+  }
+}
+
+.mobile-settings-nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  flex: 1;
+  padding: 0.35rem 0.25rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s, color 0.15s;
+}
+
+.mobile-settings-nav__icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.mobile-settings-nav__label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.mobile-settings-nav__item:hover {
+  color: var(--color-accent-pink);
+}
+
+.mobile-settings-nav__item--active {
+  color: var(--color-accent-pink);
+  background: rgba(255, 20, 147, 0.18);
+}
+
