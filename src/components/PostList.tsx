@@ -8,8 +8,10 @@
  * navegación entre todos los posts.
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import { collection, query, orderBy, onSnapshot, type DocumentData } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import PaginationNavWidget from "@/components/widgets/PaginationNavWidget";
 import MusicPlayerWidget   from "@/components/widgets/MusicPlayerWidget";
 import PostModal           from "@/components/PostModal";
@@ -24,11 +26,58 @@ interface PostListProps {
 const POSTS_PER_PAGE = 3;
 
 export default function PostList({ posts = [] }: PostListProps) {
+  const [allPosts, setAllPosts]         = useState<Post[]>(posts);
   const [currentPage, setCurrentPage]   = useState(1);
   /* null = cerrado; número = índice global del post abierto en el modal */
   const [openIndex, setOpenIndex]       = useState<number | null>(null);
 
-  if (posts.length === 0) {
+  /* Suscripción en tiempo real a la colección `posts` de Firestore */
+  useEffect(() => {
+    const q = query(collection(db, "posts"), orderBy("date", "desc"));
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const fsPosts: Post[] = snap.docs.map((doc: DocumentData) => {
+          const d = doc.data();
+          const playlistRaw = d.playlist ? String(d.playlist) : undefined;
+          const playlistId  = d.playlistId ?? (playlistRaw ? extractYouTubePlaylistId(playlistRaw) : undefined);
+
+          return {
+            slug:       String(d.slug       ?? doc.id),
+            title:      String(d.title      ?? "(Sin título)"),
+            date:       String(d.date       ?? ""),
+            mood:       String(d.mood       ?? ""),
+            song:       String(d.song       ?? ""),
+            songCover:  d.songCover ? String(d.songCover) : undefined,
+            playlist:   playlistRaw,
+            playlistId: playlistId,
+            cover:      d.cover ? String(d.cover) : undefined,
+            excerpt:    d.content ? String(d.content).slice(0, 160) + "…" : "",
+            content:    String(d.content    ?? ""),
+          };
+        });
+
+        // Combinar posts de Firestore con los posts de Markdown iniciales (evitando duplicados por slug)
+        const fsSlugs = new Set(fsPosts.map((p) => p.slug));
+        const uniqueMarkdownPosts = posts.filter((p) => !fsSlugs.has(p.slug));
+        const merged = [...fsPosts, ...uniqueMarkdownPosts].sort((a, b) => {
+          if (!a.date && !b.date) return 0;
+          if (!a.date) return 1;
+          if (!b.date) return -1;
+          return b.date.localeCompare(a.date);
+        });
+
+        setAllPosts(merged);
+      },
+      (err) => {
+        console.error("Error al obtener publicaciones de Firestore:", err);
+      }
+    );
+
+    return () => unsub();
+  }, [posts]);
+
+  if (allPosts.length === 0) {
     return (
       <section aria-label="Entradas del blog">
         <div className="retro-box" style={{ textAlign: "center", padding: "1.5rem 1rem" }}>
@@ -40,9 +89,9 @@ export default function PostList({ posts = [] }: PostListProps) {
     );
   }
 
-  const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
+  const totalPages = Math.ceil(allPosts.length / POSTS_PER_PAGE);
   const start      = (currentPage - 1) * POSTS_PER_PAGE;
-  const pagePosts  = posts.slice(start, start + POSTS_PER_PAGE);
+  const pagePosts  = allPosts.slice(start, start + POSTS_PER_PAGE);
 
   return (
     <>
@@ -166,7 +215,7 @@ export default function PostList({ posts = [] }: PostListProps) {
       {/* Modal de lectura completa */}
       {openIndex !== null && (
         <PostModal
-          posts={posts}
+          posts={allPosts}
           currentIndex={openIndex}
           onClose={() => setOpenIndex(null)}
           onNavigate={(idx) => setOpenIndex(idx)}
