@@ -111,7 +111,7 @@ body {
   background-color: var(--color-bg-page);
 
   /* Fondo Emo Scene */
-  background-image: url('/emo_scene_pink_bg_256px.png');
+  background-image: url('/backgrounds/emo_scene_pink_bg_256px.png');
   background-repeat: repeat; /* Para que se repita como mosaico si es un patrón */
   background-attachment: fixed; /* El fondo se queda quieto al hacer scroll */
   background-position: top left;
@@ -184,7 +184,7 @@ body::before {
 .site-header {
   background-color: var(--color-bg-header);
   /* Fondo Emo Scene */
-  background-image: url('/emo_scene_green_bg_256px.png');
+  background-image: url('/backgrounds/emo_scene_green_bg_256px.png');
   background-repeat: repeat; /* Para que se repita como mosaico si es un patrón */
   background-position: top left;
 
