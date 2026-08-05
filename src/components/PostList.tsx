@@ -155,7 +155,7 @@ export default function PostList({ posts = [] }: PostListProps) {
               <div className="post-card__body">
                 {/* Contenido clampado con fade al pie */}
                 <div className="post-card__content-clamp">
-                  <p className="welcome-text" style={{ color: "var(--color-text-secondary)" }}>
+                  <p className="welcome-text" style={{ color: "var(--color-text-secondary)", whiteSpace: "pre-wrap" }}>
                     {post.content || post.excerpt}
                   </p>
 

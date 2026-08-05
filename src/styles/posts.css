@@ -11,6 +11,8 @@
 .post-content p {
   font-size: 1.4rem;
   line-height: 1.75;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 /* Fondo verde emo scene para el texto en el modal de lectura */
