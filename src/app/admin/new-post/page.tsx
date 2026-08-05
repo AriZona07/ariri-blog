@@ -13,8 +13,10 @@ import { useState }            from "react";
 import { useRouter }           from "next/navigation";
 import Link                    from "next/link";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db }      from "@/lib/firebase";
-import { useAuth } from "@/lib/auth-context";
+import { ref, uploadBytes, getDownloadURL }    from "firebase/storage";
+import { db, storage }      from "@/lib/firebase";
+import { useAuth }          from "@/lib/auth-context";
+import { extractYouTubePlaylistId, processSongCoverUrl } from "@/lib/youtube";
 
 export default function NewPostPage() {
   const { user, isAdmin, loading } = useAuth();
@@ -27,8 +29,13 @@ export default function NewPostPage() {
   const [mood,      setMood]      = useState("");
   const [song,      setSong]      = useState("");
   const [songCover, setSongCover] = useState("");
-  const [cover,     setCover]     = useState("");
+  const [playlist,  setPlaylist]  = useState("");
   const [date,      setDate]      = useState(new Date().toISOString().split("T")[0]);
+
+  // Selección de Portada del Post (Exclusiva: Enlace URL vs. Archivo desde la computadora)
+  const [coverMode, setCoverMode] = useState<"url" | "file">("url");
+  const [coverUrl,  setCoverUrl]  = useState("");
+  const [coverFile, setCoverFile] = useState<File | null>(null);
 
   const [saving,  setSaving]  = useState(false);
   const [success, setSuccess] = useState(false);
@@ -59,14 +66,32 @@ export default function NewPostPage() {
     setSaving(true);
     setError(null);
     try {
+      const playlistTrimmed = playlist.trim();
+      const playlistIdExtracted = playlistTrimmed ? extractYouTubePlaylistId(playlistTrimmed) : null;
+      
+      // Procesa la portada de canción: si pusieron un link de YouTube, extrae la miniatura hqdefault
+      const finalSongCover = processSongCoverUrl(songCover);
+
+      // Procesa la portada del post (subida a Firebase Storage si es archivo o URL estática)
+      let finalCover: string | null = null;
+      if (coverMode === "file" && coverFile) {
+        const storageRef = ref(storage, `post-covers/${Date.now()}_${coverFile.name}`);
+        const snapshot   = await uploadBytes(storageRef, coverFile);
+        finalCover       = await getDownloadURL(snapshot.ref);
+      } else if (coverMode === "url" && coverUrl.trim()) {
+        finalCover       = coverUrl.trim();
+      }
+
       await addDoc(collection(db, "posts"), {
         title:      title.trim(),
         slug:       slug.trim(),
         content:    content.trim(),
-        mood:       mood.trim()      || null,
-        song:       song.trim()      || null,
-        songCover:  songCover.trim() || null,
-        cover:      cover.trim()     || null,
+        mood:       mood.trim()       || null,
+        song:       song.trim()       || null,
+        songCover:  finalSongCover,
+        playlist:   playlistTrimmed   || null,
+        playlistId: playlistIdExtracted,
+        cover:      finalCover,
         date,
         source:     "firestore",        // Distingue los posts de Firestore vs. Markdown
         authorUid:  user!.uid,
@@ -84,10 +109,24 @@ export default function NewPostPage() {
 
       setSuccess(true);
     } catch {
-      setError("Error al publicar. Verifica tu conexión y permisos.");
+      setError("Error al publicar o subir la imagen. Verifica tu conexión y permisos.");
     } finally {
       setSaving(false);
     }
+  }
+
+  function resetForm() {
+    setSuccess(false);
+    setTitle("");
+    setSlug("");
+    setContent("");
+    setPlaylist("");
+    setSong("");
+    setSongCover("");
+    setCoverUrl("");
+    setCoverFile(null);
+    setCoverMode("url");
+    setMood("");
   }
 
   if (success) {
@@ -103,7 +142,7 @@ export default function NewPostPage() {
             <button
               className="admin-btn-new"
               style={{ background: "#221b2e", color: "#00ff66", border: "2px solid #00ff66" }}
-              onClick={() => { setSuccess(false); setTitle(""); setSlug(""); setContent(""); }}
+              onClick={resetForm}
             >
               + Otra Entrada
             </button>
@@ -190,18 +229,83 @@ export default function NewPostPage() {
                   placeholder="Artista — Título" />
               </div>
               <div className="new-post-form__field">
-                <label htmlFor="np-song-cover" className="new-post-form__label">URL Portada Canción</label>
-                <input id="np-song-cover" type="url" className="new-post-form__input"
+                <label htmlFor="np-song-cover" className="new-post-form__label">
+                  Portada Canción <small style={{ color: "var(--color-text-muted)" }}>(URL de imagen o link de YouTube)</small>
+                </label>
+                <input id="np-song-cover" type="text" className="new-post-form__input"
                   value={songCover} onChange={(e) => setSongCover(e.target.value)}
-                  placeholder="https://…" />
+                  placeholder="https://... o https://youtube.com/watch?v=..." />
               </div>
             </div>
 
             <div className="new-post-form__field">
-              <label htmlFor="np-cover" className="new-post-form__label">URL Imagen de Portada del Post</label>
-              <input id="np-cover" type="url" className="new-post-form__input"
-                value={cover} onChange={(e) => setCover(e.target.value)}
-                placeholder="https://…" />
+              <label htmlFor="np-playlist" className="new-post-form__label">
+                Playlist de YouTube <small style={{ color: "var(--color-text-muted)" }}>(URL o ID opcional para reproductor)</small>
+              </label>
+              <input id="np-playlist" type="text" className="new-post-form__input"
+                value={playlist} onChange={(e) => setPlaylist(e.target.value)}
+                placeholder="https://youtube.com/playlist?list=PLb_cyNEBFTVA…" />
+            </div>
+
+            {/* Imagen de portada del post con selector exclusivo */}
+            <div className="new-post-form__field" style={{ padding: "0.85rem", background: "rgba(255, 255, 255, 0.03)", border: "1px dashed var(--color-border)", borderRadius: "var(--radius-sm)" }}>
+              <label className="new-post-form__label" style={{ marginBottom: "0.4rem", display: "block" }}>
+                Imagen de Portada del Post <small style={{ color: "var(--color-text-muted)" }}>(Solo 1 opción activa)</small>
+              </label>
+
+              <div style={{ display: "flex", gap: "1.25rem", marginBottom: "0.75rem" }}>
+                <label style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8rem", color: "var(--color-text-primary)", cursor: "pointer" }}>
+                  <input
+                    type="radio"
+                    name="coverMode"
+                    value="url"
+                    checked={coverMode === "url"}
+                    onChange={() => { setCoverMode("url"); setCoverFile(null); }}
+                  />
+                  🔗 Enlace URL Externo
+                </label>
+
+                <label style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8rem", color: "#00ff66", cursor: "pointer" }}>
+                  <input
+                    type="radio"
+                    name="coverMode"
+                    value="file"
+                    checked={coverMode === "file"}
+                    onChange={() => { setCoverMode("file"); setCoverUrl(""); }}
+                  />
+                  📁 Archivo Local (Subir a Firebase)
+                </label>
+              </div>
+
+              {coverMode === "url" ? (
+                <input
+                  id="np-cover-url"
+                  type="url"
+                  className="new-post-form__input"
+                  value={coverUrl}
+                  onChange={(e) => setCoverUrl(e.target.value)}
+                  placeholder="https://ejemplo.com/imagen-de-portada.png"
+                />
+              ) : (
+                <div>
+                  <input
+                    id="np-cover-file"
+                    type="file"
+                    accept="image/*"
+                    className="new-post-form__input"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        setCoverFile(e.target.files[0]);
+                      }
+                    }}
+                  />
+                  {coverFile && (
+                    <p style={{ fontSize: "0.75rem", color: "#00ff66", marginTop: "0.4rem" }}>
+                      ✓ Archivo seleccionado: <strong>{coverFile.name}</strong> ({Math.round(coverFile.size / 1024)} KB)
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             <button
@@ -210,7 +314,7 @@ export default function NewPostPage() {
               disabled={saving}
               id="np-submit-btn"
             >
-              {saving ? "Publicando…" : "★ Publicar Entrada ★"}
+              {saving ? "Publicando y Subiendo…" : "★ Publicar Entrada ★"}
             </button>
 
           </form>

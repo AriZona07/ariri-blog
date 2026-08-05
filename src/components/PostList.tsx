@@ -11,7 +11,9 @@
 import { useState } from "react";
 import Image from "next/image";
 import PaginationNavWidget from "@/components/widgets/PaginationNavWidget";
+import MusicPlayerWidget   from "@/components/widgets/MusicPlayerWidget";
 import PostModal           from "@/components/PostModal";
+import { extractYouTubePlaylistId } from "@/lib/youtube";
 import type { Post } from "@/app/page";
 
 interface PostListProps {
@@ -107,6 +109,15 @@ export default function PostList({ posts = [] }: PostListProps) {
                   <p className="welcome-text" style={{ color: "var(--color-text-secondary)" }}>
                     {post.content || post.excerpt}
                   </p>
+
+                  {(post.playlistId || post.playlist) && (
+                    <div style={{ marginTop: "1rem" }}>
+                      <MusicPlayerWidget
+                        playlistId={post.playlistId || extractYouTubePlaylistId(post.playlist)}
+                        title={`🎵 Playlist: ${post.title}`}
+                      />
+                    </div>
+                  )}
 
                   {post.cover && (
                     <footer style={{ marginTop: "1rem", paddingTop: "0.8rem", borderTop: "1px dashed var(--color-border)" }}>

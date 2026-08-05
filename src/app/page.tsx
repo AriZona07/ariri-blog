@@ -11,17 +11,20 @@ import fs     from "fs";
 import matter from "gray-matter";
 
 import PostList from "@/components/PostList";
+import { extractYouTubePlaylistId } from "@/lib/youtube";
 
 export interface Post {
-  slug:       string;
-  title:      string;
-  date:       string;   /* ISO 8601: "YYYY-MM-DD" */
-  mood:       string;
-  song:       string;
-  songCover?: string;
-  cover?:     string;
-  excerpt:    string;
-  content:    string;
+  slug:        string;
+  title:       string;
+  date:        string;   /* ISO 8601: "YYYY-MM-DD" */
+  mood:        string;
+  song:        string;
+  songCover?:  string;
+  playlist?:   string;
+  playlistId?: string;
+  cover?:      string;
+  excerpt:     string;
+  content:     string;
 }
 
 /** Lee y ordena todos los posts de /src/content/ */
@@ -38,16 +41,21 @@ function getAllPosts(): Post[] {
     const raw     = fs.readFileSync(path.join(contentDir, filename), "utf-8");
     const { data, content } = matter(raw);
 
+    const playlistRaw = data.playlist ? String(data.playlist) : undefined;
+    const playlistId  = playlistRaw ? extractYouTubePlaylistId(playlistRaw) : undefined;
+
     return {
       slug,
-      title:     String(data.title   ?? slug),
-      date:      String(data.date    ?? ""),
-      mood:      String(data.mood    ?? ""),
-      song:      String(data.song    ?? ""),
-      songCover: data.songCover ? String(data.songCover) : undefined,
-      cover:     data.cover ? String(data.cover) : undefined,
-      excerpt:   String(data.excerpt ?? ""),
-      content:   content.trim(),
+      title:      String(data.title   ?? slug),
+      date:       String(data.date    ?? ""),
+      mood:       String(data.mood    ?? ""),
+      song:       String(data.song    ?? ""),
+      songCover:  data.songCover ? String(data.songCover) : undefined,
+      playlist:   playlistRaw,
+      playlistId: playlistId,
+      cover:      data.cover ? String(data.cover) : undefined,
+      excerpt:    String(data.excerpt ?? ""),
+      content:    content.trim(),
     };
   });
 

@@ -16,7 +16,9 @@
 import { useEffect }    from "react";
 import Image            from "next/image";
 import PaginationNavWidget from "@/components/widgets/PaginationNavWidget";
+import MusicPlayerWidget   from "@/components/widgets/MusicPlayerWidget";
 import CommentsWidget   from "@/components/widgets/CommentsWidget";
+import { extractYouTubePlaylistId } from "@/lib/youtube";
 import type { Post }    from "@/app/page";
 
 interface PostModalProps {
@@ -112,6 +114,15 @@ export default function PostModal({ posts, currentIndex, onClose, onNavigate }: 
           <p className="welcome-text" style={{ color: "var(--color-text-secondary)", marginBottom: "1rem" }}>
             {post.content || post.excerpt}
           </p>
+
+          {(post.playlistId || post.playlist) && (
+            <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
+              <MusicPlayerWidget
+                playlistId={post.playlistId || extractYouTubePlaylistId(post.playlist)}
+                title={`🎵 Playlist: ${post.title}`}
+              />
+            </div>
+          )}
 
           {post.cover && (
             <footer style={{ marginTop: "1rem", paddingTop: "0.8rem", borderTop: "1px dashed var(--color-border)" }}>
