@@ -18,7 +18,7 @@ interface ProfileWidgetProps {
  * Se usa en la parte superior de la barra lateral izquierda.
  */
 export default function ProfileWidget({
-  avatarSrc = "/android-chrome-192x192.png",
+  avatarSrc = "/icons/android-chrome-192x192.png",
   avatarAlt = "Logo del blog / Avatar de Ariri",
   name = "aRIRI",
   bio = "Estudiante de programación ✦ Lectora de Manga GL/Yuri ✦ Anarquista Ⓐ",

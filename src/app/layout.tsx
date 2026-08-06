@@ -29,6 +29,16 @@ export const metadata: Metadata = {
   description: "Blog personal de Ariri — videojuegos, manga, linux, punk y más. Estética retro de los 2000s.",
   keywords: ["blog", "retro", "linux", "manga", "gaming", "anarquismo", "software libre"],
   manifest: "/site.webmanifest",
+  icons: {
+    icon: [
+      { url: '/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/icons/favicon.ico', sizes: 'any' }
+    ],
+    apple: [
+      { url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }
+    ]
+  },
   openGraph: {
     title: "Ariri Blog",
     description: "Mi vida y aficiones en un blog retro de los 2000s.",
@@ -36,13 +46,13 @@ export const metadata: Metadata = {
     siteName: "ariri.app",
     locale: "es_MX",
     type: "website",
-    images: [{ url: "https://ariri.app/og-image.png", width: 1200, height: 630, alt: "Vista previa del Blog de Ariri" }],
+    images: [{ url: "https://ariri.app/banners/og-image.png", width: 1200, height: 630, alt: "Vista previa del Blog de Ariri" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Ariri Blog",
     description: "Mi vida y aficiones en un blog retro de los 2000s.",
-    images: ["https://ariri.app/og-image.png"],
+    images: ["https://ariri.app/banners/og-image.png"],
   },
 };
 

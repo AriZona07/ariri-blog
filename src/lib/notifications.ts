@@ -71,8 +71,8 @@ export function triggerBrowserNotification(
     try {
       const notification = new Notification(title, {
         body,
-        icon: "/android-chrome-192x192.png",
-        badge: "/favicon-32x32.png",
+        icon: "/icons/android-chrome-192x192.png",
+        badge: "/icons/favicon-32x32.png",
       });
 
       if (slug) {
