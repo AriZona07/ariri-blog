@@ -57,13 +57,40 @@ La IA tiene autorización para crear o modificar directamente los siguientes tip
 
 ---
 
+## 🏗️ 5. Reglas de Arquitectura y Organización de Archivos
+
+Al crear o modificar archivos en el proyecto, la IA debe cumplir estrictamente las siguientes pautas de organización:
+
+1. **Estructuración de Componentes (`src/components/`):**
+   - **Reutilización obligatoria:** Antes de crear un nuevo componente, verificar minuciosamente `src/components/` para evitar duplicidad de código.
+   - **Subcarpetas por responsabilidad:**
+     - `src/components/widgets/`: Widgets interactivos o laterales (reproductor MP3, pizarrón, perfil, lista de ajustes, etc.).
+     - `src/components/ui/`: Controles e inputs de interfaz reutilizables (ej. `ImageUploader.tsx`).
+     - `src/components/auth/`: Modales y formularios de inicio de sesión/registro (`AuthModal.tsx`, `LoginForm.tsx`, `RegisterForm.tsx`).
+     - `src/components/` (raíz): Componentes contenedores o estructurales globales (`SiteHeader`, `SiteFooter`, `SidebarLeft`, `SidebarRight`, `PostList`, `PostModal`).
+   - Evitar crear subcarpetas innecesarias o archivos sin un propósito claro.
+
+2. **Modularización de Estilos CSS (`src/styles/`):**
+   - No concentrar código en un solo archivo gigante ni utilizar estilos en línea (*inline styles*).
+   - `globals.css`: Únicamente variables CSS globales, reset HTML, tipografías `@font-face` y clases retro transversales (`.retro-box`, cursores, scrollbar).
+   - Archivos CSS modulares: Separar los estilos por contexto o pantalla (`layout.css`, `header.css`, `footer.css`, `widgets.css`, `posts.css`, `account.css`, `admin.css`, `auth.css`, `comments.css`, `notifications.css`, `uploader.css`, `nav.css`).
+   - **Prohibición de duplicación:** Si una regla visual o estilo es compartido por varios componentes, debe abstraerse en `globals.css` o `widgets.css`.
+
+3. **Lógica y Utilidades (`src/lib/`):**
+   - Desacoplar completamente la lógica de los componentes de React. Todos los SDKs (`firebase.ts`), contextos de estado (`auth-context.tsx`), integraciones externas (`youtube.ts`) o tareas de fondo (`deletion-queue.ts`, `notifications.ts`) deben alojarse exclusivamente en `src/lib/`.
+
+4. **Recursos Estáticos (`public/`):**
+   - Los archivos estáticos deben organizarse por categoría: `backgrounds/` (fondos retro/mosaico), `fonts/` (fuentes `.ttf`), `icons/` (favicons y manifiestos PWA) y `banners/` (banners 88x31 e imagen OpenGraph).
+
+---
+
 ## 📝 Resumen de Reglas
 
 | Tipo de Tarea / Archivo | ¿La IA puede intervenir? | Condición / Alcance |
 | :--- | :---: | :--- |
 | **Estilo de Respuesta** | **SÍ** | Respuestas concisas y explicativas. Sin saludos ni felicitaciones. Comentarios moderados y oportunos en el código. |
 | **Código (`.tsx` / `.ts` / `.css`)** | **SÍ** | Solo para plasmar ideas del usuario o arreglar bugs. Prohibido innovar creativamente en diseño (respetar `README.md`). |
-| **Refactorización / Reorganización** | **SÍ** | Permitida bajo la cláusula de configuración y mantenimiento del proyecto. |
+| **Refactorización / Reorganización** | **SÍ** | Permitida bajo la cláusula de configuración y mantenimiento del proyecto. Respetar la arquitectura en `src/components/`, `src/styles/`, `src/lib/` y `public/`. |
 | **Archivos de Configuración** | **SÍ** | Cuando sea necesario configurar o ajustar el entorno del proyecto. |
 | **Documentación y Planeación** | **SÍ** | Para actualizar `README.md`, `DEPENDENCIES.md`, `AGENTS.md` y agregar notas a `PLANEATION.md` (**prohibido a la IA borrar secciones de `PLANEATION.md`**). |
 | **Generación de Multimedia (IA)** | **NO** | **Totalmente prohibido** generar imágenes, audio o video con IA. Extraer de la web o usar originales del usuario. |

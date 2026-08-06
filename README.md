@@ -87,13 +87,55 @@ El sitio evoca la nostalgia web de los años 2000 con un contenedor central flot
 
 ## 📂 4. Arquitectura de Código y Estructura de Carpetas
 
+### 🌲 Árbol de Carpetas del Proyecto
+
 ```text
-src/
+public/                       <-- Archivos estáticos servidos directamente
+├── backgrounds/              (Texturas y fondos mosaico retro en PNG: 256px, 512px, 1024px)
+├── banners/                  (Banners retro 88x31 e imagen OpenGraph og-image.png)
+├── fonts/                    (Fuentes tipográficas locales .ttf: simple-japan, special-punk)
+└── icons/                    (Favicons, apple-touch-icon, iconos PWA e iconos enmascarables)
+
+src/                          <-- Código fuente del proyecto
 ├── app/                      <-- Rutas del App Router de Next.js
-│   ├── layout.tsx            (Layout raíz con HTML, Metadatos y estructura general)
-│   ├── page.tsx              (Página principal conectada dinámicamente a Firestore)
-│   └── sitemap.ts            (Generador de sitemap XML estático)
+│   ├── settings/             (Sub-rutas de configuración: /account, /admin, /notifications, /terms)
+│   ├── layout.tsx            (Layout raíz con HTML, metadatos, fuentes y AuthProvider)
+│   └── page.tsx              (Página principal conectada dinámicamente a Cloud Firestore)
+│
+├── components/               <-- Componentes React modularizados
+│   ├── auth/                 (Formularios y modales de sesión: AuthModal, LoginForm, RegisterForm)
+│   ├── ui/                   (Controles de interfaz reutilizables: ImageUploader)
+│   └── widgets/              (Widgets independientes: Profile, MusicPlayer, SketchBoard, etc.)
+│
+├── lib/                      <-- Utilidades, SDKs y lógica de estado
+│   ├── firebase.ts           (Conexión e inicialización del SDK de Firebase)
+│   └── youtube.ts            (Integración con YouTube IFrame API para el reproductor)
+│
+└── styles/                   <-- Estilos CSS Puro organizados modularmente
+    ├── globals.css           (Variables de color/tokens, reset HTML y clases retro compartidas)
+    └── layout.css            (Contenedor principal flotante y grid de 3 columnas)
 ```
+
+### 📐 Principios de Organización y Arquitectura
+
+1. **Reutilización y Desacoplamiento de Componentes (`src/components/`):**
+   - **Reutilización estricta:** Antes de crear un componente nuevo, se debe verificar si ya existe uno similar en `src/components/` para evitar duplicación.
+   - **Organización por carpetas:**
+     - `widgets/`: Widgets interactivos y laterales con lógica autónoma.
+     - `ui/`: Componentes reutilizables de UI (ej. controles de carga de imágenes).
+     - `auth/`: Modales y formularios dedicados al flujo de usuarios y sesión.
+     - Raíz (`src/components/`): Componentes contenedores o estructurales de la maquetación base.
+
+2. **Modularización de Estilos (`src/styles/`):**
+   - Se prohíbe el uso de CSS inline o un único archivo masivo de estilos.
+   - `globals.css` alberga únicamente los tokens del sistema de diseño (variables HSL/hex), resets globales, tipografías `@font-face` y utilidades retro transversales (`.retro-box`, cursores personalizables, scrollbars).
+   - Cada área funcional o pantalla posee su propio archivo CSS dedicado (`account.css`, `admin.css`, `comments.css`, etc.). Si un estilo o botón es compartido entre múltiples pantallas, se abstrae en `globals.css` o `widgets.css`.
+
+3. **Separación de Lógica y SDKs (`src/lib/`):**
+   - La lógica de negocio, integración con APIs externas (Firebase, YouTube API) y contextos de React residen exclusivamente en `src/lib/`, manteniendo los componentes puramente enfocados en el renderizado y la UX.
+
+4. **Clasificación Estricta de Recursos Estáticos (`public/`):**
+   - Todos los recursos estáticos se distribuyen en carpetas dedicadas según su categoría (`backgrounds/`, `fonts/`, `icons/`, `banners/`) para asegurar orden en el mantenimiento y carga optimizada.
 
 ---
 
@@ -142,26 +184,24 @@ npm run build
 
 ---
 
-## 🗺️ 8. Estado del Proyecto & Roadmap
+## 🗺️ 8. Estado del Proyecto & Gestión de Planeación
 
-Para ver el desglose detallado de arquitectura, implicaciones y planes de acción de cada funcionalidad planificada, consulta la [Guía de Planeación (`PLANEATION.md`)](/PLANEATION.md).
+Toda la planificación de características, arquitectura y seguimiento del roadmap se gestiona de forma centralizada en [`PLANEATION.md`](/PLANEATION.md).
 
-### ✅ Funcionalidades Implementadas (Fases 1 - 4 Completadas)
-- [x] **Maquetación Base & Layout Flotante:** Grid de 3 columnas responsivo en CSS puro con soporte para dispositivos móviles.
-- [x] **Motor de Blog en Markdown:** Lectura de entradas en `src/content/`, metadatos (`date`, `mood`, `song`, `songCover`, `cover`), paginación interactiva y modal de lectura completa (`PostModal`).
-- [x] **Estética Emo/Scene 2000s & Assets:** Tipografías personalizadas (`simple-japan.ttf`, `special-punk.ttf`), cursor emo de calavera, scrollbar personalizada y contenedores `.retro-box`.
-- [x] **Widgets Interactivos:**
-  - Reproductor de audio retro de YouTube sin video visible, con playlist, shuffle, loop modos y control de volumen.
-  - Pizarrón interactivo HTML5 Canvas con paleta Emo, borrador, grosores de pincel y preservación de trazo al redimensionar.
-  - Perfil con foto capitalizada estilo revista, enlaces sociales y badges de roles/intereses.
-  - Banners 88x31 en pie de página.
-- [x] **SEO & Infraestructura:** Sitemap dinámico estático, metadatos OpenGraph/Twitter Card, `robots.txt` y despliegue continuo en GitHub Pages (`ariri.app`).
+### 📌 Estructura de `PLANEATION.md`
 
-### 🔥 Próxima Funcionalidad Prioritaria (En Fase de Solución de Errores y Afinamiento)
-- [ ] **Ecosistema Dinámico Firebase + RSS 2.0:** Autenticación (Admin/Amigos), Comentarios, Libro de Visitas, Creación de Posts desde Web (`/admin`), Notificaciones y RSS unificado. *(Fase activa: Solución de errores, corrección de bugs y afinamiento de la implementación)*. Ver plan de acción y arquitectura en [`PLANEATION.md`](/PLANEATION.md).
+El documento está organizado en dos secciones principales:
 
-### 🔮 Ideas & Mejoras Futuras
-- [ ] **Resaltado de Sintaxis en Código:** Ver detalles en [`PLANEATION.md`](/PLANEATION.md).
+1. **📻 Futuro Cercano (Prioritario & En Desarrollo):** Contiene las características en desarrollo activo o planificadas a corto plazo.
+2. **📻 Futuro Lejano (Opcionales & Evaluables):** Ideas opcionales (algunas vagamente detalladas y otras bien detalladas) que podrían o no realizarse en el futuro.
+
+### 🔄 Fases de Implementación (Futuro Cercano)
+
+Toda nueva función dentro de la sección de **Futuro Cercano** atraviesa las siguientes fases de desarrollo:
+
+- **📋 1. Fase de Planeación:** Se planifica detalladamente cada aspecto (backend y frontend), evaluando implicaciones en la arquitectura del proyecto, dependencias necesarias, pros, contras y otros detalles técnicos.
+- **🛠️ 2. Fase de Implementación:** Se realiza todo lo relacionado a la materialización de lo planificado. Incluye escribir código, crear y/o buscar recursos necesarios (imágenes, iconos, etc.) y cualquier tarea requerida para concretar la idea.
+- **🧪 3. Fase de Corrección de Bugs + Perfeccionamiento:** Con la implementación en producción, se realizan pruebas finales para solucionar errores o bugs pequeños no detectados en la fase anterior. Asimismo, se perfecciona la idea inicial añadiendo detalles o mejoras que no estaban planeadas originalmente pero que se consideran valiosas tras ver la función en marcha.
 
 ---
 
