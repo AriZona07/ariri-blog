@@ -102,7 +102,7 @@ export default function SiteHeader({
                     onClick={() => setShowUserMenu(false)}
                     role="menuitem"
                   >
-                    👤 Mi Cuenta
+                    ⚙️ Ajustes
                   </Link>
                   {isAdmin && (
                     <Link
@@ -111,7 +111,7 @@ export default function SiteHeader({
                       onClick={() => setShowUserMenu(false)}
                       role="menuitem"
                     >
-                      ⚙️ Panel de Admin
+                      👩‍💻 Panel de Admin
                     </Link>
                   )}
                   <button

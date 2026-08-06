@@ -29,7 +29,7 @@ export default function MobileSettingsNav() {
   if (isAdmin) {
     items.push({
       href: "/settings/admin",
-      icon: "⚙️",
+      icon: "👩‍💻",
       label: "Admin",
     });
   }

@@ -12,6 +12,7 @@ import { usePathname }     from "next/navigation";
 import SidebarLeft         from "@/components/SidebarLeft";
 import SidebarRight        from "@/components/SidebarRight";
 import MobileSettingsNav  from "@/components/widgets/MobileSettingsNav";
+import MobileGeneralNav   from "@/components/widgets/MobileGeneralNav";
 
 interface SiteBodyProps {
   children: React.ReactNode;
@@ -31,7 +32,7 @@ export default function SiteBody({ children }: SiteBodyProps) {
 
       <SidebarRight />
 
-      {isSettingsPage && <MobileSettingsNav />}
+      {isSettingsPage ? <MobileSettingsNav /> : <MobileGeneralNav />}
     </div>
   );
 }

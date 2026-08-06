@@ -4,17 +4,16 @@
  * PostList — Lista de entradas del blog con paginación en el cliente.
  *
  * Cada tarjeta muestra el contenido clampado a un alto máximo con un fade
- * al pie. El botón "Leer más" abre PostModal con el post completo y
- * navegación entre todos los posts.
+ * al pie. El botón "Leer más" o clic en el título navega a la página /posts/[slug].
  */
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import { collection, query, orderBy, onSnapshot, type DocumentData } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import PaginationNavWidget from "@/components/widgets/PaginationNavWidget";
 import MusicPlayerWidget   from "@/components/widgets/MusicPlayerWidget";
-import PostModal           from "@/components/PostModal";
 import { extractYouTubePlaylistId } from "@/lib/youtube";
 import { renderMarkdown }           from "@/lib/markdown";
 import type { Post } from "@/app/page";
@@ -25,8 +24,6 @@ const POSTS_PER_PAGE = 3;
 export default function PostList() {
   const [allPosts, setAllPosts]       = useState<Post[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  /* null = cerrado; número = índice global del post abierto en el modal */
-  const [openIndex, setOpenIndex]     = useState<number | null>(null);
 
   /* Suscripción en tiempo real a la colección `posts` de Firestore */
   useEffect(() => {
@@ -94,9 +91,8 @@ export default function PostList() {
         aria-label="Entradas del blog"
         style={{ display: "flex", flexDirection: "column", gap: "var(--gap-lg)" }}
       >
-        {pagePosts.map((post, pageIdx) => {
-          /* Índice global del post dentro del array completo de posts */
-          const globalIdx = start + pageIdx;
+        {pagePosts.map((post) => {
+          const postUrl = `/posts/${encodeURIComponent(post.slug)}`;
 
           return (
             <article key={post.slug} className="post-card">
@@ -130,13 +126,10 @@ export default function PostList() {
                   )}
                 </div>
                 <h2 className="post-card__title">
-                  {/* El título abre el modal directamente */}
-                  <a
-                    href="#"
-                    onClick={(e) => { e.preventDefault(); setOpenIndex(globalIdx); }}
-                  >
+                  {/* El título navega a la página del post */}
+                  <Link href={postUrl}>
                     {post.title}
-                  </a>
+                  </Link>
                 </h2>
               </div>
               <div className="post-card__body">
@@ -175,15 +168,15 @@ export default function PostList() {
                   )}
                 </div>
 
-                {/* "Leer más" siempre visible; abre el modal */}
+                {/* "Leer más" navega a la página del post */}
                 <div style={{ marginTop: "1.1rem" }}>
-                  <button
+                  <Link
+                    href={postUrl}
                     className="post-card__read-more"
-                    onClick={() => setOpenIndex(globalIdx)}
                     aria-label={`Leer publicación completa: ${post.title}`}
                   >
                     Leer más →
-                  </button>
+                  </Link>
                 </div>
               </div>
             </article>
@@ -198,16 +191,6 @@ export default function PostList() {
         onPageChange={setCurrentPage}
         idPrefix="list-bottom"
       />
-
-      {/* Modal de lectura completa */}
-      {openIndex !== null && (
-        <PostModal
-          posts={allPosts}
-          currentIndex={openIndex}
-          onClose={() => setOpenIndex(null)}
-          onNavigate={(idx) => setOpenIndex(idx)}
-        />
-      )}
     </>
   );
 }
