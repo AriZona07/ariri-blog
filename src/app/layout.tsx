@@ -51,7 +51,7 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="es">
+    <html lang="es" data-scroll-behavior="smooth">
       <head>
         {/* Autodescubrimiento del feed RSS para lectores y agregadores */}
         <link
