@@ -18,6 +18,11 @@ import {
   query,
   orderBy,
   onSnapshot,
+  getDoc,
+  addDoc,
+  deleteDoc,
+  doc,
+  serverTimestamp,
   type DocumentData,
 } from "firebase/firestore";
 import { db }      from "@/lib/firebase";
@@ -45,6 +50,7 @@ export default function SettingsAdminPage() {
   const [fetching,       setFetching]       = useState(true);
   const [draftsOpen,     setDraftsOpen]     = useState(false);
   const [fetchingDrafts, setFetchingDrafts] = useState(true);
+  const [actionError,    setActionError]    = useState<string | null>(null);
 
   /* Redirección de seguridad lado cliente */
   useEffect(() => {
@@ -109,6 +115,34 @@ export default function SettingsAdminPage() {
     return () => window.removeEventListener("keydown", handler);
   }, [draftsOpen]);
 
+  /* Mover un post publicado a la colección de borradores */
+  async function handleMoveToDraft(postId: string) {
+    if (!window.confirm("¿Regresar esta publicación a borradores? Se despublicará del blog hasta que la vuelvas a publicar.")) return;
+
+    setActionError(null);
+    try {
+      const postRef = doc(db, "posts", postId);
+      const snap = await getDoc(postRef);
+      if (!snap.exists()) {
+        setActionError("No se encontró la publicación en Firestore.");
+        return;
+      }
+
+      const postData = snap.data();
+      const draftRef = await addDoc(collection(db, "drafts"), {
+        ...postData,
+        authorUid: user?.uid ?? "",
+        savedAt:   serverTimestamp(),
+      });
+
+      await deleteDoc(postRef);
+      router.push(`/settings/admin/new-post?draft=${draftRef.id}`);
+    } catch (err: unknown) {
+      console.error("Error al trasladar publicación a borrador:", err);
+      setActionError("Ocurrió un error al regresar la publicación a borrador.");
+    }
+  }
+
   if (loading || (!loading && !isAdmin)) {
     return (
       <div className="retro-box">
@@ -150,6 +184,12 @@ export default function SettingsAdminPage() {
               </div>
             </div>
 
+            {actionError && (
+              <p className="auth-error" style={{ marginBottom: "1rem" }} role="alert">
+                {actionError}
+              </p>
+            )}
+
             {fetching ? (
               <p className="admin-empty">Cargando posts…</p>
             ) : posts.length === 0 ? (
@@ -162,6 +202,25 @@ export default function SettingsAdminPage() {
                   <div key={post.id} className="admin-post-item">
                     <span className="admin-post-item__title">{post.title}</span>
                     <span className="admin-post-item__date">{post.date}</span>
+
+                    <div className="admin-post-item__actions">
+                      <Link
+                        href={`/settings/admin/new-post?edit=${post.id}`}
+                        className="admin-btn-action-edit"
+                        title="Editar este post"
+                      >
+                        ✏️ Editar
+                      </Link>
+
+                      <button
+                        type="button"
+                        className="admin-btn-action-draft"
+                        title="Regresar post a borradores"
+                        onClick={() => handleMoveToDraft(post.id)}
+                      >
+                        ↩️ A borrador
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

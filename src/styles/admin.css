@@ -467,9 +467,177 @@
   white-space: nowrap;
 }
 
+/* --- Botones de acción rápida en la lista del panel admin --- */
+.admin-post-item__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.admin-btn-action-edit {
+  padding: 0.25rem 0.65rem;
+  background: rgba(0, 240, 255, 0.12);
+  border: 1px solid #00f0ff;
+  border-radius: var(--radius-sm);
+  color: #00f0ff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.12s, transform 0.1s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+.admin-btn-action-edit:hover {
+  background: #00f0ff;
+  color: #000;
+}
+
+.admin-btn-action-draft {
+  padding: 0.25rem 0.65rem;
+  background: rgba(255, 255, 0, 0.12);
+  border: 1px solid #ffff00;
+  border-radius: var(--radius-sm);
+  color: #ffff00;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s, transform 0.1s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+.admin-btn-action-draft:hover {
+  background: #ffff00;
+  color: #000;
+}
+
+/* --- Row horizontal flex/grid para Canción del Día + Portada de Canción --- */
+.song-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: start;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 1rem;
+}
+
+.song-field-row__disabled-hint {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+  padding: 0.6rem 0.85rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+/* --- Editor de Markdown (MarkdownEditor) --- */
+.md-editor {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: #110d17;
+  overflow: hidden;
+}
+
+.md-editor__tabs {
+  display: flex;
+  background: #181222;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.md-editor__tab {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-family: var(--font-main);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.md-editor__tab:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+.md-editor__tab--active {
+  color: #00ff66;
+  background: #110d17;
+  border-bottom: 2px solid #00ff66;
+  margin-bottom: -2px;
+}
+
+.md-editor__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.4rem 0.6rem;
+  background: #161021;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.md-editor__tool-btn {
+  padding: 0.25rem 0.5rem;
+  background: #221b2e;
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+}
+.md-editor__tool-btn:hover {
+  background: #312742;
+  border-color: #00ff66;
+  color: #00ff66;
+}
+
+.md-editor__textarea {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  min-height: 280px;
+}
+.md-editor__textarea:focus {
+  border: none;
+  box-shadow: none;
+}
+
+.md-editor__preview-container {
+  padding: 1rem;
+  min-height: 280px;
+  background: #0d0a12;
+  overflow-y: auto;
+}
+
+.md-editor__preview-empty {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.md-editor__preview-content {
+  white-space: pre-wrap;
+  color: var(--color-text-secondary);
+}
+
 @media (max-width: 600px) {
   .new-post-form__meta-row { grid-template-columns: 1fr; }
+  .song-field-row { grid-template-columns: 1fr; }
   .new-post-form__actions { flex-direction: column; }
   .new-post-form__actions .new-post-form__submit { min-width: unset; }
   .new-post-form__save-draft { min-width: unset; }
 }
+
