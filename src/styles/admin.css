@@ -633,11 +633,20 @@
   color: var(--color-text-secondary);
 }
 
+.title-slug-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
 @media (max-width: 600px) {
   .new-post-form__meta-row { grid-template-columns: 1fr; }
+  .title-slug-row { grid-template-columns: 1fr; }
   .song-field-row { grid-template-columns: 1fr; }
   .new-post-form__actions { flex-direction: column; }
   .new-post-form__actions .new-post-form__submit { min-width: unset; }
   .new-post-form__save-draft { min-width: unset; }
 }
+
 

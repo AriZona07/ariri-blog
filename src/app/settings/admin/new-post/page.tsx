@@ -10,12 +10,6 @@
  *   - Con query param `?draft=<id>` → Carga el borrador desde `drafts/<id>` y trabaja en modo edición de borrador.
  *   - Con query param `?edit=<id>` → Carga el post publicado desde `posts/<id>` y trabaja en modo edición de post.
  *
- * Botones de acción:
- *   - "★ Publicar post ★" / "★ Guardar cambios ★" → Guarda en `posts`. Si provenía de un borrador, lo elimina de `drafts`.
- *   - "💾 Guardar borrador" → Guarda/actualiza en `drafts`.
- *   - "↩️ Regresar a borrador" → Convierte una entrada de `posts/<id>` a `drafts/<newId>` y la borra de `posts`.
- *   - "🗑 Eliminar borrador" → Elimina de `drafts` y redirige al panel admin.
- *
  * Seguridad: Firestore Rules bloquea escritura si el token no tiene claim `admin: true`.
  */
 
@@ -40,6 +34,9 @@ import { useAuth }          from "@/lib/auth-context";
 import { extractYouTubePlaylistId, processSongCoverUrl } from "@/lib/youtube";
 import ImageUploader                        from "@/components/ui/ImageUploader";
 import MarkdownEditor                       from "@/components/ui/MarkdownEditor";
+import SlugInput, { sanitizeSlug }          from "@/components/ui/SlugInput";
+import SongSection                          from "@/components/ui/SongSection";
+import PostActionsBar                       from "@/components/ui/PostActionsBar";
 import { markForDeletion, processScheduledDeletions } from "@/lib/deletion-queue";
 
 function SettingsNewPostForm() {
@@ -185,7 +182,7 @@ function SettingsNewPostForm() {
     return existingCoverUrl;
   }
 
-  /* Resuelve la URL de la portada de la canción (solo si hay canción especificada) */
+  /* Resuelve la URL de la portada de la canción */
   async function resolveSongCover(): Promise<string | null> {
     if (!song.trim()) return null;
 
@@ -214,14 +211,9 @@ function SettingsNewPostForm() {
     }
   }
 
-  /* Handler para blur del campo slug para alertar duplicados en tiempo real */
+  /* Handler para blur de título o slug para alertar duplicados en tiempo real */
   async function handleSlugBlur() {
-    const cleanSlug = (slug.trim() || title.trim())
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
+    const cleanSlug = sanitizeSlug(slug.trim() || title.trim()).replace(/^-+|-+$/g, "");
 
     if (cleanSlug) {
       const duplicate = await isSlugDuplicate(cleanSlug, editId);
@@ -233,7 +225,7 @@ function SettingsNewPostForm() {
     }
   }
 
-  /* Construye el objeto de datos formateado (sin valores undefined incompatibles con Firestore) */
+  /* Construye el objeto de datos formateado */
   async function buildPostData() {
     const finalCover     = await resolveCover();
     const finalSongCover = await resolveSongCover();
@@ -254,13 +246,7 @@ function SettingsNewPostForm() {
       });
     }
 
-    const cleanSlug = (slug.trim() || title.trim())
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
+    const cleanSlug = sanitizeSlug(slug.trim() || title.trim()).replace(/^-+|-+$/g, "");
     const extractedPlaylist = extractYouTubePlaylistId(playlist);
 
     const rawData = {
@@ -282,7 +268,7 @@ function SettingsNewPostForm() {
     );
   }
 
-  /* Parsea y personaliza errores de Firestore / Storage para la interfaz */
+  /* Parsea errores de Firestore / Storage */
   function formatFirestoreError(err: unknown, contextMsg: string): string {
     const msg = err instanceof Error ? err.message : String(err);
     if (msg.includes("permission-denied")) {
@@ -315,7 +301,6 @@ function SettingsNewPostForm() {
     try {
       const data = await buildPostData();
 
-      // Validación de slug duplicado en Firestore
       const duplicate = await isSlugDuplicate(String(data.slug), editId);
       if (duplicate) {
         setError(`El slug "${data.slug}" ya está asignado a otra publicación. Por favor modifica el slug.`);
@@ -324,19 +309,16 @@ function SettingsNewPostForm() {
       }
 
       if (editId) {
-        // Actualizar post existente
         await setDoc(doc(db, "posts", editId), {
           ...data,
           updatedAt: serverTimestamp(),
         }, { merge: true });
       } else {
-        // Crear nuevo post
         await addDoc(collection(db, "posts"), {
           ...data,
           createdAt: serverTimestamp(),
         });
 
-        // Notificación para nuevos posts
         try {
           await addDoc(collection(db, "notifications"), {
             title: "Nuevo post en Ariri Blog",
@@ -350,7 +332,6 @@ function SettingsNewPostForm() {
         }
       }
 
-      // Si estábamos trabajando sobre un borrador, lo eliminamos tras publicar
       if (draftId) {
         try {
           await deleteDoc(doc(db, "drafts", draftId));
@@ -415,19 +396,16 @@ function SettingsNewPostForm() {
     try {
       const data = await buildPostData();
 
-      // Guardar en `drafts`
       const newDraftRef = await addDoc(collection(db, "drafts"), {
         ...data,
         authorUid: user!.uid,
         savedAt:   serverTimestamp(),
       });
 
-      // Si estábamos editando un post publicado, borrarlo de `posts`
       if (editId) {
         await deleteDoc(doc(db, "posts", editId));
       }
 
-      // Redirigir al modo borrador
       router.push(`/settings/admin/new-post?draft=${newDraftRef.id}`);
     } catch (err: unknown) {
       console.error("Error al convertir a borrador:", err);
@@ -548,42 +526,32 @@ function SettingsNewPostForm() {
               <form onSubmit={handleSubmit}>
                 {error && <p className="auth-error" role="alert">{error}</p>}
 
-                {/* Título */}
-                <div className="auth-field">
-                  <label htmlFor="np-title" className="auth-field__label">Título *</label>
-                  <input
-                    id="np-title"
-                    type="text"
-                    className="auth-field__input"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Escribe un título genial…"
-                    required
-                  />
-                </div>
+                {/* Fila horizontal: Título + Slug manual */}
+                <div className="title-slug-row">
+                  <div className="auth-field" style={{ margin: 0 }}>
+                    <label htmlFor="np-title" className="auth-field__label">Título *</label>
+                    <input
+                      id="np-title"
+                      type="text"
+                      className="auth-field__input"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      onBlur={handleSlugBlur}
+                      placeholder="Escribe un título genial…"
+                      required
+                    />
+                  </div>
 
-                {/* Slug manual */}
-                <div className="auth-field">
-                  <label htmlFor="np-slug" className="auth-field__label">
-                    Slug manual (URL permalink)
-                  </label>
-                  <input
+                  <SlugInput
                     id="np-slug"
-                    type="text"
-                    className="auth-field__input"
                     value={slug}
-                    onChange={(e) => {
-                      setSlug(e.target.value);
+                    onChange={(val) => {
+                      setSlug(val);
                       if (slugWarning) setSlugWarning(null);
                     }}
                     onBlur={handleSlugBlur}
-                    placeholder="ej: mi-nuevo-post (opcional, se auto-genera si se omite)"
+                    warning={slugWarning}
                   />
-                  {slugWarning && (
-                    <p style={{ color: "#ffff00", fontSize: "var(--fs-xs)", marginTop: "0.3rem" }}>
-                      {slugWarning}
-                    </p>
-                  )}
                 </div>
 
                 {/* Fecha */}
@@ -613,49 +581,22 @@ function SettingsNewPostForm() {
                 </div>
 
                 {/* Row horizontal flex: Canción del día + Portada de canción */}
-                <div className="song-field-row">
-                  <div className="auth-field" style={{ margin: 0 }}>
-                    <label htmlFor="np-song" className="auth-field__label">Canción del día</label>
-                    <input
-                      id="np-song"
-                      type="text"
-                      className="auth-field__input"
-                      value={song}
-                      onChange={(e) => setSong(e.target.value)}
-                      placeholder="ej: My Chemical Romance — Helena"
-                    />
-                  </div>
-
-                  {song.trim().length > 0 ? (
-                    <ImageUploader
-                      label="Portada de la canción"
-                      id="np-song-cover-uploader"
-                      mode={songCoverMode}
-                      onModeChange={setSongCoverMode}
-                      urlValue={songCoverUrl}
-                      onUrlChange={setSongCoverUrl}
-                      fileValue={songCoverFile}
-                      onFileChange={setSongCoverFile}
-                      minWidth={100}
-                      minHeight={100}
-                      maxWidth={4000}
-                      maxHeight={4000}
-                      maxSizeMB={10}
-                      cropShape="square"
-                      cropAspectRatio={1}
-                      existingUrl={existingSongCoverUrl}
-                      onClear={() => {
-                        setSongCoverUrl("");
-                        setSongCoverFile(null);
-                        setExistingSongCoverUrl("");
-                      }}
-                    />
-                  ) : (
-                    <div className="song-field-row__disabled-hint">
-                      🎵 Escribe el nombre de la canción del día a la izquierda para adjuntar la imagen de su portada.
-                    </div>
-                  )}
-                </div>
+                <SongSection
+                  song={song}
+                  onSongChange={setSong}
+                  songCoverMode={songCoverMode}
+                  onSongCoverModeChange={setSongCoverMode}
+                  songCoverUrl={songCoverUrl}
+                  onSongCoverUrlChange={setSongCoverUrl}
+                  songCoverFile={songCoverFile}
+                  onSongCoverFileChange={setSongCoverFile}
+                  existingSongCoverUrl={existingSongCoverUrl}
+                  onClearSongCover={() => {
+                    setSongCoverUrl("");
+                    setSongCoverFile(null);
+                    setExistingSongCoverUrl("");
+                  }}
+                />
 
                 {/* Playlist de YouTube */}
                 <div className="auth-field">
@@ -708,51 +649,17 @@ function SettingsNewPostForm() {
                 </div>
 
                 {/* Barra de botones de acción */}
-                <div className="new-post-actions-bar">
-                  <button
-                    type="submit"
-                    className="auth-btn-primary"
-                    disabled={saving || savingDraft || revertingDraft}
-                    id="np-publish-btn"
-                  >
-                    {saving ? "Guardando…" : editId ? "★ Guardar cambios ★" : "★ Publicar post ★"}
-                  </button>
-
-                  <button
-                    type="button"
-                    className="admin-btn-draft-action"
-                    disabled={saving || savingDraft || revertingDraft}
-                    onClick={handleSaveDraft}
-                    id="np-save-draft-btn"
-                  >
-                    {savingDraft ? "Guardando…" : "💾 Guardar borrador"}
-                  </button>
-
-                  {editId && (
-                    <button
-                      type="button"
-                      className="admin-btn-draft-action"
-                      style={{ border: "2px solid #ffff00", color: "#ffff00" }}
-                      disabled={saving || savingDraft || revertingDraft}
-                      onClick={handleRevertToDraft}
-                      id="np-revert-draft-btn"
-                    >
-                      {revertingDraft ? "Moviendo…" : "↩️ Regresar a borrador"}
-                    </button>
-                  )}
-
-                  {draftId && (
-                    <button
-                      type="button"
-                      className="admin-btn-delete-draft"
-                      disabled={saving || savingDraft || deletingDraft}
-                      onClick={handleDeleteDraft}
-                      id="np-delete-draft-btn"
-                    >
-                      {deletingDraft ? "Eliminando…" : "🗑 Eliminar borrador"}
-                    </button>
-                  )}
-                </div>
+                <PostActionsBar
+                  saving={saving}
+                  savingDraft={savingDraft}
+                  revertingDraft={revertingDraft}
+                  deletingDraft={deletingDraft}
+                  isEditing={Boolean(editId)}
+                  isDraft={Boolean(draftId)}
+                  onSaveDraft={handleSaveDraft}
+                  onRevertToDraft={handleRevertToDraft}
+                  onDeleteDraft={handleDeleteDraft}
+                />
 
               </form>
             )}
