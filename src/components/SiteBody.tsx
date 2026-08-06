@@ -3,7 +3,7 @@
 /**
  * SiteBody.tsx — Envoltorio dinámico del cuerpo principal del sitio (sidebars + contenido central)
  *
- * Aplica la clase .site-body--no-right-sidebar cuando se navega en rutas de configuración (/settings/* o /account),
+ * Aplica la clase .site-body--no-right-sidebar cuando se navega en rutas de configuración (/settings/*),
  * permitiendo que el área de contenido principal se expanda y consuma todo el espacio disponible.
  * En móviles renderiza la barra flotante de navegación inferior (MobileSettingsNav).
  */
@@ -19,7 +19,7 @@ interface SiteBodyProps {
 
 export default function SiteBody({ children }: SiteBodyProps) {
   const pathname = usePathname();
-  const isSettingsPage = pathname?.startsWith("/settings") || pathname?.startsWith("/account");
+  const isSettingsPage = pathname?.startsWith("/settings");
 
   return (
     <div className={`site-body ${isSettingsPage ? "site-body--no-right-sidebar" : ""}`}>

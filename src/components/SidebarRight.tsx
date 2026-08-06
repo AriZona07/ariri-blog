@@ -7,11 +7,11 @@ import GuestbookWidget   from "@/components/widgets/GuestbookWidget";
 
 /**
  * SidebarRight — Barra lateral derecha.
- * Se oculta automáticamente (retorna null) en las páginas de configuración (/settings/* o /account).
+ * Se oculta automáticamente (retorna null) en las páginas de configuración (/settings/*).
  */
 export default function SidebarRight() {
   const pathname = usePathname();
-  const isSettingsPage = pathname?.startsWith("/settings") || pathname?.startsWith("/account");
+  const isSettingsPage = pathname?.startsWith("/settings");
 
   if (isSettingsPage) {
     return null;
