@@ -12,6 +12,7 @@
  */
 
 import { useState, useRef } from "react";
+import { renderMarkdown } from "@/lib/markdown";
 
 interface MarkdownEditorProps {
   id:           string;
@@ -174,7 +175,7 @@ export default function MarkdownEditor({
         <div className="md-editor__preview-container">
           {value.trim() ? (
             <div className="md-editor__preview-content welcome-text">
-              {value}
+              {renderMarkdown(value)}
             </div>
           ) : (
             <p className="md-editor__preview-empty">

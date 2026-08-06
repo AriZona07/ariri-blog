@@ -16,6 +16,7 @@ import PaginationNavWidget from "@/components/widgets/PaginationNavWidget";
 import MusicPlayerWidget   from "@/components/widgets/MusicPlayerWidget";
 import PostModal           from "@/components/PostModal";
 import { extractYouTubePlaylistId } from "@/lib/youtube";
+import { renderMarkdown }           from "@/lib/markdown";
 import type { Post } from "@/app/page";
 
 /** Posts visibles por página */
@@ -141,9 +142,9 @@ export default function PostList() {
               <div className="post-card__body">
                 {/* Contenido clampado con fade al pie */}
                 <div className="post-card__content-clamp">
-                  <p className="welcome-text" style={{ color: "var(--color-text-secondary)", whiteSpace: "pre-wrap" }}>
-                    {post.content || post.excerpt}
-                  </p>
+                  <div className="welcome-text" style={{ color: "var(--color-text-secondary)" }}>
+                    {renderMarkdown(post.content || post.excerpt)}
+                  </div>
 
                   {(post.playlistId || post.playlist) && (
                     <div style={{ marginTop: "1rem" }}>

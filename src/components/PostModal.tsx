@@ -19,6 +19,7 @@ import PaginationNavWidget from "@/components/widgets/PaginationNavWidget";
 import MusicPlayerWidget   from "@/components/widgets/MusicPlayerWidget";
 import CommentsWidget   from "@/components/widgets/CommentsWidget";
 import { extractYouTubePlaylistId } from "@/lib/youtube";
+import { renderMarkdown }           from "@/lib/markdown";
 import type { Post }    from "@/app/page";
 
 interface PostModalProps {
@@ -111,9 +112,9 @@ export default function PostModal({ posts, currentIndex, onClose, onNavigate }: 
 
         {/* Cuerpo scrolleable */}
         <div className="post-modal__body">
-          <p className="welcome-text" style={{ color: "var(--color-text-secondary)", marginBottom: "1rem", whiteSpace: "pre-wrap" }}>
-            {post.content || post.excerpt}
-          </p>
+          <div className="welcome-text" style={{ color: "var(--color-text-secondary)", marginBottom: "1rem" }}>
+            {renderMarkdown(post.content || post.excerpt)}
+          </div>
 
           {(post.playlistId || post.playlist) && (
             <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
