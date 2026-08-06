@@ -194,8 +194,10 @@
 
 .music-player__thumb {
   flex-shrink: 0;
-  width: 18%;
-  padding: 0.3rem 0 0.3rem 0.3rem;
+  width: 52px;
+  height: 52px;
+  padding: 0.25rem;
+  box-sizing: border-box;
   overflow: hidden;
 }
 

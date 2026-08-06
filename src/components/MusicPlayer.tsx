@@ -212,7 +212,7 @@ export default function MusicPlayer({
         playerRef.current = new window.YT.Player(playerId, {
           height: "1",
           width:  "1",
-          host:   "https://www.youtube-nocookie.com",
+          host:   "https://www.youtube.com",
           playerVars: {
             listType:        "playlist",
             list:            playlistId,
@@ -251,7 +251,7 @@ export default function MusicPlayer({
                 setLoopMode((currentLoop) => {
                   if (currentLoop === "track") {
                     setCurrentIndex((ci) => {
-                      event.target.playVideoAt(ci);
+                      try { event.target.playVideoAt(ci); } catch {}
                       return ci;
                     });
                   }
@@ -393,21 +393,7 @@ export default function MusicPlayer({
   return (
     <div className="music-player">
       {/* IFrame de YouTube oculto posicionalmente para permitir ejecuciones del navegador */}
-      <iframe
-        id={playerId}
-        title="YouTube Audio Player"
-        allow="autoplay; encrypted-media"
-        style={{
-          position: "absolute",
-          width: "1px",
-          height: "1px",
-          opacity: 0,
-          pointerEvents: "none",
-          overflow: "hidden",
-          left: "-9999px",
-          border: "none",
-        }}
-      />
+      <div id={playerId} style={{ position: "absolute", width: "1px", height: "1px", opacity: 0, pointerEvents: "none", overflow: "hidden", left: "-9999px" }} />
 
       {/* Pantalla LCD retro */}
       <div className="music-player__screen">
@@ -417,9 +403,9 @@ export default function MusicPlayer({
             <Image
               src={thumbnailUrl}
               alt={songTitle}
-              width={120}
-              height={90}
-              style={{ width: "100%", height: "auto", objectFit: "cover" }}
+              width={52}
+              height={52}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
               unoptimized
             />
           </div>
