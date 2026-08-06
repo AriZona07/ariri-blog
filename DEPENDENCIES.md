@@ -14,6 +14,10 @@ Este documento detalla todas las dependencias del proyecto, clasificadas entre *
 - **Estado:** ✅ Instaladas (`typescript@^5`, `@types/node`, `@types/react`, `@types/react-dom`)
 - **¿Qué hace?:** Tipado estático y autocompletado en todo el código base.
 
+### `highlight.js`
+- **Estado:** ✅ Instalada (`highlight.js`)
+- **¿Qué hace?:** Motor de resaltado de sintaxis para bloques de código en Markdown (`src/lib/markdown.tsx`) con el tema oscuro Tokyo Night.
+
 ---
 
 ## 🟡 2. Dependencias Propuestas / Opcionales para el Futuro
@@ -26,23 +30,10 @@ Este documento detalla todas las dependencias del proyecto, clasificadas entre *
 
 ---
 
-### `rehype-highlight` & `highlight.js`
-- **Estado:** ⏳ Propuesta para Posts Técnicos
-- **Comando de instalación:** `npm install rehype-highlight highlight.js`
-- **¿Qué hace?:** Analizador HTML (`rehype`) y motor de resaltado de código en sintaxis retro / terminal (`highlight.js`).
-- **Evaluación actual:** Útil cuando se escriban artículos de programación o tutoriales de Linux en el blog para colorear bloques de código (```javascript ... ```).
-
----
-
 ### `rss` (y `@types/rss`)
-- **Estado:** ⏳ Propuesta para Feed de Suscripción
-- **Comando de instalación:** 
-  ```bash
-  npm install rss
-  npm install --save-dev @types/rss
-  ```
-- **¿Qué hace?:** Generador de feeds RSS 2.0 XML en formato estándar.
-- **Evaluación actual:** El blog actualmente utiliza un sitemap nativo estático (`src/app/sitemap.ts`). `rss` se añadirá cuando se implemente la ruta `/feed.xml` para lectores de noticias retro.
+- **Estado:** 🚫 **No requerida / No instalada.**
+- **¿Qué hace?:** Generador externo de feeds RSS 2.0 XML.
+- **Evaluación actual:** No está instalada en `package.json` porque la ruta [/feed.xml](file:///home/fer_anarchy/Code/ariri-blog/src/app/feed.xml/route.ts) ya se encuentra completamente implementada de forma nativa en `src/app/feed.xml/route.ts` mediante `NextResponse` y plantillas XML estándar sin sobrecarga de librerías de terceros.
 
 ---
 
@@ -63,11 +54,7 @@ npm install
 
 ### Comandos para incorporar dependencias futuras (cuando sean necesarias):
 ```bash
-# Para resaltado de sintaxis en código:
-npm install rehype-highlight highlight.js
-
-# Para feed RSS:
-npm install rss
-npm install --save-dev @types/rss
+# Para estilos de componentes tipo Windows 98 (opcional):
+npm install 98.css
 ```
 

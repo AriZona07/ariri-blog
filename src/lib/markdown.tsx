@@ -1,5 +1,7 @@
 import React from "react";
 import Image from "next/image";
+import hljs from "highlight.js";
+import "highlight.js/styles/tokyo-night-dark.css";
 
 /**
  * markdown.tsx — Utilería de formateo y renderizado nativo de Markdown a elementos React.
@@ -7,12 +9,33 @@ import Image from "next/image";
  * Soporta:
  * - Encabezados: # H1, ## H2, ### H3
  * - Énfasis: **negrita**, *cursiva*
- * - Código: `código en línea` y ```bloques de código```
+ * - Código: `código en línea` y ```bloques de código``` con resaltado de sintaxis (highlight.js)
  * - Listas de viñetas: - elemento o * elemento
  * - Enlaces: [texto](url)
- * - Imágenes: ![descripción](url)
+ * - Imágenes: ![descripción](url) con Next.js Image
  * - Citas: > texto de cita
  */
+
+/**
+ * Resalta sintaxis en bloques de código utilizando highlight.js.
+ */
+function highlightCode(code: string, language?: string): string {
+  if (language && hljs.getLanguage(language)) {
+    try {
+      return hljs.highlight(code, { language }).value;
+    } catch {
+      // Fallback si falla el lenguaje especificado
+    }
+  }
+  try {
+    return hljs.highlightAuto(code).value;
+  } catch {
+    return code
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+}
 
 /**
  * Formatea texto inline con sintaxis Markdown (negrita, cursiva, código, enlaces e imágenes).
@@ -101,9 +124,9 @@ function parseInlineMarkdown(text: string): React.ReactNode[] {
 export function renderMarkdown(content: string): React.ReactNode {
   if (!content || !content.trim()) return null;
 
-  // 1. Extraer bloques de código (```...```)
-  const codeBlockRegex = /```([\s\S]*?)```/g;
-  const blocks: { type: "code" | "text"; content: string }[] = [];
+  // 1. Extraer bloques de código (```lang ... ```)
+  const codeBlockRegex = /```([a-zA-Z0-9_-]*)\n?([\s\S]*?)```/g;
+  const blocks: { type: "code" | "text"; language?: string; content: string }[] = [];
   let lastIdx = 0;
   let codeMatch: RegExpExecArray | null;
 
@@ -111,7 +134,9 @@ export function renderMarkdown(content: string): React.ReactNode {
     if (codeMatch.index > lastIdx) {
       blocks.push({ type: "text", content: content.substring(lastIdx, codeMatch.index) });
     }
-    blocks.push({ type: "code", content: codeMatch[1].trim() });
+    const lang = codeMatch[1].trim();
+    const code = codeMatch[2];
+    blocks.push({ type: "code", language: lang, content: code });
     lastIdx = codeBlockRegex.lastIndex;
   }
   if (lastIdx < content.length) {
@@ -123,6 +148,7 @@ export function renderMarkdown(content: string): React.ReactNode {
 
   blocks.forEach((block) => {
     if (block.type === "code") {
+      const highlightedHtml = highlightCode(block.content, block.language);
       elements.push(
         <pre
           key={`code-block-${keyCounter++}`}
@@ -133,14 +159,16 @@ export function renderMarkdown(content: string): React.ReactNode {
             borderRadius: "4px",
             padding: "0.85rem 1rem",
             overflowX: "auto",
-            color: "#00ff66",
             fontFamily: "var(--font-mono)",
             fontSize: "0.85rem",
             lineHeight: "1.45",
             margin: "0.85rem 0",
           }}
         >
-          <code>{block.content}</code>
+          <code
+            className={`hljs ${block.language ? `language-${block.language}` : ""}`}
+            dangerouslySetInnerHTML={{ __html: highlightedHtml }}
+          />
         </pre>
       );
     } else {

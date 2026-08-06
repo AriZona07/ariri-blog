@@ -4,7 +4,7 @@ Este archivo contiene el registro de características, funciones y mejoras plani
 
 ---
 
-## 📻 1. Futuro Cercano (Ya en planeación, pendiente de implementación)
+## 📻 1. Futuro Cercano (Completado e Implementado)
 
 ### ✏️ 1. Edición de Posts Publicados
 - **Concepto:** Añadir la capacidad de editar entradas que ya han sido publicadas en Firestore.
@@ -13,6 +13,7 @@ Este archivo contiene el registro de características, funciones y mejoras plani
   - Cargar los campos existentes (título, contenido, mood, canción, portadas, playlist, fecha).
   - Preservar la fecha original de publicación o permitir actualizarla.
   - **Ubicación de controles:** Los botones de "Editar post" aparecerán **exclusivamente dentro del Panel de Administración (`/settings/admin`)** en la lista de publicaciones.
+- **Estado:** ✅ **Completado.**
 
 ### ↩️ 2. Función "Regresar a Borradores"
 - **Concepto:** Permitir convertir una entrada previamente publicada de vuelta en borrador sin tener que eliminarla y volverla a redactar desde cero.
@@ -20,6 +21,7 @@ Este archivo contiene el registro de características, funciones y mejoras plani
 - **Detalles técnicos:**
   - Opción disponible tanto en el panel admin como en el formulario de edición de post.
   - Al ejecutar "Regresar a borrador", redirigir al usuario al formulario de edición de ese borrador (`/settings/admin/new-post?draft=<id>`).
+- **Estado:** ✅ **Completado.**
 
 ### 🎵 3. Vinculación y Maquetación de "Canción del Día" con su Imagen de Portada
 - **Concepto:** Integración visual y funcional entre la entrada de texto "Canción del Día" y la carga de su portada correspondiente.
@@ -28,6 +30,7 @@ Este archivo contiene el registro de características, funciones y mejoras plani
   - Ubicación horizontal: colocar el input de "Canción del Día" y el selector de imagen lado a lado.
   - Condición de visibilidad/activación: si no se ha escrito nada en "Canción del Día", el control de portada estará oculto o deshabilitado.
   - Al renderizar el post, solo mostrar la portada de la canción si existe texto en "Canción del Día".
+- **Estado:** ✅ **Completado.**
 
 ### 📝 4. Editor de Markdown Enriquecido (Barra de Accesos Rápidos y Previsualización por Pestañas)
 - **Concepto:** Mejorar el campo de "Contenido en Markdown" pasando de un `textarea` simple a un editor con barra de accesos rápidos y pestañas para alternar entre la edición y la previsualización en vivo.
@@ -35,15 +38,25 @@ Este archivo contiene el registro de características, funciones y mejoras plani
 - **Detalles técnicos:**
   - **Selector de Pestañas (Tab Switcher):** Botones superiores "✍️ Escribir" y "👁️ Previsualizar" para alternar vistas (diseño cómodo e ideal para pantallas móviles).
   - **Barra de Accesos Rápidos:** Botones interactivos para insertar sintaxis Markdown común (`#` Encabezados, `**` Negrita, `*` Cursiva, `-` Lista de viñetas, `[enlace](url)`, `![imagen](url)`, `> Cita`, ```` Carga de código ````).
+- **Estado:** ✅ **Completado.**
 
-### 🔗 5. Gestión de Slugs Duplicados en Firestore
+### 🔗 5. Gestión de Slugs Duplicados y Autogeneración en Firestore
 - **Concepto:** Validación de slugs duplicados en `/settings/admin` al crear o editar entradas de blog para evitar sobreescribir publicaciones existentes involuntariamente.
 - **Análisis de Factibilidad:** **100% Factible.** Al guardar un post o borrador, consultar la colección `posts` en Firestore (excluyendo el docId actual si se está en modo edición) para verificar si ya existe una entrada activa con el mismo `slug`. Si existe conflicto, notificar en el formulario para modificar el slug o auto-sugerir un sufijo.
+- **Detalles técnicos:**
+  - Sanitización en tiempo real (`sanitizeSlug`): minúsculas (a-z), dígitos (0-9), espacios a guiones (`-`), remoción de acentos y eliminación de símbolos.
+  - Autogeneración a partir del Título si el campo slug se deja vacío.
+- **Estado:** ✅ **Completado.**
+
+### 🎨 6. Resaltado de Sintaxis en Bloques de Código
+- **Concepto:** Coloreado de código para artículos técnicos o tutoriales.
+- **Estado:** ✅ **Completado e Implementado.** Integrado mediante `highlight.js` con el tema oscuro Tokyo Night en `src/lib/markdown.tsx`.
+- **Soporte:** Resaltado automático y detección por lenguaje (JS, TS, HTML, CSS, Bash, Python, etc.) para cualquier bloque de código ```` ```lang ... ``` ````.
 
 ### 🔄 Fases de Desarrollo (Actualización General)
-- 📋 **Fase de Planeación:** Completada. Todas las características han sido definidas, maquetadas conceptualmente y su factibilidad técnica evaluada.
-- 🛠️ **Fase de Implementación:** Completada. Todas las 5 características del Futuro Cercano han sido implementadas e integradas.
-- 🧪 **Fase de Corrección de Bugs + Perfeccionamiento:** En proceso / Verificación.
+- 📋 **Fase de Planeación:** Completada.
+- 🛠️ **Fase de Implementación:** Completada (100% de las 6 características del Futuro Cercano implementadas e integradas).
+- 🧪 **Fase de Corrección de Bugs + Perfeccionamiento:** Completada. Verificación y compilación de producción (`npm run build`) limpia al 100%.
 
 ---
 
@@ -66,7 +79,3 @@ Este archivo contiene el registro de características, funciones y mejoras plani
   - **Comportamiento Móvil:**
     - La barra de navegación inferior se mantendrá fija en pantalla (*fixed bottom bar*), mientras que el contenido (encabezado, cuerpo y footer) scrolleará normalmente.
 
-### 🎨 Resaltado de Sintaxis en Bloques de Código
-- **Concepto:** Coloreado de código para artículos técnicos o tutoriales.
-- **Dependencias a evaluar:** `rehype-highlight` + `highlight.js`.
-- **Condición:** Se implementará si se comienzan a redactar posts con contenido técnico/código frecuentemente.
