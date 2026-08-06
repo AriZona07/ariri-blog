@@ -1,14 +1,17 @@
 "use client";
 
 /**
- * MarkdownEditor.tsx — Editor de Markdown con accesos rápidos y previsualización en vivo
+ * MarkdownEditor.tsx — Editor de Markdown con accesos rápidos, deshacer/rehacer inteligente por palabra/pausa y previsualización en vivo.
  *
  * Ubicación: src/components/ui/MarkdownEditor.tsx
  *
  * Características:
  * - Pestañas "✍️ Escribir" y "👁️ Previsualizar" (ideal para pantallas móviles).
+ * - Deshacer / Rehacer inteligente: agrupa por palabra (espacios, puntuación, saltos de línea) y pausas de tipeo.
+ * - Atajos de teclado para Ctrl+Z (Deshacer) y Ctrl+Y / Ctrl+Shift+Z (Rehacer).
  * - Barra de accesos rápidos para insertar sintaxis común de Markdown.
  * - Manipulación nativa de selección de texto en textarea (selectionStart / selectionEnd).
+ * - Cumplimiento estricto de React 19 (sin setState dentro de useEffect).
  */
 
 import { useState, useRef } from "react";
@@ -34,6 +37,117 @@ export default function MarkdownEditor({
   const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Pilas de historial para Deshacer y Rehacer (límite de 50 estados por palabras/bloques)
+  const [past, setPast]           = useState<string[]>([]);
+  const [future, setFuture]       = useState<string[]>([]);
+  const [lastCheckpoint, setLastCheckpoint] = useState<string>("");
+
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Derivación del punto de control base actual (sin provocar rendiciones en cascada en useEffect)
+  const currentBase = (past.length === 0 && lastCheckpoint === "") ? value : lastCheckpoint;
+
+  /**
+   * Confirma un punto de control explícito en la pila 'past' y limpia 'future'.
+   */
+  const commitCheckpoint = (checkpointVal: string) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    if (checkpointVal !== currentBase) {
+      setPast((prev) => [...prev.slice(-49), currentBase]);
+      setLastCheckpoint(checkpointVal);
+      setFuture([]);
+    }
+    onChange(checkpointVal);
+  };
+
+  /**
+   * Maneja los cambios de texto introducidos por el usuario con agrupación inteligente por palabra/pausa.
+   */
+  const handleTextareaChange = (newVal: string) => {
+    onChange(newVal);
+
+    // Detectar fin de palabra, puntuación o salto de línea (espacio, coma, punto, enter, etc.)
+    const isWordBoundary = /[\s\n.,!?;:()[\]{}'"]/.test(newVal.slice(-1));
+
+    if (isWordBoundary) {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      if (newVal !== currentBase) {
+        setPast((prev) => [...prev.slice(-49), currentBase]);
+        setLastCheckpoint(newVal);
+        setFuture([]);
+      }
+    } else {
+      // Programar punto de control por pausa de tipeo (800ms de inactividad)
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = setTimeout(() => {
+        if (newVal !== currentBase) {
+          setPast((prev) => [...prev.slice(-49), currentBase]);
+          setLastCheckpoint(newVal);
+          setFuture([]);
+        }
+      }, 800);
+    }
+  };
+
+  /**
+   * Ejecuta la acción de Deshacer inteligente (Ctrl+Z).
+   */
+  const handleUndo = () => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+
+    // Si hay una palabra o cambios en progreso sin haber llegado a un checkpoint, revertimos al checkpoint base
+    if (currentBase !== value) {
+      setFuture((prev) => [value, ...prev]);
+      onChange(currentBase);
+      return;
+    }
+
+    if (past.length === 0) return;
+    const previous = past[past.length - 1];
+    const newPast  = past.slice(0, past.length - 1);
+    setPast(newPast);
+    setFuture((prev) => [value, ...prev]);
+    setLastCheckpoint(previous);
+    onChange(previous);
+  };
+
+  /**
+   * Ejecuta la acción de Rehacer inteligente (Ctrl+Y / Ctrl+Shift+Z).
+   */
+  const handleRedo = () => {
+    if (future.length === 0) return;
+    const next = future[0];
+    const newFuture = future.slice(1);
+    setFuture(newFuture);
+    setPast((prev) => [...prev.slice(-49), value]);
+    setLastCheckpoint(next);
+    onChange(next);
+  };
+
+  /**
+   * Intercepta atajos de teclado para Ctrl+Z y Ctrl+Y / Ctrl+Shift+Z en el textarea.
+   */
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const isMod = e.ctrlKey || e.metaKey;
+
+    if (isMod && !e.shiftKey && e.key.toLowerCase() === "z") {
+      e.preventDefault();
+      handleUndo();
+    } else if (
+      (isMod && e.key.toLowerCase() === "y") ||
+      (isMod && e.shiftKey && e.key.toLowerCase() === "z")
+    ) {
+      e.preventDefault();
+      handleRedo();
+    }
+  };
+
   /**
    * Inserta o envuelve el texto seleccionado con una sintaxis de Markdown dada.
    */
@@ -49,7 +163,7 @@ export default function MarkdownEditor({
     const newContent =
       value.substring(0, start) + prefix + textToInsert + suffix + value.substring(end);
 
-    onChange(newContent);
+    commitCheckpoint(newContent);
 
     // Ajustar el foco y el rango de selección después de insertar
     setTimeout(() => {
@@ -59,6 +173,9 @@ export default function MarkdownEditor({
       el.setSelectionRange(newCursorStart, newCursorEnd);
     }, 0);
   };
+
+  const canUndo = past.length > 0 || currentBase !== value;
+  const canRedo = future.length > 0;
 
   return (
     <div className="md-editor">
@@ -84,6 +201,29 @@ export default function MarkdownEditor({
         <div className="md-editor__write-container">
           {/* Barra de accesos rápidos */}
           <div className="md-editor__toolbar" role="toolbar" aria-label="Accesos rápidos de Markdown">
+            <button
+              type="button"
+              className="md-editor__tool-btn"
+              title="Deshacer (Ctrl+Z) — Deshace por palabra/pausa"
+              disabled={!canUndo}
+              onClick={handleUndo}
+              style={{ opacity: canUndo ? 1 : 0.4 }}
+            >
+              ↩️ Deshacer
+            </button>
+            <button
+              type="button"
+              className="md-editor__tool-btn"
+              title="Rehacer (Ctrl+Y o Ctrl+Shift+Z)"
+              disabled={!canRedo}
+              onClick={handleRedo}
+              style={{ opacity: canRedo ? 1 : 0.4 }}
+            >
+              ↪️ Rehacer
+            </button>
+
+            <span style={{ display: "inline-block", width: "1px", height: "16px", background: "var(--color-border)", margin: "0 0.2rem", alignSelf: "center" }} />
+
             <button
               type="button"
               className="md-editor__tool-btn"
@@ -165,7 +305,8 @@ export default function MarkdownEditor({
             className="auth-field__input md-editor__textarea"
             rows={rows}
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(e) => handleTextareaChange(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder={placeholder}
             required={required}
           />
