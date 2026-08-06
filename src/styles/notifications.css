@@ -293,3 +293,32 @@
   background: var(--color-accent-pink);
   color: #000;
 }
+
+/* ─── Estado Desactivado en Modal ─── */
+.notification-disabled-box {
+  padding: 2.2rem 1.2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-enable-btn {
+  background: var(--color-accent-pink);
+  color: #000;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1rem;
+  font-family: var(--font-main);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px #000;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.notification-enable-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px #000;
+}

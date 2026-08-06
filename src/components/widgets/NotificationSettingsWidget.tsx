@@ -12,9 +12,17 @@ import {
   requestBrowserNotificationPermission,
 } from "@/lib/notifications";
 
+const ENABLED_KEY = "ariri_notifications_enabled";
+const READ_KEY = "ariri_notifications_read_at";
+
 export default function NotificationSettingsWidget() {
   const { user } = useAuth();
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem(ENABLED_KEY) === "true";
+    }
+    return false;
+  });
   const [browserPerm, setBrowserPerm] = useState<string>(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
       return Notification.permission;
@@ -28,7 +36,12 @@ export default function NotificationSettingsWidget() {
     let isMounted = true;
     if (user) {
       getUserNotificationPrefs(user.uid).then((pref) => {
-        if (isMounted) setNotificationsEnabled(pref);
+        if (isMounted) {
+          setNotificationsEnabled(pref);
+          if (typeof window !== "undefined") {
+            localStorage.setItem(ENABLED_KEY, pref ? "true" : "false");
+          }
+        }
       });
     }
     return () => {
@@ -37,10 +50,16 @@ export default function NotificationSettingsWidget() {
   }, [user]);
 
   async function handleToggleNotifications(enabled: boolean) {
-    if (!user) return;
     setNotificationsEnabled(enabled);
     setSuccess(null);
     setError(null);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(ENABLED_KEY, enabled ? "true" : "false");
+      if (enabled) {
+        localStorage.setItem(READ_KEY, Date.now().toString());
+      }
+    }
+    if (!user) return;
     try {
       await setUserNotificationPrefs(user.uid, enabled);
       setSuccess(`Notificaciones ${enabled ? "activadas" : "desactivadas"} correctamente.`);

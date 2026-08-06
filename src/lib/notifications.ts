@@ -27,8 +27,8 @@ export async function getUserNotificationPrefs(uid: string): Promise<boolean> {
     console.error("Error al obtener preferencias de notificaciones:", err);
   }
   
-  // Por defecto, notificaciones activadas
-  return true;
+  // Por defecto, notificaciones desactivadas
+  return false;
 }
 
 /**
