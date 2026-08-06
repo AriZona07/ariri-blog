@@ -25,6 +25,8 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { doc, setDoc, serverTimestamp }     from "firebase/firestore";
 import { auth, storage, db }                from "@/lib/firebase";
 import { useAuth }                          from "@/lib/auth-context";
+import ImageUploader                        from "@/components/ui/ImageUploader";
+import { markForDeletion }                  from "@/lib/deletion-queue";
 
 export default function AccountWidget() {
   const { user, isAdmin, reloadUser } = useAuth();
@@ -63,13 +65,14 @@ export default function AccountWidget() {
     setError(null);
     setSuccess(null);
     try {
-      let finalPhotoURL: string | undefined = currentUser.photoURL ?? undefined;
+      const previousPhotoUrl = currentUser.photoURL || null;
+      let finalPhotoURL: string = "";
 
       if (photoMode === "file") {
         if (photoFile) {
-          // Validar tamaño máximo del archivo (5 MB)
-          if (photoFile.size > 5 * 1024 * 1024) {
-            setError("El archivo es demasiado grande. El límite para la foto de perfil es 5 MB.");
+          // Validar tamaño máximo del archivo (10 MB)
+          if (photoFile.size > 10 * 1024 * 1024) {
+            setError("El archivo es demasiado grande. El límite para la foto de perfil es 10 MB.");
             setSaving(false);
             return;
           }
@@ -80,19 +83,42 @@ export default function AccountWidget() {
           const snapshot      = await uploadBytes(storageRef, photoFile);
           finalPhotoURL       = await getDownloadURL(snapshot.ref);
           setPhotoURL(finalPhotoURL);
-        } else if (!photoURL) {
-          finalPhotoURL = undefined;
+        } else if (photoURL.trim()) {
+          finalPhotoURL = photoURL.trim();
+        } else {
+          finalPhotoURL = "";
         }
       } else {
-        finalPhotoURL = photoURL.trim() || undefined;
+        finalPhotoURL = photoURL.trim();
       }
 
+      // Actualizar perfil en Firebase Auth
       await updateProfile(currentUser, {
         displayName: displayName.trim() || currentUser.displayName,
         photoURL:    finalPhotoURL,
       });
+
+      // Si la foto previa cambió o fue eliminada, registrar en la cola de eliminación programada
+      if (previousPhotoUrl && previousPhotoUrl !== finalPhotoURL) {
+        try {
+          await markForDeletion({
+            resourceType: "image",
+            url: previousPhotoUrl,
+            reason: finalPhotoURL ? "avatar_replaced" : "avatar_removed",
+            metadata: { uid: currentUser.uid },
+          });
+        } catch (queueErr) {
+          console.warn("Aviso al registrar foto previa en cola de borrado:", queueErr);
+        }
+      }
+
       await reloadUser();
-      setSuccess("Perfil actualizado correctamente.");
+
+      if (previousPhotoUrl && !finalPhotoURL) {
+        setSuccess("Foto de perfil eliminada correctamente (programada para limpieza física en BD el día 1 del mes).");
+      } else {
+        setSuccess("Perfil actualizado correctamente.");
+      }
     } catch (err: unknown) {
       console.error("Error al actualizar perfil:", err);
       const errMsg = err instanceof Error ? err.message : String(err);
@@ -198,69 +224,28 @@ export default function AccountWidget() {
           />
         </div>
 
-        <div className="auth-field">
-          <label className="auth-field__label">Foto de Perfil</label>
-
-          <div style={{ display: "flex", gap: "1.25rem", marginBottom: "0.75rem", marginTop: "0.4rem" }}>
-            <label style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8rem", color: "var(--color-text-primary)", cursor: "pointer" }}>
-              <input
-                type="radio"
-                name="photoMode"
-                value="url"
-                checked={photoMode === "url"}
-                onChange={() => {
-                  setPhotoMode("url");
-                  setPhotoFile(null);
-                }}
-              />
-              🔗 Enlace URL Externo
-            </label>
-
-            <label style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8rem", color: "#00ff66", cursor: "pointer" }}>
-              <input
-                type="radio"
-                name="photoMode"
-                value="file"
-                checked={photoMode === "file"}
-                onChange={() => {
-                  setPhotoMode("file");
-                  setPhotoURL("");
-                }}
-              />
-              📁 Subir imagen desde mi dispositivo
-            </label>
-          </div>
-
-          {photoMode === "url" ? (
-            <input
-              id="acc-photo"
-              type="url"
-              className="auth-field__input"
-              value={photoURL}
-              onChange={(e) => setPhotoURL(e.target.value)}
-              placeholder="https://ejemplo.com/mi-foto.png"
-            />
-          ) : (
-            <div>
-              <input
-                id="acc-upload"
-                type="file"
-                accept="image/*"
-                className="auth-field__input"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    setPhotoFile(e.target.files[0]);
-                  }
-                }}
-              />
-              {photoFile && (
-                <p style={{ fontSize: "0.75rem", color: "#00ff66", marginTop: "0.4rem" }}>
-                  ✓ Archivo seleccionado: <strong>{photoFile.name}</strong> ({Math.round(photoFile.size / 1024)} KB)
-                </p>
-              )}
-            </div>
-          )}
-        </div>
+        <ImageUploader
+          label="Foto de Perfil"
+          id="acc-photo-uploader"
+          mode={photoMode}
+          onModeChange={setPhotoMode}
+          urlValue={photoURL}
+          onUrlChange={setPhotoURL}
+          fileValue={photoFile}
+          onFileChange={setPhotoFile}
+          minWidth={100}
+          minHeight={100}
+          maxWidth={4000}
+          maxHeight={4000}
+          maxSizeMB={10}
+          cropShape="circle"
+          cropAspectRatio={1}
+          existingUrl={currentUser.photoURL ?? undefined}
+          onClear={() => {
+            setPhotoURL("");
+            setPhotoFile(null);
+          }}
+        />
 
         <button
           type="submit"

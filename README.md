@@ -106,6 +106,7 @@ Cualquier edición de código en este repositorio **debe cumplir estrictamente**
 3. **Respeto a la Temática:** Mantener el lenguaje visual Emo/Scene 2000s. No modificar unilateralmente la estética general.
 4. **Comentarios Oportunos:** Explicar funciones complejas o indicar dónde ajustar variables de estilo sin sobrecargar con explicaciones de código trivial.
 5. **Registro de Planeación (`PLANEATION.md`):** Toda planeación solicitada debe registrarse en [`PLANEATION.md`](/PLANEATION.md). **Únicamente el usuario/programador tiene permitido borrar o remover secciones de `PLANEATION.md`**; la IA no debe eliminar secciones existentes.
+6. **Opción Exclusiva para Carga de Imágenes:** Siempre que exista una función para 'subir imagen', se debe proporcionar tanto la opción de ingresar un enlace URL externo como la de subir el archivo desde el dispositivo local. No se debe permitir subir una imagen seleccionando ambas formas a la vez; se debe elegir estrictamente solo 1 forma de subir la imagen.
 
 ---
 

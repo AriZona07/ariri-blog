@@ -13,6 +13,7 @@ import "@/styles/account.css";
 import "@/styles/admin.css";
 import "@/styles/comments.css";
 import "@/styles/notifications.css";
+import "@/styles/uploader.css";
 
 import { AuthProvider }  from "@/lib/auth-context";
 import SiteHeader        from "@/components/SiteHeader";

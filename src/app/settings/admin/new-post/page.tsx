@@ -35,6 +35,8 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage }      from "@/lib/firebase";
 import { useAuth }          from "@/lib/auth-context";
 import { extractYouTubePlaylistId, processSongCoverUrl } from "@/lib/youtube";
+import ImageUploader                        from "@/components/ui/ImageUploader";
+import { markForDeletion, processScheduledDeletions } from "@/lib/deletion-queue";
 
 function SettingsNewPostForm() {
   const { user, isAdmin, loading } = useAuth();
@@ -50,7 +52,6 @@ function SettingsNewPostForm() {
   const [content,   setContent]   = useState("");
   const [mood,      setMood]      = useState("");
   const [song,      setSong]      = useState("");
-  const [songCover, setSongCover] = useState("");
   const [playlist,  setPlaylist]  = useState("");
   const [date,      setDate]      = useState(new Date().toISOString().split("T")[0]);
 
@@ -59,6 +60,12 @@ function SettingsNewPostForm() {
   const [coverUrl,  setCoverUrl]  = useState("");
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [existingCoverUrl, setExistingCoverUrl] = useState("");
+
+  // Selección de portada de canción (exclusiva: URL vs. archivo local)
+  const [songCoverMode, setSongCoverMode] = useState<"url" | "file">("url");
+  const [songCoverUrl,  setSongCoverUrl]  = useState("");
+  const [songCoverFile, setSongCoverFile] = useState<File | null>(null);
+  const [existingSongCoverUrl, setExistingSongCoverUrl] = useState("");
 
   // Estado de UI
   const [saving,        setSaving]        = useState(false);
@@ -69,10 +76,12 @@ function SettingsNewPostForm() {
   const [error,         setError]         = useState<string | null>(null);
   const [draftToast,    setDraftToast]    = useState<string | null>(null);
 
-  /* Redirección de seguridad lado cliente */
+  /* Redirección de seguridad lado cliente y comprobación de limpieza mensual */
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
       router.replace("/");
+    } else if (isAdmin) {
+      processScheduledDeletions();
     }
   }, [user, isAdmin, loading, router]);
 
@@ -91,12 +100,17 @@ function SettingsNewPostForm() {
           setContent(d.content ?? "");
           setMood(d.mood ?? "");
           setSong(d.song ?? "");
-          setSongCover(d.songCover ?? "");
           setPlaylist(d.playlist ?? "");
           if (d.date) setDate(d.date);
+          if (d.songCover) {
+            setExistingSongCoverUrl(d.songCover);
+            setSongCoverMode("url");
+            setSongCoverUrl(d.songCover);
+          }
           if (d.cover) {
             setExistingCoverUrl(d.cover);
             setCoverMode("url");
+            setCoverUrl(d.cover);
           }
         }
       } catch (err) {
@@ -111,7 +125,7 @@ function SettingsNewPostForm() {
     return () => { isMounted = false; };
   }, [draftId, isAdmin]);
 
-  /* Resuelve la URL de la imagen de portada */
+  /* Resuelve la URL de la imagen de portada del post */
   async function resolveCover(): Promise<string> {
     if (coverMode === "file" && coverFile) {
       const storageRef = ref(storage, `covers/${Date.now()}_${coverFile.name}`);
@@ -124,8 +138,41 @@ function SettingsNewPostForm() {
     return existingCoverUrl;
   }
 
+  /* Resuelve la URL de la portada de la canción */
+  async function resolveSongCover(): Promise<string | null> {
+    if (songCoverMode === "file" && songCoverFile) {
+      const storageRef = ref(storage, `song-covers/${Date.now()}_${songCoverFile.name}`);
+      const snapshot   = await uploadBytes(storageRef, songCoverFile);
+      return getDownloadURL(snapshot.ref);
+    }
+    if (songCoverMode === "url" && songCoverUrl.trim()) {
+      return processSongCoverUrl(songCoverUrl.trim());
+    }
+    return existingSongCoverUrl;
+  }
+
   /* Construye el objeto de datos formateado (sin valores undefined incompatibles con Firestore) */
-  async function buildPostData(finalCover: string) {
+  async function buildPostData() {
+    const finalCover     = await resolveCover();
+    const finalSongCover = await resolveSongCover();
+
+    // Registrar en la cola de eliminación si las imágenes anteriores fueron sustituidas o quitadas
+    if (existingCoverUrl && existingCoverUrl !== finalCover) {
+      await markForDeletion({
+        resourceType: "image",
+        url: existingCoverUrl,
+        reason: finalCover ? "cover_replaced" : "cover_removed",
+      });
+    }
+
+    if (existingSongCoverUrl && existingSongCoverUrl !== finalSongCover) {
+      await markForDeletion({
+        resourceType: "image",
+        url: existingSongCoverUrl,
+        reason: finalSongCover ? "song_cover_replaced" : "song_cover_removed",
+      });
+    }
+
     const cleanSlug = (slug.trim() || title.trim())
       .toLowerCase()
       .normalize("NFD")
@@ -134,7 +181,6 @@ function SettingsNewPostForm() {
       .replace(/^-+|-+$/g, "");
 
     const extractedPlaylist = extractYouTubePlaylistId(playlist);
-    const resolvedSongCover = processSongCoverUrl(songCover);
 
     const rawData = {
       title:     title.trim()      || "(Sin título)",
@@ -145,7 +191,7 @@ function SettingsNewPostForm() {
       authorUid: user?.uid         || "",
       mood:      mood.trim()       || null,
       song:      song.trim()       || null,
-      songCover: resolvedSongCover || null,
+      songCover: finalSongCover    || null,
       playlist:  extractedPlaylist || null,
       cover:     finalCover        || null,
     };
@@ -187,8 +233,7 @@ function SettingsNewPostForm() {
     setSaving(true);
     setError(null);
     try {
-      const finalCover = await resolveCover();
-      const data       = await buildPostData(finalCover);
+      const data = await buildPostData();
 
       await addDoc(collection(db, "posts"), {
         ...data,
@@ -236,8 +281,7 @@ function SettingsNewPostForm() {
     setSavingDraft(true);
     setError(null);
     try {
-      const finalCover = await resolveCover();
-      const data       = await buildPostData(finalCover);
+      const data = await buildPostData();
 
       if (draftId) {
         await setDoc(doc(db, "drafts", draftId), {
@@ -273,6 +317,21 @@ function SettingsNewPostForm() {
     setDeletingDraft(true);
     setError(null);
     try {
+      if (existingCoverUrl) {
+        await markForDeletion({
+          resourceType: "image",
+          url: existingCoverUrl,
+          reason: "draft_deleted",
+        });
+      }
+      if (existingSongCoverUrl) {
+        await markForDeletion({
+          resourceType: "image",
+          url: existingSongCoverUrl,
+          reason: "draft_deleted",
+        });
+      }
+
       await deleteDoc(doc(db, "drafts", draftId));
       router.push("/settings/admin");
     } catch (err: unknown) {
@@ -290,7 +349,10 @@ function SettingsNewPostForm() {
     setContent("");
     setPlaylist("");
     setSong("");
-    setSongCover("");
+    setSongCoverUrl("");
+    setSongCoverFile(null);
+    setSongCoverMode("url");
+    setExistingSongCoverUrl("");
     setCoverUrl("");
     setCoverFile(null);
     setCoverMode("url");
@@ -419,17 +481,29 @@ function SettingsNewPostForm() {
                 </div>
 
                 {/* Portada de la canción */}
-                <div className="auth-field">
-                  <label htmlFor="np-song-cover" className="auth-field__label">Portada de la canción</label>
-                  <input
-                    id="np-song-cover"
-                    type="text"
-                    className="auth-field__input"
-                    value={songCover}
-                    onChange={(e) => setSongCover(e.target.value)}
-                    placeholder="URL de la imagen o link de YouTube"
-                  />
-                </div>
+                <ImageUploader
+                  label="Portada de la canción"
+                  id="np-song-cover-uploader"
+                  mode={songCoverMode}
+                  onModeChange={setSongCoverMode}
+                  urlValue={songCoverUrl}
+                  onUrlChange={setSongCoverUrl}
+                  fileValue={songCoverFile}
+                  onFileChange={setSongCoverFile}
+                  minWidth={100}
+                  minHeight={100}
+                  maxWidth={4000}
+                  maxHeight={4000}
+                  maxSizeMB={10}
+                  cropShape="square"
+                  cropAspectRatio={1}
+                  existingUrl={existingSongCoverUrl}
+                  onClear={() => {
+                    setSongCoverUrl("");
+                    setSongCoverFile(null);
+                    setExistingSongCoverUrl("");
+                  }}
+                />
 
                 {/* Playlist de YouTube */}
                 <div className="auth-field">
@@ -445,54 +519,29 @@ function SettingsNewPostForm() {
                 </div>
 
                 {/* Portada principal del post */}
-                <div className="auth-field">
-                  <label className="auth-field__label">Imagen de Portada del Post</label>
-                  <div style={{ display: "flex", gap: "1.25rem", marginBottom: "0.5rem" }}>
-                    <label style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8rem", color: "var(--color-text-primary)", cursor: "pointer" }}>
-                      <input
-                        type="radio"
-                        name="coverMode"
-                        value="url"
-                        checked={coverMode === "url"}
-                        onChange={() => setCoverMode("url")}
-                      />
-                      🔗 URL Externa
-                    </label>
-                    <label style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8rem", color: "#00ff66", cursor: "pointer" }}>
-                      <input
-                        type="radio"
-                        name="coverMode"
-                        value="file"
-                        checked={coverMode === "file"}
-                        onChange={() => setCoverMode("file")}
-                      />
-                      📁 Subir Imagen
-                    </label>
-                  </div>
-
-                  {coverMode === "url" ? (
-                    <input
-                      id="np-cover-url"
-                      type="url"
-                      className="auth-field__input"
-                      value={coverUrl}
-                      onChange={(e) => setCoverUrl(e.target.value)}
-                      placeholder="https://ejemplo.com/portada.jpg"
-                    />
-                  ) : (
-                    <input
-                      id="np-cover-file"
-                      type="file"
-                      accept="image/*"
-                      className="auth-field__input"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          setCoverFile(e.target.files[0]);
-                        }
-                      }}
-                    />
-                  )}
-                </div>
+                <ImageUploader
+                  label="Imagen de Portada del Post"
+                  id="np-cover-uploader"
+                  mode={coverMode}
+                  onModeChange={setCoverMode}
+                  urlValue={coverUrl}
+                  onUrlChange={setCoverUrl}
+                  fileValue={coverFile}
+                  onFileChange={setCoverFile}
+                  minWidth={200}
+                  minHeight={200}
+                  maxWidth={5000}
+                  maxHeight={5000}
+                  maxSizeMB={10}
+                  cropShape="rect"
+                  cropAspectRatio={1.777}
+                  existingUrl={existingCoverUrl}
+                  onClear={() => {
+                    setCoverUrl("");
+                    setCoverFile(null);
+                    setExistingCoverUrl("");
+                  }}
+                />
 
                 {/* Contenido en Markdown */}
                 <div className="auth-field">

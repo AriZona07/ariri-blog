@@ -1,0 +1,304 @@
+/**
+ * uploader.css — Estilos retro 2000s para el componente reutilizable ImageUploader y Modal de Recorte
+ */
+
+/* Contenedor principal */
+.img-uploader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.img-uploader__label {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: var(--color-accent-pink, #ff1493);
+  display: block;
+}
+
+/* Modos de subida (Radio buttons) */
+.img-uploader__modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.4rem 0.6rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px dashed var(--color-accent-pink, #ff1493);
+  border-radius: 4px;
+}
+
+.img-uploader__radio-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: #fff;
+  cursor: pointer;
+  user-select: none;
+}
+
+.img-uploader__radio-label input[type="radio"] {
+  accent-color: var(--color-accent-pink, #ff1493);
+  cursor: pointer;
+}
+
+/* Mensajes de error */
+.img-uploader__error {
+  font-size: 0.75rem;
+  color: #ff4444;
+  background: rgba(255, 68, 68, 0.12);
+  border: 1px solid #ff4444;
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  margin-top: 0.3rem;
+}
+
+/* Info del archivo e previsualización */
+.img-uploader__info {
+  font-size: 0.75rem;
+  color: #00ff66;
+  margin-top: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Botón para abrir modal de recorte */
+.img-uploader__crop-trigger-btn {
+  background: linear-gradient(180deg, #332040 0%, #16131d 100%);
+  color: #00ff66;
+  border: 1px solid #00ff66;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.img-uploader__crop-trigger-btn:hover {
+  background: #00ff66;
+  color: #000;
+  box-shadow: 0 0 8px rgba(0, 255, 102, 0.5);
+}
+
+/* Botón para eliminar/quitar imagen */
+.img-uploader__remove-btn {
+  background: linear-gradient(180deg, #401010 0%, #16131d 100%);
+  color: #ff4444;
+  border: 1px solid #ff4444;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+  margin-left: 0.5rem;
+}
+
+.img-uploader__remove-btn:hover {
+  background: #ff4444;
+  color: #000;
+  box-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
+}
+
+/* Previsualización actual */
+.img-uploader__thumbnail-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #0d0b12;
+  border: 1px solid #2d2638;
+  border-radius: 4px;
+}
+
+.img-uploader__thumb {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border: 1px solid var(--color-accent-pink, #ff1493);
+}
+
+.img-uploader__thumb--circle {
+  border-radius: 50%;
+}
+
+/* ──────────────────────────────────────────────────────────
+   Modal de Recorte Interactivo
+   ────────────────────────────────────────────────────────── */
+
+.img-crop-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.img-crop-modal {
+  background: #16131d;
+  border: 2px solid var(--color-accent-pink, #ff1493);
+  box-shadow: 0 0 20px rgba(255, 20, 147, 0.3), inset 0 0 10px rgba(0, 0, 0, 0.8);
+  width: 100%;
+  max-width: 520px;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.img-crop-modal__header {
+  background: linear-gradient(90deg, #ff1493 0%, #b80058 100%);
+  color: #fff;
+  padding: 0.6rem 1rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.img-crop-modal__close {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.img-crop-modal__body {
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.img-crop-instruction {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary, #ccc);
+  text-align: center;
+  margin: 0;
+}
+
+/* Área de encuadre/arrastre */
+.img-crop-viewport {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  background: #000;
+  border: 2px dashed #00ff66;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.img-crop-viewport:active {
+  cursor: grabbing;
+}
+
+.img-crop-viewport__image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center center;
+  pointer-events: none;
+  max-width: none;
+  max-height: none;
+}
+
+/* Máscara de recorte (Overlay visual de la forma elegida) */
+.img-crop-mask {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.65);
+}
+
+.img-crop-mask--circle {
+  border-radius: 50%;
+  border: 2px solid #00ff66;
+}
+
+.img-crop-mask--square {
+  border: 2px solid #00ff66;
+}
+
+.img-crop-mask--rect {
+  border: 2px solid #00ff66;
+}
+
+/* Controles de Zoom y Ajuste */
+.img-crop-controls {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.img-crop-slider-group {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.8rem;
+  color: #fff;
+}
+
+.img-crop-slider-group input[type="range"] {
+  flex: 1;
+  accent-color: #00ff66;
+  cursor: pointer;
+}
+
+.img-crop-modal__actions {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.img-crop-btn-cancel {
+  flex: 1;
+  background: #2b2536;
+  color: #fff;
+  border: 1px solid #443c54;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.img-crop-btn-save {
+  flex: 1.5;
+  background: #00ff66;
+  color: #000;
+  border: 1px solid #00ff66;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+.img-crop-btn-save:hover {
+  background: #00cc52;
+}
