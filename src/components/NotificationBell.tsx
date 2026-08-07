@@ -25,31 +25,28 @@ export default function NotificationBell() {
   const router = useRouter();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-
-  // Inicializar estado lazily leyendo de localStorage (evita setState síncrono en useEffect)
-  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem(ENABLED_KEY) === "true";
-    }
-    return false;
-  });
-
-  const [lastReadTime, setLastReadTime] = useState<number>(() => {
-    if (typeof window !== "undefined") {
-      const storedRead = localStorage.getItem(READ_KEY);
-      if (storedRead) {
-        return parseInt(storedRead, 10);
-      }
-      // Primera vez que entra: ignorar publicaciones anteriores
-      const now = Date.now();
-      localStorage.setItem(READ_KEY, now.toString());
-      return now;
-    }
-    return 0;
-  });
-
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(false);
+  const [lastReadTime, setLastReadTime] = useState<number>(0);
   const [toastNotification, setToastNotification] = useState<NotificationItem | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Cargar estado inicial desde localStorage al montar en el cliente (usando microtarea para evitar setState síncrono en useEffect)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      queueMicrotask(() => {
+        setNotificationsEnabled(localStorage.getItem(ENABLED_KEY) === "true");
+
+        const storedRead = localStorage.getItem(READ_KEY);
+        if (storedRead) {
+          setLastReadTime(parseInt(storedRead, 10));
+        } else {
+          const now = Date.now();
+          localStorage.setItem(READ_KEY, now.toString());
+          setLastReadTime(now);
+        }
+      });
+    }
+  }, []);
 
   // Sincronizar preferencia asíncrona del usuario desde Firestore cuando 'user' existe
   useEffect(() => {

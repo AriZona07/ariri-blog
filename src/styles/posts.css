@@ -450,6 +450,42 @@
   font-weight: 600;
 }
 
+/* BARRA DE SELECCIÓN DE TIPOGRAFÍA DE LECTURA */
+.post-detail__font-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px dashed var(--color-border);
+}
+
+.post-detail__font-label {
+  font-size: var(--fs-sm);
+  font-weight: bold;
+  color: var(--color-text-secondary);
+}
+
+.post-detail__font-select {
+  background: #0f0b14;
+  color: var(--color-accent-pink);
+  border: 1px solid var(--color-accent-pink);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.6rem;
+  font-size: var(--fs-sm);
+  font-weight: bold;
+  font-family: var(--font-main);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.post-detail__font-select:focus,
+.post-detail__font-select:hover {
+  border-color: #ffffff;
+  box-shadow: 0 0 5px rgba(255, 20, 147, 0.5);
+}
+
 @media (max-width: 600px) {
   .post-detail__title {
     font-size: 1.9rem;

@@ -30,6 +30,13 @@ export default function SinglePostPage({ params }: PostPageProps) {
 
   const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [loading, setLoading]   = useState(true);
+  const [postFont, setPostFont] = useState<"japan" | "comic" | "book">("japan");
+
+  const fontFamilies = {
+    japan: "var(--font-main)",
+    comic: "var(--font-comic)",
+    book:  "var(--font-merriweather)",
+  };
 
   /* Suscripción a Firestore para obtener los posts y permitir navegación entre ellos */
   useEffect(() => {
@@ -167,8 +174,32 @@ export default function SinglePostPage({ params }: PostPageProps) {
           )}
         </div>
 
+        {/* SELECTOR DESPLEGABLE DE TIPOGRAFÍA DE LECTURA */}
+        <div className="post-detail__font-bar">
+          <label htmlFor="post-font-select" className="post-detail__font-label">
+            🔤 Fuente:
+          </label>
+          <select
+            id="post-font-select"
+            className="post-detail__font-select"
+            value={postFont}
+            onChange={(e) => setPostFont(e.target.value as "japan" | "comic" | "book")}
+          >
+            <option value="japan">Simple Japan (Por defecto)</option>
+            <option value="comic">Comic Sans (Divertida)</option>
+            <option value="book">Merriweather (Lectura Clásica)</option>
+          </select>
+        </div>
+
         <div className="post-detail__body">
-          <div className="welcome-text" style={{ color: "var(--color-text-secondary)", marginBottom: "1.2rem" }}>
+          <div
+            className="welcome-text"
+            style={{
+              color: "var(--color-text-secondary)",
+              marginBottom: "1.2rem",
+              fontFamily: fontFamilies[postFont],
+            }}
+          >
             {renderMarkdown(post.content || post.excerpt)}
           </div>
 

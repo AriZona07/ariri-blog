@@ -51,9 +51,11 @@
   --shadow-inset:          inset 0 2px 4px rgba(0, 0, 0, 0.6);
 
   /* --- Tipografía --- */
-  --font-main:  "SimpleJapan", "Trebuchet MS", sans-serif;
-  --font-punk:  "SpecialPunk", "Impact", fantasy, sans-serif;
-  --font-mono:  "Courier New", "Lucida Console", monospace;
+  --font-main:        "SimpleJapan", "Trebuchet MS", sans-serif;
+  --font-punk:        "SpecialPunk", "Impact", fantasy, sans-serif;
+  --font-mono:        "Courier New", "Lucida Console", monospace;
+  --font-comic:       "ComicSans", "Comic Sans MS", "Comic Neue", cursive, sans-serif;
+  --font-merriweather: "MerriweatherCustom", "Merriweather", "Georgia", serif;
 
   /* --- Tamaños de Fuente Generales --- */
   --fs-xs:   0.75rem;   /* 12px */
@@ -94,6 +96,32 @@
   src: url("/fonts/special-punk.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
+}
+
+/* Fuente Comic Sans */
+@font-face {
+  font-family: "ComicSans";
+  src: url("/fonts/Comic-Sans.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Fuente Merriweather (Variable & Static) */
+@font-face {
+  font-family: "MerriweatherCustom";
+  src: url("/fonts/Merriweather/Merriweather-VariableFont_opsz,wdth,wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MerriweatherCustom";
+  src: url("/fonts/Merriweather/Merriweather-Italic-VariableFont_opsz,wdth,wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
   font-display: swap;
 }
 

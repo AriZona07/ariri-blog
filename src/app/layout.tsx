@@ -62,7 +62,7 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="es" data-scroll-behavior="smooth">
+    <html lang="es" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         {/* Autodescubrimiento del feed RSS para lectores y agregadores */}
         <link
@@ -72,7 +72,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           href="/feed.xml"
         />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         {/* AuthProvider provee el estado de sesión a todo el árbol de componentes */}
         <AuthProvider>
           <div className="page-wrapper">

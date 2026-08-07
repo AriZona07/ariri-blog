@@ -17,20 +17,21 @@ const READ_KEY = "ariri_notifications_read_at";
 
 export default function NotificationSettingsWidget() {
   const { user } = useAuth();
-  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem(ENABLED_KEY) === "true";
-    }
-    return false;
-  });
-  const [browserPerm, setBrowserPerm] = useState<string>(() => {
-    if (typeof window !== "undefined" && "Notification" in window) {
-      return Notification.permission;
-    }
-    return "default";
-  });
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(false);
+  const [browserPerm, setBrowserPerm] = useState<string>("default");
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError]     = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      queueMicrotask(() => {
+        setNotificationsEnabled(localStorage.getItem(ENABLED_KEY) === "true");
+        if ("Notification" in window) {
+          setBrowserPerm(Notification.permission);
+        }
+      });
+    }
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
