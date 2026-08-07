@@ -57,14 +57,19 @@ export default function ImageUploader({
   // Estado para dimensiones cargadas asíncronamente
   const [loadedDimensions, setLoadedDimensions] = useState<{ width: number; height: number; src: string } | null>(null);
 
-  // Estado del Modal de Recorte
+  // Estado para el modal de recorte
   const [showCropModal, setShowCropModal] = useState(false);
   const [cropZoom, setCropZoom] = useState(1);
   const [cropPan, setCropPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [modalImgDims, setModalImgDims] = useState<{ width: number; height: number } | null>(null);
   const dragStartRef = useRef({ x: 0, y: 0 });
   const panStartRef = useRef({ x: 0, y: 0 });
   const cropImageRef = useRef<HTMLImageElement | null>(null);
+
+  // Calcular dimensiones dinámicas del viewport según el aspect ratio
+  const viewportW = cropShape === "rect" ? Math.min(360, Math.round(280 * (cropAspectRatio || 1.777))) : 280;
+  const viewportH = Math.round(viewportW / (cropAspectRatio || 1));
 
   // Validar formato de archivo / URL
   const isFormatAllowed = useCallback((nameOrUrl: string, mimeType?: string): boolean => {
@@ -164,6 +169,15 @@ export default function ImageUploader({
     ? validateDimensions(imageDimensions.width, imageDimensions.height)
     : null;
 
+  // Derivar dimensiones naturales de la imagen y la escala base (baseScale) para encuadrarla por defecto sin zoom excesivo
+  const naturalImgW = modalImgDims?.width || imageDimensions?.width || 300;
+  const naturalImgH = modalImgDims?.height || imageDimensions?.height || 300;
+
+  // Escala base requerida para cubrir todo el viewport a zoom 1.0
+  const baseScale = Math.max(viewportW / naturalImgW, viewportH / naturalImgH);
+  const displayedWidth = naturalImgW * baseScale;
+  const displayedHeight = naturalImgH * baseScale;
+
   const error = formatError || sizeError || dimensionError;
 
   // Manejo de arrastre (pan) en el modal de recorte
@@ -216,31 +230,48 @@ export default function ImageUploader({
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      const viewportSize = 280;
-      const targetWidth = cropShape === "rect" ? Math.round(viewportSize * cropAspectRatio) : viewportSize;
-      const targetHeight = viewportSize;
+      // Dimensiones de exportación del Canvas (Alta calidad)
+      const exportW = cropShape === "rect" ? Math.round(500 * (cropAspectRatio || 1.777)) : 500;
+      const exportH = 500;
 
-      canvas.width = targetWidth;
-      canvas.height = targetHeight;
+      canvas.width = exportW;
+      canvas.height = exportH;
 
-      // Limpiar canvas
-      ctx.clearRect(0, 0, targetWidth, targetHeight);
+      ctx.clearRect(0, 0, exportW, exportH);
 
-      // Calcular escala de la imagen proyectada en el viewport
-      const scale = Math.max(targetWidth / img.naturalWidth, targetHeight / img.naturalHeight) * cropZoom;
-      const drawWidth = img.naturalWidth * scale;
-      const drawHeight = img.naturalHeight * scale;
+      const naturalW = img.naturalWidth;
+      const naturalH = img.naturalHeight;
 
-      const drawX = (targetWidth - drawWidth) / 2 + cropPan.x;
-      const drawY = (targetHeight - drawHeight) / 2 + cropPan.y;
+      // Escala base requerida para encuadrar en el viewport de la interfaz
+      const calcBaseScale = Math.max(viewportW / naturalW, viewportH / naturalH);
 
-      ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+      // Dimensiones renderizadas a zoom 1.0
+      const dispW = naturalW * calcBaseScale;
+      const dispH = naturalH * calcBaseScale;
+
+      // Dimensiones reales renderizadas según el zoom del usuario
+      const currentW = dispW * cropZoom;
+      const currentH = dispH * cropZoom;
+
+      // Esquina superior izquierda de la imagen respecto al centro del viewport
+      const imgLeft = (viewportW - currentW) / 2 + cropPan.x;
+      const imgTop = (viewportH - currentH) / 2 + cropPan.y;
+
+      // Proporción de escala entre Canvas de alta resolución y Viewport de la interfaz
+      const scaleRatio = exportW / viewportW;
+
+      // Dibujar imagen exacta en el canvas
+      const drawX = imgLeft * scaleRatio;
+      const drawY = imgTop * scaleRatio;
+      const drawW = currentW * scaleRatio;
+      const drawH = currentH * scaleRatio;
+
+      ctx.drawImage(img, drawX, drawY, drawW, drawH);
 
       canvas.toBlob((blob) => {
         if (!blob) return;
         const croppedFile = new File([blob], `cropped_${Date.now()}.png`, { type: "image/png" });
 
-        // Cambiar automáticamente a modo archivo y asignar el archivo recortado
         onModeChange("file");
         onFileChange(croppedFile);
         setShowCropModal(false);
@@ -397,6 +428,7 @@ export default function ImageUploader({
 
               <div
                 className="img-crop-viewport"
+                style={{ width: `${viewportW}px`, height: `${viewportH}px` }}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
@@ -411,7 +443,13 @@ export default function ImageUploader({
                   src={previewSrc}
                   alt="Ajuste de recorte"
                   className="img-crop-viewport__image"
+                  onLoad={(e) => {
+                    const target = e.currentTarget;
+                    setModalImgDims({ width: target.naturalWidth, height: target.naturalHeight });
+                  }}
                   style={{
+                    width: `${displayedWidth}px`,
+                    height: `${displayedHeight}px`,
                     transform: `translate(-50%, -50%) translate(${cropPan.x}px, ${cropPan.y}px) scale(${cropZoom})`,
                   }}
                 />
@@ -423,13 +461,24 @@ export default function ImageUploader({
                   <span>Zoom:</span>
                   <input
                     type="range"
-                    min="1"
+                    min="0.5"
                     max="3"
                     step="0.05"
                     value={cropZoom}
                     onChange={(e) => setCropZoom(parseFloat(e.target.value))}
                   />
                   <span>{(cropZoom * 100).toFixed(0)}%</span>
+                  <button
+                    type="button"
+                    className="img-crop-reset-btn"
+                    onClick={() => {
+                      setCropZoom(1);
+                      setCropPan({ x: 0, y: 0 });
+                    }}
+                    title="Restablecer encuadre y zoom por defecto"
+                  >
+                    ↺ Restablecer
+                  </button>
                 </div>
               </div>
 
