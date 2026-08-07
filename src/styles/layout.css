@@ -117,26 +117,15 @@
   border-bottom: none;
 }
 
-/* Adaptación responsive del layout */
+/* Adaptación responsive del layout: En móviles (<768px) las sidebars se ocultan al 100% */
 @media (max-width: 768px) {
   .site-body {
-    grid-template-areas:
-      "content"
-      "sidebar-left"
-      "sidebar-right";
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  /* Oculta al 100% la sidebar izquierda y derecha en móvil dentro de las páginas de ajustes /settings/* */
-  .site-body.site-body--no-right-sidebar {
     display: block !important;
     width: 100% !important;
-    grid-template-areas: "content" !important;
-    grid-template-columns: 100% !important;
   }
 
-  .site-body--no-right-sidebar .sidebar-left,
-  .site-body--no-right-sidebar .sidebar-right {
+  .sidebar-left,
+  .sidebar-right {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
@@ -145,22 +134,11 @@
     border: none !important;
   }
 
-  .site-body--no-right-sidebar .site-content {
+  .site-content {
     width: 100% !important;
     max-width: 100% !important;
     padding: 1rem 1rem 5.5rem 1rem !important;
     box-sizing: border-box !important;
-  }
-
-  .sidebar-left,
-  .sidebar-right {
-    border-right: none;
-    border-left: none;
-    border-top: 2px solid var(--color-border);
-  }
-
-  .site-content {
-    padding: 1rem 1rem 5.5rem 1rem;
   }
 }
 

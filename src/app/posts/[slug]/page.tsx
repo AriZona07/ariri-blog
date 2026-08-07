@@ -30,7 +30,6 @@ export default function SinglePostPage({ params }: PostPageProps) {
 
   const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [loading, setLoading]   = useState(true);
-  const [readingMode, setReadingMode] = useState<"traditional" | "document">("traditional");
 
   /* Suscripción a Firestore para obtener los posts y permitir navegación entre ellos */
   useEffect(() => {
@@ -102,32 +101,13 @@ export default function SinglePostPage({ params }: PostPageProps) {
   const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
 
   return (
-    <article className={`post-detail-page ${readingMode === "document" ? "post-detail-page--doc-mode" : ""}`}>
+    <article className="post-detail-page">
 
-      {/* Barra de navegación superior: Volver + Modos de lectura */}
-      <nav className="post-detail__top-bar" aria-label="Opciones de lectura">
+      {/* Barra de navegación superior: Volver al feed */}
+      <nav className="post-detail__top-bar" aria-label="Navegación de lectura">
         <Link href="/" className="post-detail__back-link">
           ← Volver al feed
         </Link>
-
-        <div className="post-detail__mode-selector" role="group" aria-label="Modo de lectura">
-          <button
-            type="button"
-            className={`post-detail__mode-btn ${readingMode === "traditional" ? "post-detail__mode-btn--active" : ""}`}
-            onClick={() => setReadingMode("traditional")}
-            title="Vista tradicional del blog"
-          >
-            📑 Tradicional
-          </button>
-          <button
-            type="button"
-            className={`post-detail__mode-btn ${readingMode === "document" ? "post-detail__mode-btn--active" : ""}`}
-            onClick={() => setReadingMode("document")}
-            title="Vista tipo documento / hoja de lectura"
-          >
-            📄 Modo Documento
-          </button>
-        </div>
       </nav>
 
       {/* Contenido principal de la publicación */}

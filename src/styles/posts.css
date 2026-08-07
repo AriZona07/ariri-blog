@@ -241,71 +241,64 @@
 }
 
 
-/* --- 4. PAGINACIÓN RETRO (.pagination-nav) --- */
+/* --- 4. PAGINACIÓN RETRO COMPACTA (.pagination-nav) --- */
 .pagination-nav {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  padding: 1.1rem 1rem 1.4rem;
-  border-top: 2px solid var(--color-border);
-  background: linear-gradient(180deg, #1a1226 0%, #110e17 100%);
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  background: rgba(18, 10, 24, 0.8);
+  border-top: 1px dashed var(--color-border);
+  border-bottom: 1px dashed var(--color-border);
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  border-radius: var(--radius-sm);
 }
 
 .pagination-nav__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 40px;
-  height: 36px;
-  padding: 0 0.75rem;
-
-  background: linear-gradient(180deg, #ff1493 0%, #b80058 100%);
-  color: #ffffff;
-  font-size: var(--fs-base);
+  background: transparent;
+  border: none;
+  font-size: var(--fs-sm);
   font-weight: bold;
+  color: var(--color-accent-pink);
   font-family: var(--font-main);
-
-  border: 2px solid #000000;
-  border-radius: var(--radius-sm);
-  box-shadow: 2px 2px 0px #000000, inset 0 1px 0 rgba(255,255,255,0.25);
-
   cursor: pointer;
-  text-shadow: 1px 1px 0 #000000;
-  transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.12s ease;
+  padding: 0;
+  transition: color 0.15s;
   user-select: none;
+  text-decoration: none;
 }
 
 .pagination-nav__btn:not(:disabled):hover {
-  background: linear-gradient(180deg, #ff3399 0%, #d6006e 100%);
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0px #000000, inset 0 1px 0 rgba(255,255,255,0.25);
   color: #ffffff;
+  text-decoration: underline;
 }
 
-.pagination-nav__btn:not(:disabled):active {
-  transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0px #000000;
-}
-
-.pagination-nav__btn:disabled {
-  background: linear-gradient(180deg, #3a1030 0%, #220b1d 100%);
-  color: #6b3355;
-  border-color: #3a1030;
-  box-shadow: 1px 1px 0px #000000;
+.pagination-nav__btn:disabled,
+.pagination-nav__btn--disabled {
+  color: var(--color-text-muted);
+  opacity: 0.5;
   cursor: not-allowed;
-  text-shadow: none;
+  text-decoration: none;
+  font-weight: normal;
+}
+
+.pagination-nav__info {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  font-weight: 600;
 }
 
 .pagination-nav__selector {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  background: #0c0a10;
-  border: 2px solid var(--color-accent-pink);
+  gap: 0.3rem;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: 0.2rem 0.6rem 0.2rem 0.5rem;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.7), 0 0 0 1px #000000;
+  padding: 0.15rem 0.5rem;
 }
 
 .pagination-nav__input {
@@ -313,12 +306,12 @@
   background: transparent;
   border: none;
   outline: none;
-  color: #ff66b2;
+  color: var(--color-accent-pink);
   font-family: var(--font-mono);
-  font-size: var(--fs-base);
+  font-size: var(--fs-sm);
   font-weight: bold;
   text-align: center;
-  caret-color: #ff1493;
+  caret-color: var(--color-accent-pink);
   appearance: textfield;
   -moz-appearance: textfield;
 }
@@ -332,14 +325,6 @@
   font-size: var(--fs-sm);
   color: var(--color-text-muted);
   white-space: nowrap;
-}
-
-/* Responsive Modal y Paginación */
-@media (max-width: 480px) {
-  .pagination-nav__btn {
-    min-width: 44px;
-    height: 40px;
-  }
 }
 
 /* --- 5. PÁGINA DEDICADA DE DETALLE DE POST (/posts/[slug]) --- */
@@ -465,57 +450,9 @@
   font-weight: 600;
 }
 
-/* --- MODO DOCUMENTO (PDF / DOCS) --- */
-.post-detail-page--doc-mode .post-detail__card {
-  background: #fcf9f2 !important;
-  border: 2px solid #2b261f !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85), inset 0 0 50px rgba(210, 195, 170, 0.3) !important;
-  border-radius: var(--radius-sm) !important;
-}
-
-.post-detail-page--doc-mode .post-detail__header {
-  background: linear-gradient(90deg, #2b221a 0%, #1a140e 100%) !important;
-  border-bottom: 2px solid #8b5e3c !important;
-}
-
-.post-detail-page--doc-mode .post-detail__title {
-  color: #ffb86c !important;
-  text-shadow: 1px 1px 0 #000 !important;
-}
-
-.post-detail-page--doc-mode .post-detail__body {
-  padding: 2.2rem 2rem !important;
-}
-
-.post-detail-page--doc-mode .post-detail__body .welcome-text {
-  color: #1a1612 !important;
-  font-family: Georgia, 'Times New Roman', serif !important;
-  font-size: 1.35rem !important;
-  line-height: 1.9 !important;
-  letter-spacing: 0.01em !important;
-  background: transparent !important;
-  padding: 0 !important;
-}
-
-.post-detail-page--doc-mode .post-detail__post-nav {
-  background: #f2ebd9 !important;
-  border-color: #d1c5a9 !important;
-}
-
-.post-detail-page--doc-mode .post-detail__nav-btn {
-  color: #8b2500 !important;
-}
-
-.post-detail-page--doc-mode .post-detail__nav-info {
-  color: #4a3e35 !important;
-}
-
 @media (max-width: 600px) {
   .post-detail__title {
     font-size: 1.9rem;
-  }
-  .post-detail-page--doc-mode .post-detail__body {
-    padding: 1.2rem 1rem !important;
   }
 }
 

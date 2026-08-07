@@ -72,45 +72,45 @@ export default function PaginationNavWidget({
       {/* Botón: página anterior */}
       <button
         id={`${idPrefix}-prev`}
-        className="pagination-nav__btn"
+        className={`pagination-nav__btn ${isFirst ? "pagination-nav__btn--disabled" : ""}`}
         onClick={() => goToPage(currentPage - 1)}
         disabled={isFirst}
         aria-label="Página anterior"
         title="Página anterior"
       >
-        ◀
+        « Página Anterior
       </button>
 
-      {/* Selector de página: escribe número + Enter.
-          key={currentPage} remonta el input cada vez que la página cambia,
-          reseteando su valor al defaultValue sin necesidad de estado local. */}
-      <span className="pagination-nav__selector">
-        <input
-          key={currentPage}
-          ref={inputRef}
-          id={`${idPrefix}-page-input`}
-          className="pagination-nav__input"
-          type="text"
-          inputMode="numeric"
-          defaultValue={String(currentPage)}
-          onInput={handleInput}
-          onKeyDown={handleKeyDown}
-          aria-label={`Página actual, ${currentPage} de ${totalPages}`}
-          title="Escribe el número de página y presiona Enter"
-        />
-        <span className="pagination-nav__total">/ {totalPages}</span>
+      {/* Selector de página: escribe número + Enter */}
+      <span className="pagination-nav__info">
+        <span className="pagination-nav__selector">
+          <input
+            key={currentPage}
+            ref={inputRef}
+            id={`${idPrefix}-page-input`}
+            className="pagination-nav__input"
+            type="text"
+            inputMode="numeric"
+            defaultValue={String(currentPage)}
+            onInput={handleInput}
+            onKeyDown={handleKeyDown}
+            aria-label={`Página actual, ${currentPage} de ${totalPages}`}
+            title="Escribe el número de página y presiona Enter"
+          />
+          <span className="pagination-nav__total">/ {totalPages}</span>
+        </span>
       </span>
 
       {/* Botón: página siguiente */}
       <button
         id={`${idPrefix}-next`}
-        className="pagination-nav__btn"
+        className={`pagination-nav__btn ${isLast ? "pagination-nav__btn--disabled" : ""}`}
         onClick={() => goToPage(currentPage + 1)}
         disabled={isLast}
         aria-label="Página siguiente"
         title="Página siguiente"
       >
-        ▶
+        Página Siguiente »
       </button>
 
     </nav>
