@@ -14,7 +14,7 @@
  * - Cumplimiento estricto de React 19 (sin setState dentro de useEffect).
  */
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { renderMarkdown } from "@/lib/markdown";
 
 interface MarkdownEditorProps {
@@ -35,7 +35,25 @@ export default function MarkdownEditor({
   required = false,
 }: MarkdownEditorProps) {
   const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
+  const [editorFont, setEditorFont] = useState<"japan" | "comic" | "book">("japan");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const fontFamilies = {
+    japan: "var(--font-main)",
+    comic: "var(--font-comic)",
+    book:  "var(--font-merriweather)",
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      queueMicrotask(() => {
+        const saved = localStorage.getItem("ariri_preferred_font");
+        if (saved === "japan" || saved === "comic" || saved === "book") {
+          setEditorFont(saved);
+        }
+      });
+    }
+  }, []);
 
   // Pilas de historial para Deshacer y Rehacer (límite de 50 estados por palabras/bloques)
   const [past, setPast]           = useState<string[]>([]);
@@ -180,21 +198,48 @@ export default function MarkdownEditor({
   return (
     <div className="md-editor">
       {/* Pestañas superiores */}
-      <div className="md-editor__tabs">
-        <button
-          type="button"
-          className={`md-editor__tab ${activeTab === "write" ? "md-editor__tab--active" : ""}`}
-          onClick={() => setActiveTab("write")}
-        >
-          ✍️ Escribir
-        </button>
-        <button
-          type="button"
-          className={`md-editor__tab ${activeTab === "preview" ? "md-editor__tab--active" : ""}`}
-          onClick={() => setActiveTab("preview")}
-        >
-          👁️ Previsualizar
-        </button>
+      <div className="md-editor__tabs" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", gap: "0.2rem" }}>
+          <button
+            type="button"
+            className={`md-editor__tab ${activeTab === "write" ? "md-editor__tab--active" : ""}`}
+            onClick={() => setActiveTab("write")}
+          >
+            ✍️ Escribir
+          </button>
+          <button
+            type="button"
+            className={`md-editor__tab ${activeTab === "preview" ? "md-editor__tab--active" : ""}`}
+            onClick={() => setActiveTab("preview")}
+          >
+            👁️ Previsualizar
+          </button>
+        </div>
+
+        <div style={{ paddingRight: "0.5rem", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+          <label htmlFor={`${id}-font-select`} style={{ fontSize: "0.75rem", color: "var(--color-text-secondary)", fontWeight: "bold" }}>
+            🔤 Fuente:
+          </label>
+          <select
+            id={`${id}-font-select`}
+            value={editorFont}
+            onChange={(e) => setEditorFont(e.target.value as "japan" | "comic" | "book")}
+            style={{
+              background: "#0f0b14",
+              color: "var(--color-accent-pink)",
+              border: "1px solid var(--color-accent-pink)",
+              borderRadius: "3px",
+              padding: "0.15rem 0.4rem",
+              fontSize: "0.75rem",
+              fontWeight: "bold",
+              cursor: "pointer",
+            }}
+          >
+            <option value="japan">Simple Japan (Por defecto)</option>
+            <option value="comic">Comic Sans (Divertida)</option>
+            <option value="book">Merriweather (Lectura Clásica)</option>
+          </select>
+        </div>
       </div>
 
       {activeTab === "write" ? (
@@ -309,13 +354,14 @@ export default function MarkdownEditor({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             required={required}
+            style={{ fontFamily: fontFamilies[editorFont] }}
           />
         </div>
       ) : (
         /* Vista previa en vivo */
         <div className="md-editor__preview-container">
           {value.trim() ? (
-            <div className="md-editor__preview-content welcome-text">
+            <div className="md-editor__preview-content welcome-text" style={{ fontFamily: fontFamilies[editorFont] }}>
               {renderMarkdown(value)}
             </div>
           ) : (

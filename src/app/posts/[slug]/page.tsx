@@ -38,6 +38,18 @@ export default function SinglePostPage({ params }: PostPageProps) {
     book:  "var(--font-merriweather)",
   };
 
+  /* Cargar preferencia de tipografía guardada del usuario en localStorage */
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      queueMicrotask(() => {
+        const saved = localStorage.getItem("ariri_preferred_font");
+        if (saved === "japan" || saved === "comic" || saved === "book") {
+          setPostFont(saved);
+        }
+      });
+    }
+  }, []);
+
   /* Suscripción a Firestore para obtener los posts y permitir navegación entre ellos */
   useEffect(() => {
     const q = query(collection(db, "posts"), orderBy("date", "desc"));
@@ -257,7 +269,7 @@ export default function SinglePostPage({ params }: PostPageProps) {
 
         {/* Sección de comentarios al pie de la entrada */}
         <section style={{ marginTop: "2rem", paddingTop: "1.5rem", borderTop: "2px solid var(--color-accent-pink)" }}>
-          <CommentsWidget postSlug={post.slug} />
+          <CommentsWidget postSlug={post.slug} fontFamily={fontFamilies[postFont]} />
         </section>
       </div>
 

@@ -11,7 +11,7 @@
  *   - Enlace a Términos y Condiciones (/settings/terms)
  */
 
-import { useState }                         from "react";
+import { useState, useEffect }                from "react";
 import Image                                from "next/image";
 import Link                                 from "next/link";
 import {
@@ -38,6 +38,7 @@ export default function AccountWidget() {
   const [photoFile,   setPhotoFile]   = useState<File | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [currentPass, setCurrentPass] = useState("");
+  const [preferredFont, setPreferredFont] = useState<"japan" | "comic" | "book">("japan");
 
   // Estado de eliminación de cuenta
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -48,6 +49,18 @@ export default function AccountWidget() {
   const [success,   setSuccess]   = useState<string | null>(null);
   const [error,     setError]     = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  // Cargar preferencia de fuente guardada
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      queueMicrotask(() => {
+        const saved = localStorage.getItem("ariri_preferred_font");
+        if (saved === "japan" || saved === "comic" || saved === "book") {
+          setPreferredFont(saved);
+        }
+      });
+    }
+  }, []);
 
   if (!user) return null;
 
@@ -110,6 +123,16 @@ export default function AccountWidget() {
         } catch (queueErr) {
           console.warn("Aviso al registrar foto previa en cola de borrado:", queueErr);
         }
+      }
+
+      // Guardar preferencia de fuente
+      if (typeof window !== "undefined") {
+        localStorage.setItem("ariri_preferred_font", preferredFont);
+      }
+      try {
+        await setDoc(doc(db, "users", currentUser.uid), { preferredFont }, { merge: true });
+      } catch (fontErr) {
+        console.warn("Aviso al guardar preferencia de fuente en Firestore:", fontErr);
       }
 
       await reloadUser();
@@ -246,6 +269,23 @@ export default function AccountWidget() {
             setPhotoFile(null);
           }}
         />
+
+        <div className="auth-field" style={{ marginTop: "1rem", marginBottom: "1.2rem" }}>
+          <label htmlFor="acc-font-select" className="auth-field__label">
+            🔤 Tipografía preferida para publicaciones y comentarios
+          </label>
+          <select
+            id="acc-font-select"
+            className="auth-field__input"
+            value={preferredFont}
+            onChange={(e) => setPreferredFont(e.target.value as "japan" | "comic" | "book")}
+            style={{ background: "#0f0b14", color: "var(--color-accent-pink)", cursor: "pointer" }}
+          >
+            <option value="japan">Simple Japan (Por defecto)</option>
+            <option value="comic">Comic Sans (Divertida)</option>
+            <option value="book">Merriweather (Lectura Clásica)</option>
+          </select>
+        </div>
 
         <button
           type="submit"

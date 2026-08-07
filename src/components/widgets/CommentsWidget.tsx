@@ -35,9 +35,10 @@ interface Comment {
 
 interface CommentsWidgetProps {
   postSlug: string;
+  fontFamily?: string;
 }
 
-export default function CommentsWidget({ postSlug }: CommentsWidgetProps) {
+export default function CommentsWidget({ postSlug, fontFamily }: CommentsWidgetProps) {
   const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [text,     setText]     = useState("");
@@ -87,7 +88,7 @@ export default function CommentsWidget({ postSlug }: CommentsWidgetProps) {
   }
 
   return (
-    <section className="comments-widget" aria-label="Comentarios">
+    <section className="comments-widget" aria-label="Comentarios" style={fontFamily ? { fontFamily } : undefined}>
       <h3 className="comments-widget__title">
         ★ Comentarios {comments.length > 0 && `(${comments.length})`}
       </h3>
@@ -114,7 +115,7 @@ export default function CommentsWidget({ postSlug }: CommentsWidgetProps) {
                   <span className="comment-item__author">{c.authorName}</span>
                   <span className="comment-item__date">{c.createdAt}</span>
                 </div>
-                <p className="comment-item__text">{c.text}</p>
+                <p className="comment-item__text" style={fontFamily ? { fontFamily } : undefined}>{c.text}</p>
               </div>
             </article>
           ))}
@@ -127,6 +128,7 @@ export default function CommentsWidget({ postSlug }: CommentsWidgetProps) {
           {error && <p className="auth-error" role="alert">{error}</p>}
           <textarea
             className="comments-form__textarea"
+            style={fontFamily ? { fontFamily } : undefined}
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Escribe tu comentario…"
