@@ -74,8 +74,7 @@ export default function SettingsAdminPage() {
     const unsub = onSnapshot(doc(db, "settings", "music"), (snap) => {
       if (snap.exists()) {
         const data = snap.data();
-        if (data?.playlistUrl) setMusicPlaylistInput(data.playlistUrl);
-        if (data?.playlistId)  setMusicPlaylistId(data.playlistId);
+        if (data?.playlistId) setMusicPlaylistId(data.playlistId);
       }
     });
     return () => unsub();
@@ -188,6 +187,7 @@ export default function SettingsAdminPage() {
       }, { merge: true });
 
       setMusicPlaylistId(extractedId);
+      setMusicPlaylistInput("");
       setMusicSuccess("Playlist del reproductor MP3 actualizada correctamente.");
     } catch (err) {
       console.error("Error al guardar la playlist en Firestore:", err);

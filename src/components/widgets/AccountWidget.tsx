@@ -34,8 +34,9 @@ export default function AccountWidget() {
   // Campos del formulario
   const [displayName,      setDisplayName]      = useState(user?.displayName ?? "");
   const [photoMode,        setPhotoMode]        = useState<"url" | "file">("url");
-  const [photoURL,         setPhotoURL]         = useState(user?.photoURL   ?? "");
+  const [photoURL,         setPhotoURL]         = useState("");
   const [photoFile,        setPhotoFile]        = useState<File | null>(null);
+  const [isPhotoRemoved,   setIsPhotoRemoved]   = useState(false);
   const [newPassword,      setNewPassword]      = useState("");
   const [currentPass,      setCurrentPass]      = useState("");
   const [userSelectedFont, setUserSelectedFont] = useState<"japan" | "comic" | "book" | null>(null);
@@ -84,14 +85,19 @@ export default function AccountWidget() {
           const storageRef    = ref(storage, `avatars/${currentUser.uid}/${Date.now()}_${cleanFileName}`);
           const snapshot      = await uploadBytes(storageRef, photoFile);
           finalPhotoURL       = await getDownloadURL(snapshot.ref);
-          setPhotoURL(finalPhotoURL);
-        } else if (photoURL.trim()) {
-          finalPhotoURL = photoURL.trim();
-        } else {
+        } else if (isPhotoRemoved) {
           finalPhotoURL = "";
+        } else {
+          finalPhotoURL = previousPhotoUrl || "";
         }
       } else {
-        finalPhotoURL = photoURL.trim();
+        if (photoURL.trim()) {
+          finalPhotoURL = photoURL.trim();
+        } else if (isPhotoRemoved) {
+          finalPhotoURL = "";
+        } else {
+          finalPhotoURL = previousPhotoUrl || "";
+        }
       }
 
       // Actualizar perfil en Firebase Auth
@@ -119,6 +125,11 @@ export default function AccountWidget() {
       setUserSelectedFont(null);
 
       await reloadUser();
+
+      // Limpiar campos de enlace y archivo para que no queden visibles en la interfaz
+      setPhotoURL("");
+      setPhotoFile(null);
+      setIsPhotoRemoved(false);
 
       if (previousPhotoUrl && !finalPhotoURL) {
         setSuccess("Foto de perfil eliminada correctamente (programada para limpieza física en BD el día 1 del mes).");
@@ -236,9 +247,15 @@ export default function AccountWidget() {
           mode={photoMode}
           onModeChange={setPhotoMode}
           urlValue={photoURL}
-          onUrlChange={setPhotoURL}
+          onUrlChange={(val) => {
+            setPhotoURL(val);
+            if (val) setIsPhotoRemoved(false);
+          }}
           fileValue={photoFile}
-          onFileChange={setPhotoFile}
+          onFileChange={(file) => {
+            setPhotoFile(file);
+            if (file) setIsPhotoRemoved(false);
+          }}
           minWidth={100}
           minHeight={100}
           maxWidth={4000}
@@ -246,10 +263,11 @@ export default function AccountWidget() {
           maxSizeMB={10}
           cropShape="circle"
           cropAspectRatio={1}
-          existingUrl={currentUser.photoURL ?? undefined}
+          existingUrl={isPhotoRemoved ? undefined : (currentUser.photoURL ?? undefined)}
           onClear={() => {
             setPhotoURL("");
             setPhotoFile(null);
+            setIsPhotoRemoved(true);
           }}
         />
 
