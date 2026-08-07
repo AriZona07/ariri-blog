@@ -649,4 +649,49 @@
   .new-post-form__save-draft { min-width: unset; }
 }
 
+/* --- Sección de Configuración de Playlist MP3 --- */
+.admin-music-card {
+  margin-bottom: 2rem;
+  padding: 1.25rem;
+  background: #110e18;
+  border: 2px solid #00ff66;
+  border-radius: var(--radius-sm);
+  box-shadow: 4px 4px 0px #000;
+}
+
+.admin-music-card__title {
+  font-family: var(--font-punk);
+  font-size: var(--fs-lg);
+  color: #00ff66;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 1px 1px 0px #000;
+}
+
+.admin-music-card__desc {
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.admin-music-card__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.admin-music-card__row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+@media (max-width: 600px) {
+  .admin-music-card__row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+
 

@@ -31,12 +31,12 @@ interface GuestbookEntry {
 }
 
 export default function GuestbookWidget() {
-  const { user } = useAuth();
+  const { user, preferredFont } = useAuth();
+
   const [entries,  setEntries]  = useState<GuestbookEntry[]>([]);
   const [message,  setMessage]  = useState("");
   const [sending,  setSending]  = useState(false);
   const [error,    setError]    = useState<string | null>(null);
-  const [prefFont, setPrefFont] = useState<"japan" | "comic" | "book">("japan");
 
   const fontFamilies = {
     japan: "var(--font-main)",
@@ -44,17 +44,7 @@ export default function GuestbookWidget() {
     book:  "var(--font-merriweather)",
   };
 
-  /* Cargar preferencia de tipografía guardada por el usuario */
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      queueMicrotask(() => {
-        const saved = localStorage.getItem("ariri_preferred_font");
-        if (saved === "japan" || saved === "comic" || saved === "book") {
-          setPrefFont(saved);
-        }
-      });
-    }
-  }, []);
+  const prefFont = preferredFont;
 
   /* Suscripción en tiempo real al guestbook */
   useEffect(() => {

@@ -14,8 +14,9 @@
  * - Cumplimiento estricto de React 19 (sin setState dentro de useEffect).
  */
 
-import { useState, useRef, useEffect } from "react";
-import { renderMarkdown } from "@/lib/markdown";
+import { useState, useRef }         from "react";
+import { renderMarkdown }           from "@/lib/markdown";
+import { useAuth }                  from "@/lib/auth-context";
 
 interface MarkdownEditorProps {
   id:           string;
@@ -34,8 +35,11 @@ export default function MarkdownEditor({
   rows = 12,
   required = false,
 }: MarkdownEditorProps) {
-  const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
-  const [editorFont, setEditorFont] = useState<"japan" | "comic" | "book">("japan");
+  const { preferredFont }           = useAuth();
+  const [activeTab, setActiveTab]   = useState<"write" | "preview">("write");
+  const [overrideFont, setOverrideFont] = useState<"japan" | "comic" | "book" | null>(null);
+  const editorFont = overrideFont ?? preferredFont;
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const fontFamilies = {
@@ -43,17 +47,6 @@ export default function MarkdownEditor({
     comic: "var(--font-comic)",
     book:  "var(--font-merriweather)",
   };
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      queueMicrotask(() => {
-        const saved = localStorage.getItem("ariri_preferred_font");
-        if (saved === "japan" || saved === "comic" || saved === "book") {
-          setEditorFont(saved);
-        }
-      });
-    }
-  }, []);
 
   // Pilas de historial para Deshacer y Rehacer (límite de 50 estados por palabras/bloques)
   const [past, setPast]           = useState<string[]>([]);
@@ -223,7 +216,7 @@ export default function MarkdownEditor({
           <select
             id={`${id}-font-select`}
             value={editorFont}
-            onChange={(e) => setEditorFont(e.target.value as "japan" | "comic" | "book")}
+            onChange={(e) => setOverrideFont(e.target.value as "japan" | "comic" | "book")}
             style={{
               background: "#0f0b14",
               color: "var(--color-accent-pink)",

@@ -25,20 +25,26 @@ import { auth, db }                       from "@/lib/firebase";
 
 /* --- Tipos del contexto --- */
 
+export type UserFont = "japan" | "comic" | "book";
+
 interface AuthContextValue {
-  user:       User | null;
-  isAdmin:    boolean;
-  loading:    boolean;
-  reloadUser: () => Promise<void>;
+  user:             User | null;
+  isAdmin:          boolean;
+  loading:          boolean;
+  preferredFont:    UserFont;
+  reloadUser:       () => Promise<void>;
+  setPreferredFont: (font: UserFont) => Promise<void>;
 }
 
 /* --- Creación del contexto con valores por defecto seguros --- */
 
 const AuthContext = createContext<AuthContextValue>({
-  user:       null,
-  isAdmin:    false,
-  loading:    true,
-  reloadUser: async () => {},
+  user:             null,
+  isAdmin:          false,
+  loading:          true,
+  preferredFont:    "japan",
+  reloadUser:       async () => {},
+  setPreferredFont: async () => {},
 });
 
 /* --- Provider: envuelve la app en layout.tsx --- */
@@ -47,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user,                   setUser]                   = useState<User | null>(null);
   const [isAdmin,                setIsAdmin]                = useState(false);
   const [loading,                setLoading]                = useState(true);
+  const [preferredFont,          setPreferredFontState]     = useState<UserFont>("japan");
   const [deletionRestoredNotice, setDeletionRestoredNotice] = useState<string | null>(null);
 
   // Recarga el objeto de usuario desde Firebase Auth
@@ -54,6 +61,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (auth.currentUser) {
       await auth.currentUser.reload();
       setUser(Object.assign(Object.create(Object.getPrototypeOf(auth.currentUser)), auth.currentUser));
+    }
+  }
+
+  // Actualiza la fuente del usuario en Firestore y en el estado global
+  async function setPreferredFont(font: UserFont) {
+    setPreferredFontState(font);
+    if (auth.currentUser) {
+      try {
+        await setDoc(doc(db, "users", auth.currentUser.uid), { preferredFont: font }, { merge: true });
+      } catch (err) {
+        console.warn("No se pudo guardar la preferencia de tipografía en Firestore:", err);
+      }
     }
   }
 
@@ -66,26 +85,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const tokenResult = await firebaseUser.getIdTokenResult();
         setIsAdmin(tokenResult.claims["admin"] === true);
 
-        // Comprobar si existía una solicitud de eliminación de cuenta activa
+        // Comprobar datos del usuario en Firestore (eliminación de cuenta y tipografía preferida)
         try {
           const userRef = doc(db, "users", firebaseUser.uid);
           const snap    = await getDoc(userRef);
-          if (snap.exists() && snap.data()?.eliminar_cuenta === true) {
-            // Cancela automáticamente la eliminación al iniciar sesión dentro del período de 15 días
-            await setDoc(userRef, {
-              eliminar_cuenta: false,
-              eliminar_cuenta_at: null,
-            }, { merge: true });
+          if (snap.exists()) {
+            const data = snap.data();
+            if (data?.preferredFont === "japan" || data?.preferredFont === "comic" || data?.preferredFont === "book") {
+              setPreferredFontState(data.preferredFont);
+            }
 
-            setDeletionRestoredNotice(
-              "¡Bienvenid@ de nuevo! Tu solicitud de eliminación de cuenta ha sido cancelada automáticamente y tu cuenta seguirá activa."
-            );
+            if (data?.eliminar_cuenta === true) {
+              // Cancela automáticamente la eliminación al iniciar sesión dentro del período de 15 días
+              await setDoc(userRef, {
+                eliminar_cuenta: false,
+                eliminar_cuenta_at: null,
+              }, { merge: true });
+
+              setDeletionRestoredNotice(
+                "¡Bienvenid@ de nuevo! Tu solicitud de eliminación de cuenta ha sido cancelada automáticamente y tu cuenta seguirá activa."
+              );
+            }
           }
         } catch (err) {
-          console.warn("No se pudo consultar el estado de eliminación de cuenta:", err);
+          console.warn("No se pudo consultar el perfil de usuario en Firestore:", err);
         }
       } else {
         setIsAdmin(false);
+        setPreferredFontState("japan");
       }
 
       setLoading(false);
@@ -95,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAdmin, loading, reloadUser }}>
+    <AuthContext.Provider value={{ user, isAdmin, loading, preferredFont, reloadUser, setPreferredFont }}>
       {children}
 
       {/* Aviso emergente de cancelación automática de eliminación de cuenta */}

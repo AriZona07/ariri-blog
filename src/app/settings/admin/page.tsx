@@ -19,14 +19,16 @@ import {
   orderBy,
   onSnapshot,
   getDoc,
+  setDoc,
   addDoc,
   deleteDoc,
   doc,
   serverTimestamp,
   type DocumentData,
 } from "firebase/firestore";
-import { db }      from "@/lib/firebase";
-import { useAuth } from "@/lib/auth-context";
+import { db }                       from "@/lib/firebase";
+import { useAuth }                  from "@/lib/auth-context";
+import { extractYouTubePlaylistId } from "@/lib/youtube";
 
 interface FirestorePost {
   id:    string;
@@ -52,12 +54,32 @@ export default function SettingsAdminPage() {
   const [fetchingDrafts, setFetchingDrafts] = useState(true);
   const [actionError,    setActionError]    = useState<string | null>(null);
 
+  // Estado para la playlist del widget MP3
+  const [musicPlaylistInput, setMusicPlaylistInput] = useState("");
+  const [musicPlaylistId,    setMusicPlaylistId]    = useState("");
+  const [savingMusic,        setSavingMusic]        = useState(false);
+  const [musicSuccess,       setMusicSuccess]       = useState<string | null>(null);
+  const [musicError,         setMusicError]         = useState<string | null>(null);
+
   /* Redirección de seguridad lado cliente */
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
       router.replace("/");
     }
   }, [user, isAdmin, loading, router]);
+
+  /* Suscripción en tiempo real a la configuración de la playlist de música */
+  useEffect(() => {
+    if (!isAdmin) return;
+    const unsub = onSnapshot(doc(db, "settings", "music"), (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        if (data?.playlistUrl) setMusicPlaylistInput(data.playlistUrl);
+        if (data?.playlistId)  setMusicPlaylistId(data.playlistId);
+      }
+    });
+    return () => unsub();
+  }, [isAdmin]);
 
   /* Suscripción a colección posts */
   useEffect(() => {
@@ -143,6 +165,38 @@ export default function SettingsAdminPage() {
     }
   }
 
+  /* Guardar nueva playlist de YouTube en Firestore */
+  async function handleSaveMusicPlaylist(e: React.FormEvent) {
+    e.preventDefault();
+    setSavingMusic(true);
+    setMusicSuccess(null);
+    setMusicError(null);
+
+    const extractedId = extractYouTubePlaylistId(musicPlaylistInput);
+
+    if (!extractedId) {
+      setMusicError("Enlace de playlist de YouTube no válido. Por favor ingresa una URL o ID válido (ej. https://www.youtube.com/playlist?list=PL...).");
+      setSavingMusic(false);
+      return;
+    }
+
+    try {
+      await setDoc(doc(db, "settings", "music"), {
+        playlistUrl: musicPlaylistInput.trim(),
+        playlistId:  extractedId,
+        updatedAt:   serverTimestamp(),
+      }, { merge: true });
+
+      setMusicPlaylistId(extractedId);
+      setMusicSuccess("Playlist del reproductor MP3 actualizada correctamente.");
+    } catch (err) {
+      console.error("Error al guardar la playlist en Firestore:", err);
+      setMusicError("No se pudo guardar la playlist en Firestore. Revisa las reglas de seguridad.");
+    } finally {
+      setSavingMusic(false);
+    }
+  }
+
   if (loading || (!loading && !isAdmin)) {
     return (
       <div className="retro-box">
@@ -161,6 +215,44 @@ export default function SettingsAdminPage() {
         <div className="retro-box__header">⚙ Panel de Administración</div>
         <div className="retro-box__body">
           <div className="admin-page">
+
+            {/* --- Sección: Playlist del Reproductor MP3 --- */}
+            <div className="admin-music-card">
+              <h3 className="admin-music-card__title">🎵 Playlist del Reproductor MP3 (Sidebar)</h3>
+              <p className="admin-music-card__desc">
+                Pega aquí el enlace o ID de la playlist de YouTube para actualizar la música de la barra lateral en todo el blog.
+              </p>
+
+              {musicSuccess && <p className="account-success" role="status" style={{ marginBottom: "0.8rem" }}>{musicSuccess}</p>}
+              {musicError   && <p className="auth-error"      role="alert"  style={{ marginBottom: "0.8rem" }}>{musicError}</p>}
+
+              <form onSubmit={handleSaveMusicPlaylist} className="admin-music-card__form">
+                <div className="admin-music-card__row">
+                  <input
+                    type="text"
+                    className="auth-field__input"
+                    style={{ flex: 1 }}
+                    value={musicPlaylistInput}
+                    onChange={(e) => setMusicPlaylistInput(e.target.value)}
+                    placeholder="https://www.youtube.com/playlist?list=PL..."
+                    id="admin-music-playlist-input"
+                  />
+                  <button
+                    type="submit"
+                    className="admin-btn-new"
+                    disabled={savingMusic || !musicPlaylistInput.trim()}
+                    id="admin-save-music-btn"
+                  >
+                    {savingMusic ? "Guardando…" : "Guardar Playlist"}
+                  </button>
+                </div>
+                {musicPlaylistId && (
+                  <p style={{ fontSize: "var(--fs-xs)", color: "#00ff66", margin: "0.2rem 0 0 0" }}>
+                    ✔ Playlist activa actualmente: <strong>{musicPlaylistId}</strong>
+                  </p>
+                )}
+              </form>
+            </div>
 
             <div className="admin-page__header">
               <h2 className="admin-page__title">Posts en Firestore</h2>

@@ -11,9 +11,9 @@
  *   - Enlace a Términos y Condiciones (/settings/terms)
  */
 
-import { useState, useEffect }                from "react";
-import Image                                from "next/image";
-import Link                                 from "next/link";
+import { useState }                  from "react";
+import Image                         from "next/image";
+import Link                          from "next/link";
 import {
   updateProfile,
   updatePassword,
@@ -29,16 +29,17 @@ import ImageUploader                        from "@/components/ui/ImageUploader"
 import { markForDeletion }                  from "@/lib/deletion-queue";
 
 export default function AccountWidget() {
-  const { user, isAdmin, reloadUser } = useAuth();
+  const { user, isAdmin, reloadUser, preferredFont, setPreferredFont } = useAuth();
 
   // Campos del formulario
-  const [displayName, setDisplayName] = useState(user?.displayName ?? "");
-  const [photoMode,   setPhotoMode]   = useState<"url" | "file">("url");
-  const [photoURL,    setPhotoURL]    = useState(user?.photoURL   ?? "");
-  const [photoFile,   setPhotoFile]   = useState<File | null>(null);
-  const [newPassword, setNewPassword] = useState("");
-  const [currentPass, setCurrentPass] = useState("");
-  const [preferredFont, setPreferredFont] = useState<"japan" | "comic" | "book">("japan");
+  const [displayName,      setDisplayName]      = useState(user?.displayName ?? "");
+  const [photoMode,        setPhotoMode]        = useState<"url" | "file">("url");
+  const [photoURL,         setPhotoURL]         = useState(user?.photoURL   ?? "");
+  const [photoFile,        setPhotoFile]        = useState<File | null>(null);
+  const [newPassword,      setNewPassword]      = useState("");
+  const [currentPass,      setCurrentPass]      = useState("");
+  const [userSelectedFont, setUserSelectedFont] = useState<"japan" | "comic" | "book" | null>(null);
+  const selectedFont                            = userSelectedFont ?? preferredFont;
 
   // Estado de eliminación de cuenta
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -50,18 +51,6 @@ export default function AccountWidget() {
   const [error,     setError]     = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  // Cargar preferencia de fuente guardada
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      queueMicrotask(() => {
-        const saved = localStorage.getItem("ariri_preferred_font");
-        if (saved === "japan" || saved === "comic" || saved === "book") {
-          setPreferredFont(saved);
-        }
-      });
-    }
-  }, []);
-
   if (!user) return null;
 
   const currentUser = user;
@@ -71,7 +60,7 @@ export default function AccountWidget() {
     (p) => p.providerId === "password"
   );
 
-  /* --- Guardar cambios de perfil (nombre + foto) --- */
+  /* --- Guardar cambios de perfil (nombre + foto + tipografía) --- */
   async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -125,15 +114,9 @@ export default function AccountWidget() {
         }
       }
 
-      // Guardar preferencia de fuente
-      if (typeof window !== "undefined") {
-        localStorage.setItem("ariri_preferred_font", preferredFont);
-      }
-      try {
-        await setDoc(doc(db, "users", currentUser.uid), { preferredFont }, { merge: true });
-      } catch (fontErr) {
-        console.warn("Aviso al guardar preferencia de fuente en Firestore:", fontErr);
-      }
+      // Guardar preferencia de fuente en Firestore vía AuthContext
+      await setPreferredFont(selectedFont);
+      setUserSelectedFont(null);
 
       await reloadUser();
 
@@ -277,8 +260,8 @@ export default function AccountWidget() {
           <select
             id="acc-font-select"
             className="auth-field__input"
-            value={preferredFont}
-            onChange={(e) => setPreferredFont(e.target.value as "japan" | "comic" | "book")}
+            value={selectedFont}
+            onChange={(e) => setUserSelectedFont(e.target.value as "japan" | "comic" | "book")}
             style={{ background: "#0f0b14", color: "var(--color-accent-pink)", cursor: "pointer" }}
           >
             <option value="japan">Simple Japan (Por defecto)</option>

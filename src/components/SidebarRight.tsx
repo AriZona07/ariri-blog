@@ -19,7 +19,7 @@ export default function SidebarRight() {
 
   return (
     <aside className="sidebar-right" role="complementary" aria-label="Widgets interactivos">
-      <MusicPlayerWidget playlistId="PLRUBc5sTzob8" />
+      <MusicPlayerWidget />
       <SketchBoardWidget />
       <GuestbookWidget />
     </aside>

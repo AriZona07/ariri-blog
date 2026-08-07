@@ -9,15 +9,16 @@
  */
 
 import { useState, useEffect, use } from "react";
-import Link from "next/link";
-import Image from "next/image";
+import Link                         from "next/link";
+import Image                        from "next/image";
 import { collection, query, orderBy, onSnapshot, type DocumentData } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import MusicPlayerWidget   from "@/components/widgets/MusicPlayerWidget";
-import CommentsWidget      from "@/components/widgets/CommentsWidget";
+import { db }                       from "@/lib/firebase";
+import MusicPlayerWidget            from "@/components/widgets/MusicPlayerWidget";
+import CommentsWidget               from "@/components/widgets/CommentsWidget";
 import { extractYouTubePlaylistId } from "@/lib/youtube";
 import { renderMarkdown }           from "@/lib/markdown";
-import type { Post } from "@/app/page";
+import type { Post }                from "@/app/page";
+import { useAuth }                  from "@/lib/auth-context";
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
@@ -28,27 +29,17 @@ export default function SinglePostPage({ params }: PostPageProps) {
   const rawSlug = resolvedParams?.slug;
   const currentSlug = rawSlug ? decodeURIComponent(rawSlug) : "";
 
-  const [allPosts, setAllPosts] = useState<Post[]>([]);
-  const [loading, setLoading]   = useState(true);
-  const [postFont, setPostFont] = useState<"japan" | "comic" | "book">("japan");
+  const { preferredFont }               = useAuth();
+  const [allPosts, setAllPosts]         = useState<Post[]>([]);
+  const [loading, setLoading]           = useState(true);
+  const [overrideFont, setOverrideFont] = useState<"japan" | "comic" | "book" | null>(null);
+  const postFont                        = overrideFont ?? preferredFont;
 
   const fontFamilies = {
     japan: "var(--font-main)",
     comic: "var(--font-comic)",
     book:  "var(--font-merriweather)",
   };
-
-  /* Cargar preferencia de tipografía guardada del usuario en localStorage */
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      queueMicrotask(() => {
-        const saved = localStorage.getItem("ariri_preferred_font");
-        if (saved === "japan" || saved === "comic" || saved === "book") {
-          setPostFont(saved);
-        }
-      });
-    }
-  }, []);
 
   /* Suscripción a Firestore para obtener los posts y permitir navegación entre ellos */
   useEffect(() => {
@@ -195,7 +186,7 @@ export default function SinglePostPage({ params }: PostPageProps) {
             id="post-font-select"
             className="post-detail__font-select"
             value={postFont}
-            onChange={(e) => setPostFont(e.target.value as "japan" | "comic" | "book")}
+            onChange={(e) => setOverrideFont(e.target.value as "japan" | "comic" | "book")}
           >
             <option value="japan">Simple Japan (Por defecto)</option>
             <option value="comic">Comic Sans (Divertida)</option>

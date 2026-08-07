@@ -16,7 +16,7 @@ export const metadata = {
 export default function WidgetsPage() {
   return (
     <section aria-label="Widgets interactivos" style={{ display: "flex", flexDirection: "column", gap: "var(--gap-lg)" }}>
-      <MusicPlayerWidget playlistId="PLRUBc5sTzob8" />
+      <MusicPlayerWidget />
       <SketchBoardWidget />
       <GuestbookWidget />
     </section>
