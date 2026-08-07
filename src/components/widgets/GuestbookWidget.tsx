@@ -36,6 +36,25 @@ export default function GuestbookWidget() {
   const [message,  setMessage]  = useState("");
   const [sending,  setSending]  = useState(false);
   const [error,    setError]    = useState<string | null>(null);
+  const [prefFont, setPrefFont] = useState<"japan" | "comic" | "book">("japan");
+
+  const fontFamilies = {
+    japan: "var(--font-main)",
+    comic: "var(--font-comic)",
+    book:  "var(--font-merriweather)",
+  };
+
+  /* Cargar preferencia de tipografía guardada por el usuario */
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      queueMicrotask(() => {
+        const saved = localStorage.getItem("ariri_preferred_font");
+        if (saved === "japan" || saved === "comic" || saved === "book") {
+          setPrefFont(saved);
+        }
+      });
+    }
+  }, []);
 
   /* Suscripción en tiempo real al guestbook */
   useEffect(() => {
@@ -92,7 +111,7 @@ export default function GuestbookWidget() {
                   <span className="guestbook-item__author">{e.authorName}</span>
                   <span className="guestbook-item__date">{e.createdAt}</span>
                 </div>
-                <p className="guestbook-item__message">{e.message}</p>
+                <p className="guestbook-item__message" style={{ fontFamily: fontFamilies[prefFont] }}>{e.message}</p>
               </div>
             ))}
           </div>
@@ -105,6 +124,7 @@ export default function GuestbookWidget() {
             <input
               type="text"
               className="guestbook-form__input"
+              style={{ fontFamily: fontFamilies[prefFont] }}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Deja tu firma aquí ✨"
