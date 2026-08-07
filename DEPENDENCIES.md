@@ -10,12 +10,20 @@ Este documento detalla todas las dependencias del proyecto, clasificadas entre *
 - **Estado:** ✅ Instaladas (`next@16.3.0`, `react@19.2.8`, `react-dom@19.2.8`)
 - **¿Qué hace?:** Núcleo del framework para la generación estática (SSG) y la renderización de componentes React.
 
+### `firebase` & `firebase-admin`
+- **Estado:** ✅ Instaladas (`firebase@^12.17.1`, `firebase-admin@^14.2.0`)
+- **¿Qué hace?:** SDK de Firebase Client (Firestore, Auth, Storage en el cliente) y SDK de Firebase Admin para operaciones avanzadas o administrativas en el servidor.
+
 ### `typescript` & `@types/*`
 - **Estado:** ✅ Instaladas (`typescript@^5`, `@types/node`, `@types/react`, `@types/react-dom`)
 - **¿Qué hace?:** Tipado estático y autocompletado en todo el código base.
 
+### `eslint` & `eslint-config-next`
+- **Estado:** ✅ Instaladas (`eslint@^9`, `eslint-config-next@16.3.0`)
+- **¿Qué hace?:** Análisis estático y linter para código Next.js y React.
+
 ### `highlight.js`
-- **Estado:** ✅ Instalada (`highlight.js`)
+- **Estado:** ✅ Instalada (`highlight.js@^11.11.1`)
 - **¿Qué hace?:** Motor de resaltado de sintaxis para bloques de código en Markdown (`src/lib/markdown.tsx`) con el tema oscuro Tokyo Night.
 
 ---
