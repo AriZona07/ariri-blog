@@ -36,6 +36,67 @@ interface CommentsWidgetProps {
   fontFamily?: string;
 }
 
+/**
+ * Componente de Avatar tolerante a fallos de carga (404/URL rota)
+ */
+function CommentAvatar({
+  src,
+  name,
+  size = 36,
+  isDeleted = false,
+}: {
+  src?: string | null;
+  name: string;
+  size?: 36 | 28;
+  isDeleted?: boolean;
+}) {
+  const [hasError, setHasError] = useState(false);
+
+  const isValidSrc =
+    Boolean(src) &&
+    typeof src === "string" &&
+    src.trim() !== "" &&
+    src !== "null" &&
+    src !== "undefined";
+
+  const isSmall = size === 28;
+  const placeholderClass = `comment-item__avatar-placeholder ${
+    isSmall ? "comment-item__avatar-placeholder--sm" : ""
+  }`;
+  const avatarClass = `comment-item__avatar ${
+    isSmall ? "comment-item__avatar--sm" : ""
+  }`;
+
+  if (isDeleted) {
+    return (
+      <div className={placeholderClass} aria-hidden>
+        👻
+      </div>
+    );
+  }
+
+  if (!isValidSrc || hasError) {
+    return (
+      <div className={placeholderClass} aria-hidden>
+        👤
+      </div>
+    );
+  }
+
+  return (
+    <Image
+      src={src!}
+      alt={name || "Usuario"}
+      width={size}
+      height={size}
+      unoptimized
+      className={avatarClass}
+      style={{ width: `${size}px`, height: `${size}px` }}
+      onError={() => setHasError(true)}
+    />
+  );
+}
+
 export default function CommentsWidget({ postSlug, fontFamily }: CommentsWidgetProps) {
   const { user, isAdmin } = useAuth();
 
@@ -431,21 +492,12 @@ export default function CommentsWidget({ postSlug, fontFamily }: CommentsWidgetP
                   className={`comment-item ${c.isDeleted ? "comment-item--deleted" : ""}`}
                   role="listitem"
                 >
-                  {!c.isDeleted && c.authorPhoto ? (
-                    <Image
-                      src={c.authorPhoto}
-                      alt={c.authorName}
-                      width={36}
-                      height={36}
-                      unoptimized
-                      className="comment-item__avatar"
-                      style={{ width: "36px", height: "36px" }}
-                    />
-                  ) : (
-                    <div className="comment-item__avatar-placeholder" aria-hidden>
-                      {c.isDeleted ? "👻" : "👤"}
-                    </div>
-                  )}
+                  <CommentAvatar
+                    src={c.authorPhoto}
+                    name={c.authorName}
+                    size={36}
+                    isDeleted={c.isDeleted}
+                  />
 
                   <div className="comment-item__body">
                     <div className="comment-item__header">
@@ -561,19 +613,11 @@ export default function CommentsWidget({ postSlug, fontFamily }: CommentsWidgetP
                               id={`comment-${r.id}`}
                               className="comment-item comment-item--reply"
                             >
-                              {r.authorPhoto ? (
-                                <Image
-                                  src={r.authorPhoto}
-                                  alt={r.authorName}
-                                  width={28}
-                                  height={28}
-                                  unoptimized
-                                  className="comment-item__avatar comment-item__avatar--sm"
-                                  style={{ width: "28px", height: "28px" }}
-                                />
-                              ) : (
-                                <div className="comment-item__avatar-placeholder comment-item__avatar-placeholder--sm" aria-hidden>👤</div>
-                              )}
+                              <CommentAvatar
+                                src={r.authorPhoto}
+                                name={r.authorName}
+                                size={28}
+                              />
 
                               <div className="comment-item__body">
                                 <div className="comment-item__header">
