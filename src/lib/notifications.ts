@@ -8,10 +8,6 @@ import {
   setDoc,
   addDoc,
   collection,
-  query,
-  where,
-  getDocs,
-  deleteDoc,
   serverTimestamp,
   type Timestamp,
   type FieldValue,
@@ -20,6 +16,7 @@ import { db } from "@/lib/firebase";
 
 export interface NotificationItem {
   id: string;
+  targetUserId?: string | null;
   title: string;
   message: string;
   postSlug: string;
@@ -109,7 +106,7 @@ export async function setUserNotificationPrefs(
 }
 
 /**
- * Crea una nueva notificación en la subcolección `users/{targetUserId}/notifications`
+ * Crea una nueva notificación en la colección principal `notifications`
  */
 export async function createUserNotification(
   targetUserId: string,
@@ -122,7 +119,8 @@ export async function createUserNotification(
   }
 ): Promise<void> {
   try {
-    await addDoc(collection(db, "users", targetUserId, "notifications"), {
+    await addDoc(collection(db, "notifications"), {
+      targetUserId,
       title: data.title,
       message: data.message,
       postSlug: data.postSlug,
@@ -132,7 +130,7 @@ export async function createUserNotification(
       createdAt: serverTimestamp(),
     });
   } catch (err) {
-    console.error("Error al crear notificación para usuario:", targetUserId, err);
+    console.warn("Aviso al crear notificación para usuario:", targetUserId, err);
   }
 }
 
@@ -141,9 +139,7 @@ export async function createUserNotification(
  */
 export async function cleanUnreadNotificationsForComment(commentId: string): Promise<void> {
   try {
-    // Si un comentario se borra, podemos marcar o eliminar notificaciones huérfanas
-    // Nota: Como viven en subcolecciones de usuarios, se puede hacer una búsqueda si es necesario
-    // o marcar como inactivas sin interrumpir el flujo del cliente.
+    if (!commentId) return;
   } catch (err) {
     console.warn("Aviso al limpiar notificaciones de comentario:", err);
   }

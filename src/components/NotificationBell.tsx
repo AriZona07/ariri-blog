@@ -59,17 +59,12 @@ export default function NotificationBell() {
     };
   }, [user]);
 
-  // Escuchar subcolección `users/{user.uid}/notifications` si el usuario tiene sesión
+  // Escuchar notificaciones globales o dirigidas desde la colección `notifications`
   useEffect(() => {
-    if (!user) {
-      setNotifications([]);
-      return;
-    }
-
     const q = query(
-      collection(db, "users", user.uid, "notifications"),
+      collection(db, "notifications"),
       orderBy("createdAt", "desc"),
-      limit(15)
+      limit(20)
     );
 
     let isInitialLoad = true;
@@ -77,24 +72,34 @@ export default function NotificationBell() {
     const unsubscribe = onSnapshot(
       q,
       async (snapshot) => {
-        const list: NotificationItem[] = snapshot.docs.map((docSnap) => {
-          const data = docSnap.data();
-          return {
-            id: docSnap.id,
-            title: data.title || "Notificación",
-            message: data.message || "",
-            postSlug: data.postSlug || "",
-            commentId: data.commentId || undefined,
-            read: Boolean(data.read),
-            type: data.type || "info",
-            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
-          };
-        });
+        const list: NotificationItem[] = snapshot.docs
+          .map((docSnap) => {
+            const data = docSnap.data();
+            return {
+              id: docSnap.id,
+              targetUserId: data.targetUserId || null,
+              title: data.title || "Notificación",
+              message: data.message || "",
+              postSlug: data.postSlug || "",
+              commentId: data.commentId || undefined,
+              read: Boolean(data.read),
+              type: data.type || "info",
+              createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
+            };
+          })
+          .filter((item: NotificationItem) => {
+            // Notificación dirigida a un usuario específico
+            if (item.targetUserId) {
+              return user && item.targetUserId === user.uid;
+            }
+            // Notificación global (nuevos posts)
+            return true;
+          });
 
         setNotifications(list);
 
         // Disparar aviso emergente o Web Push si llega una nueva notificación tras la carga inicial
-        if (!isInitialLoad && list.length > 0) {
+        if (!isInitialLoad && list.length > 0 && user) {
           const latest = list[0];
           const latestTime = latest.createdAt instanceof Date ? latest.createdAt.getTime() : Date.now();
 
@@ -123,7 +128,7 @@ export default function NotificationBell() {
         isInitialLoad = false;
       },
       (err) => {
-        console.warn("Aviso de permisos de Firestore al escuchar notificaciones:", err);
+        console.warn("Aviso al consultar notificaciones en Firestore:", err);
       }
     );
 

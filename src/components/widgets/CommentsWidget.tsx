@@ -14,7 +14,7 @@
  * - Sorteo por prioridad de hash URL (`#comment-xyz`).
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useAuth } from "@/lib/auth-context";
 import {
@@ -61,36 +61,46 @@ export default function CommentsWidget({ postSlug, fontFamily }: CommentsWidgetP
   const [visibleCount, setVisibleCount] = useState(10);
 
   // ID del comentario destino desde el hash (#comment-xyz)
-  const [targetCommentId, setTargetCommentId] = useState<string | null>(null);
-
-  // Cargar número total y comentarios principales
-  const loadCommentsData = useCallback(async (priorityId?: string) => {
-    setLoading(true);
-    try {
-      const count = await getCommentCount(postSlug);
-      setTotalCount(count);
-
-      const fetched = await getTopLevelComments(postSlug, priorityId);
-      setComments(fetched);
-    } catch (err) {
-      console.error("Error al cargar comentarios:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [postSlug]);
-
-  // Leer hash de la URL (#comment-xyz)
-  useEffect(() => {
-    let priorityId: string | undefined;
+  const [targetCommentId] = useState<string | null>(() => {
     if (typeof window !== "undefined" && window.location.hash) {
       const hash = window.location.hash;
       if (hash.startsWith("#comment-")) {
-        priorityId = hash.replace("#comment-", "");
-        setTargetCommentId(priorityId);
+        return hash.replace("#comment-", "");
       }
     }
-    loadCommentsData(priorityId);
-  }, [loadCommentsData]);
+    return null;
+  });
+
+  // Cargar datos iniciales de comentarios (asíncrono con desuscripción limpia)
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function fetchInitialComments() {
+      try {
+        const count = await getCommentCount(postSlug);
+        const fetched = await getTopLevelComments(postSlug, targetCommentId || undefined);
+
+        if (!isCancelled) {
+          setTotalCount(count);
+          setComments(fetched);
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          console.error("Error al cargar comentarios:", err);
+        }
+      } finally {
+        if (!isCancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchInitialComments();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [postSlug, targetCommentId]);
 
   // Scrollear y resaltar el comentario destino si se accedió vía hash
   useEffect(() => {
@@ -151,8 +161,27 @@ export default function CommentsWidget({ postSlug, fontFamily }: CommentsWidgetP
     }
   }
 
+  // Enviar con Enter en teclados físicos de escritorio (Shift+Enter para salto de línea)
+  function handleKeyDownSubmit(
+    e: React.KeyboardEvent<HTMLTextAreaElement>,
+    submitFn: (e: React.SyntheticEvent) => void
+  ) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      const isMobile =
+        typeof window !== "undefined" &&
+        (window.matchMedia("(pointer: coarse)").matches ||
+          "ontouchstart" in window ||
+          navigator.maxTouchPoints > 0);
+
+      if (!isMobile) {
+        e.preventDefault();
+        submitFn(e);
+      }
+    }
+  }
+
   // Enviar comentario principal
-  async function handleSubmitMain(e: React.FormEvent) {
+  async function handleSubmitMain(e: React.SyntheticEvent) {
     e.preventDefault();
     if (!user || !mainText.trim()) return;
 
@@ -171,7 +200,7 @@ export default function CommentsWidget({ postSlug, fontFamily }: CommentsWidgetP
   }
 
   // Enviar respuesta a comentario o respuesta
-  async function handleSubmitReply(e: React.FormEvent) {
+  async function handleSubmitReply(e: React.SyntheticEvent) {
     e.preventDefault();
     if (!user || !replyingTo || !replyText.trim()) return;
 
@@ -203,7 +232,7 @@ export default function CommentsWidget({ postSlug, fontFamily }: CommentsWidgetP
             const existingReplies = c.replies || [];
             return {
               ...c,
-              replyCount: c.replyCount + 1,
+              replyCount: Math.max(c.replyCount + 1, existingReplies.length + 1),
               replies: [...existingReplies, newReply],
             };
           }
@@ -213,7 +242,8 @@ export default function CommentsWidget({ postSlug, fontFamily }: CommentsWidgetP
 
       setReplyText("");
       setReplyingTo(null);
-    } catch {
+    } catch (err: unknown) {
+      console.warn("Aviso al enviar respuesta:", err);
       setError("No se pudo enviar la respuesta.");
     } finally {
       setSendingReply(false);
@@ -357,6 +387,7 @@ export default function CommentsWidget({ postSlug, fontFamily }: CommentsWidgetP
             style={fontFamily ? { fontFamily } : undefined}
             value={mainText}
             onChange={(e) => setMainText(e.target.value)}
+            onKeyDown={(e) => handleKeyDownSubmit(e, handleSubmitMain)}
             placeholder="Escribe tu comentario…"
             maxLength={500}
             id={`comment-input-${postSlug}`}
@@ -406,8 +437,9 @@ export default function CommentsWidget({ postSlug, fontFamily }: CommentsWidgetP
                       alt={c.authorName}
                       width={36}
                       height={36}
+                      unoptimized
                       className="comment-item__avatar"
-                      style={{ width: "auto", height: "auto" }}
+                      style={{ width: "36px", height: "36px" }}
                     />
                   ) : (
                     <div className="comment-item__avatar-placeholder" aria-hidden>
@@ -489,6 +521,7 @@ export default function CommentsWidget({ postSlug, fontFamily }: CommentsWidgetP
                       style={fontFamily ? { fontFamily } : undefined}
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
+                      onKeyDown={(e) => handleKeyDownSubmit(e, handleSubmitReply)}
                       placeholder="Escribe tu respuesta..."
                       maxLength={300}
                       rows={2}
@@ -534,8 +567,9 @@ export default function CommentsWidget({ postSlug, fontFamily }: CommentsWidgetP
                                   alt={r.authorName}
                                   width={28}
                                   height={28}
+                                  unoptimized
                                   className="comment-item__avatar comment-item__avatar--sm"
-                                  style={{ width: "auto", height: "auto" }}
+                                  style={{ width: "28px", height: "28px" }}
                                 />
                               ) : (
                                 <div className="comment-item__avatar-placeholder comment-item__avatar-placeholder--sm" aria-hidden>👤</div>
@@ -555,7 +589,7 @@ export default function CommentsWidget({ postSlug, fontFamily }: CommentsWidgetP
                                     title="Haz clic para ir a la respuesta original"
                                   >
                                     <span className="reply-preview-author">@{r.replyTo.authorName}:</span>{" "}
-                                    <span className="reply-preview-text">"{r.replyTo.textSnippet}"</span>
+                                    <span className="reply-preview-text">&ldquo;{r.replyTo.textSnippet}&rdquo;</span>
                                   </div>
                                 )}
 

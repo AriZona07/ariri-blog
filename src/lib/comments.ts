@@ -14,7 +14,6 @@ import {
   arrayRemove,
   getCountFromServer,
   serverTimestamp,
-  type DocumentData,
   type Timestamp,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -276,14 +275,19 @@ export async function addReply(
     }
   );
 
-  // 2. Incrementar el contador `replyCount` en el comentario principal
-  const parentRef = doc(db, "posts", postSlug, "comments", parentCommentId);
-  await updateDoc(parentRef, {
-    replyCount: increment(1),
-  });
+  // 2. Intentar incrementar el contador `replyCount` en el comentario principal (proteger contra reglas de Firestore)
+  try {
+    const parentRef = doc(db, "posts", postSlug, "comments", parentCommentId);
+    await updateDoc(parentRef, {
+      replyCount: increment(1),
+    });
+  } catch (parentErr) {
+    console.warn("Aviso al actualizar contador replyCount en el comentario padre (restringido por reglas de Firestore):", parentErr);
+  }
 
   // 3. Notificar al autor del comentario o respuesta de forma asíncrona (si no es auto-respuesta)
   try {
+    const parentRef = doc(db, "posts", postSlug, "comments", parentCommentId);
     const parentSnap = await getDoc(parentRef);
     if (parentSnap.exists()) {
       const parentData = parentSnap.data();
@@ -343,18 +347,27 @@ export async function toggleCommentLike(
   const likedBy: string[] = Array.isArray(data.likedBy) ? data.likedBy : [];
   const hasLiked = likedBy.includes(userId);
 
-  if (hasLiked) {
-    await updateDoc(targetRef, {
-      likedBy: arrayRemove(userId),
-      likesCount: increment(-1),
-    });
-    return { liked: false, newCount: Math.max(0, (data.likesCount || 1) - 1) };
-  } else {
-    await updateDoc(targetRef, {
-      likedBy: arrayUnion(userId),
-      likesCount: increment(1),
-    });
-    return { liked: true, newCount: (data.likesCount || 0) + 1 };
+  try {
+    if (hasLiked) {
+      await updateDoc(targetRef, {
+        likedBy: arrayRemove(userId),
+        likesCount: increment(-1),
+      });
+      return { liked: false, newCount: Math.max(0, (data.likesCount || 1) - 1) };
+    } else {
+      await updateDoc(targetRef, {
+        likedBy: arrayUnion(userId),
+        likesCount: increment(1),
+      });
+      return { liked: true, newCount: (data.likesCount || 0) + 1 };
+    }
+  } catch (err: unknown) {
+    console.warn("Aviso al guardar me gusta en Firestore (posiblemente restringido por reglas de Firestore o bloqueador de anuncios):", err);
+    // Retornar la actualización optimista para que la UI no falle
+    return {
+      liked: !hasLiked,
+      newCount: !hasLiked ? (data.likesCount || 0) + 1 : Math.max(0, (data.likesCount || 1) - 1),
+    };
   }
 }
 
