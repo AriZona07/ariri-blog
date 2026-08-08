@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     template: "%s | Ariri Blog",
   },
   description: "Blog personal de Ariri — Vida personal, reseñas a mangas y series. Estética retro de los 2000s.",
-  keywords: ["blog", "retro", "manga", "anime", "reseñas", "red social", "personal"],
+  keywords: ["blog", "retro", "manga", "anime", "musica", "reseñas", "red social", "personal", "Arianna Torres", "Ariri"],
   manifest: "/site.webmanifest",
   icons: {
     icon: [
