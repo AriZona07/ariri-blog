@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * NotificationBell.tsx — Campana de notificaciones con menú desplegable y avisos en tiempo real
+ * NotificationBell.tsx — Campana de notificaciones del sitio y avisos en tiempo real
  */
 
 import { useState, useEffect, useRef } from "react";
@@ -12,30 +12,27 @@ import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import {
   getUserNotificationPrefs,
-  setUserNotificationPrefs,
   triggerBrowserNotification,
-  type NotificationItem
+  DEFAULT_NOTIFICATION_PREFS,
+  type NotificationItem,
+  type UserNotificationPrefs,
 } from "@/lib/notifications";
 
 const READ_KEY = "ariri_notifications_read_at";
-const ENABLED_KEY = "ariri_notifications_enabled";
 
 export default function NotificationBell() {
   const { user } = useAuth();
   const router = useRouter();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(false);
+  const [prefs, setPrefs] = useState<UserNotificationPrefs>(DEFAULT_NOTIFICATION_PREFS);
   const [lastReadTime, setLastReadTime] = useState<number>(0);
   const [toastNotification, setToastNotification] = useState<NotificationItem | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Cargar estado inicial desde localStorage al montar en el cliente (usando microtarea para evitar setState síncrono en useEffect)
   useEffect(() => {
     if (typeof window !== "undefined") {
       queueMicrotask(() => {
-        setNotificationsEnabled(localStorage.getItem(ENABLED_KEY) === "true");
-
         const storedRead = localStorage.getItem(READ_KEY);
         if (storedRead) {
           setLastReadTime(parseInt(storedRead, 10));
@@ -48,16 +45,12 @@ export default function NotificationBell() {
     }
   }, []);
 
-  // Sincronizar preferencia asíncrona del usuario desde Firestore cuando 'user' existe
   useEffect(() => {
     let isMounted = true;
     if (user) {
-      getUserNotificationPrefs(user.uid).then((enabled) => {
+      getUserNotificationPrefs(user.uid).then((p) => {
         if (isMounted) {
-          setNotificationsEnabled(enabled);
-          if (typeof window !== "undefined") {
-            localStorage.setItem(ENABLED_KEY, enabled ? "true" : "false");
-          }
+          setPrefs(p);
         }
       });
     }
@@ -66,60 +59,78 @@ export default function NotificationBell() {
     };
   }, [user]);
 
-  // Escuchar notificaciones en tiempo real desde Firestore
+  // Escuchar subcolección `users/{user.uid}/notifications` si el usuario tiene sesión
   useEffect(() => {
+    if (!user) {
+      setNotifications([]);
+      return;
+    }
+
     const q = query(
-      collection(db, "notifications"),
+      collection(db, "users", user.uid, "notifications"),
       orderBy("createdAt", "desc"),
-      limit(10)
+      limit(15)
     );
 
     let isInitialLoad = true;
 
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      const list: NotificationItem[] = snapshot.docs.map((docSnap) => {
-        const data = docSnap.data();
-        return {
-          id: docSnap.id,
-          title: data.title || "Notificación",
-          message: data.message || "",
-          postSlug: data.postSlug || "",
-          type: data.type || "info",
-          createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
-        };
-      });
+    const unsubscribe = onSnapshot(
+      q,
+      async (snapshot) => {
+        const list: NotificationItem[] = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data();
+          return {
+            id: docSnap.id,
+            title: data.title || "Notificación",
+            message: data.message || "",
+            postSlug: data.postSlug || "",
+            commentId: data.commentId || undefined,
+            read: Boolean(data.read),
+            type: data.type || "info",
+            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
+          };
+        });
 
-      setNotifications(list);
+        setNotifications(list);
 
-      // Si se añade una nueva notificación mientras la app está abierta
-      if (!isInitialLoad && list.length > 0) {
-        const latest = list[0];
-        const latestTime = latest.createdAt instanceof Date ? latest.createdAt.getTime() : Date.now();
+        // Disparar aviso emergente o Web Push si llega una nueva notificación tras la carga inicial
+        if (!isInitialLoad && list.length > 0) {
+          const latest = list[0];
+          const latestTime = latest.createdAt instanceof Date ? latest.createdAt.getTime() : Date.now();
 
-        let enabled = notificationsEnabled;
-        if (user) {
-          enabled = await getUserNotificationPrefs(user.uid);
+          const currentPrefs = await getUserNotificationPrefs(user.uid);
+
+          if (latestTime > lastReadTime) {
+            if (currentPrefs.inApp.newReplies || currentPrefs.inApp.newComments) {
+              setToastNotification(latest);
+            }
+
+            if (currentPrefs.webPush.newReplies || currentPrefs.webPush.newComments) {
+              const targetUrl = latest.commentId
+                ? `/posts/${latest.postSlug}#comment-${latest.commentId}`
+                : `/posts/${latest.postSlug}`;
+
+              triggerBrowserNotification(
+                latest.title,
+                latest.message,
+                targetUrl,
+                (path) => router.push(path)
+              );
+            }
+          }
         }
 
-        // Solo notificar si las notificaciones están activadas y el post es posterior a la última lectura
-        if (enabled && latestTime > lastReadTime) {
-          setToastNotification(latest);
-          triggerBrowserNotification(
-            latest.title,
-            latest.message,
-            latest.postSlug,
-            (path) => router.push(path)
-          );
-        }
+        isInitialLoad = false;
+      },
+      (err) => {
+        console.warn("Aviso de permisos de Firestore al escuchar notificaciones:", err);
       }
-
-      isInitialLoad = false;
-    });
+    );
 
     return () => unsubscribe();
-  }, [user, router, notificationsEnabled, lastReadTime]);
+  }, [user, router, lastReadTime]);
 
-  // Bloquear scroll del body cuando el modal de notificaciones está abierto
+  // Bloquear scroll del body cuando el modal está abierto
   useEffect(() => {
     if (!isOpen) return;
     const prevOverflow = document.body.style.overflow;
@@ -129,7 +140,6 @@ export default function NotificationBell() {
     };
   }, [isOpen]);
 
-  // Cerrar al presionar Escape
   useEffect(() => {
     if (!isOpen) return;
     function handleKeyDown(e: KeyboardEvent) {
@@ -141,17 +151,17 @@ export default function NotificationBell() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
-  // Solo mostrar notificaciones posteriores a la última lectura/activación si notificaciones están activadas
-  const visibleNotifications = notificationsEnabled
+  const hasInAppEnabled = prefs.inApp.newComments || prefs.inApp.newReplies;
+
+  const visibleNotifications = hasInAppEnabled
     ? notifications.filter((n) => {
         const nTime = n.createdAt instanceof Date ? n.createdAt.getTime() : 0;
-        return nTime > lastReadTime;
+        return nTime > lastReadTime && !n.read;
       })
     : [];
 
   const unreadCount = visibleNotifications.length;
 
-  // Marcar todas como leídas (actualiza timestamp y limpia la lista visible)
   function handleMarkAllRead() {
     const now = Date.now();
     setLastReadTime(now);
@@ -160,29 +170,14 @@ export default function NotificationBell() {
     }
   }
 
-  // Activar notificaciones desde el modal
-  async function handleEnableNotifications() {
-    const now = Date.now();
-    setLastReadTime(now);
-    if (typeof window !== "undefined") {
-      localStorage.setItem(READ_KEY, now.toString());
-      localStorage.setItem(ENABLED_KEY, "true");
-    }
-    setNotificationsEnabled(true);
-    if (user) {
-      await setUserNotificationPrefs(user.uid, true);
-    }
-  }
-
   return (
     <div className="notification-bell-container" ref={dropdownRef}>
-      {/* Botón de la campana */}
       <button
         type="button"
         className="notification-bell-btn"
         onClick={() => setIsOpen((v) => !v)}
         aria-label="Notificaciones"
-        title="Notificaciones de nuevas publicaciones"
+        title="Notificaciones"
         id="notification-bell-btn"
       >
         🔔
@@ -193,14 +188,13 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {/* Modal Pop-up Global de Notificaciones */}
       {isOpen && (
         <div
           className="notification-modal-overlay"
           onClick={() => setIsOpen(false)}
           role="dialog"
           aria-modal="true"
-          aria-label="Notificaciones del blog"
+          aria-label="Notificaciones"
         >
           <div
             className="notification-modal"
@@ -209,7 +203,7 @@ export default function NotificationBell() {
             <div className="notification-modal__header">
               <span className="notification-modal__title">🔔 Notificaciones</span>
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                {notificationsEnabled && visibleNotifications.length > 0 && (
+                {visibleNotifications.length > 0 && (
                   <button
                     type="button"
                     className="notification-dropdown__clear-btn"
@@ -230,66 +224,77 @@ export default function NotificationBell() {
             </div>
 
             <div className="notification-modal__list">
-              {!notificationsEnabled ? (
+              {!user ? (
+                <div className="notification-disabled-box">
+                  <p style={{ fontSize: "0.85rem", color: "var(--color-text-secondary)" }}>
+                    Inicia sesión para ver tus notificaciones.
+                  </p>
+                </div>
+              ) : !hasInAppEnabled ? (
                 <div className="notification-disabled-box">
                   <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🔕</div>
                   <p style={{ fontWeight: "bold", fontSize: "0.85rem", color: "var(--color-text-primary)", marginBottom: "0.3rem" }}>
-                    Notificaciones desactivadas
+                    Notificaciones en el sitio desactivadas
                   </p>
                   <p style={{ fontSize: "0.75rem", color: "var(--color-text-muted)", marginBottom: "1rem", maxWidth: "260px" }}>
-                    Activa las notificaciones para recibir avisos en tiempo real cuando se publiquen nuevos artículos en el blog.
+                    Actívalas en la pantalla de ajustes para enterarte cuando respondan tus comentarios.
                   </p>
-                  <button
-                    type="button"
+                  <Link
+                    href="/settings/notifications"
                     className="notification-enable-btn"
-                    onClick={handleEnableNotifications}
+                    onClick={() => setIsOpen(false)}
                   >
-                    🔔 Activar notificaciones
-                  </button>
+                    ⚙️ Configurar Notificaciones
+                  </Link>
                 </div>
               ) : visibleNotifications.length === 0 ? (
                 <div className="notification-dropdown__empty">
-                  No hay notificaciones recientes.
+                  No hay notificaciones sin leer.
                 </div>
               ) : (
-                visibleNotifications.map((item) => (
-                  <Link
-                    key={item.id}
-                    href={item.postSlug ? `/?post=${item.postSlug}` : "/"}
-                    className="notification-item notification-item--unread"
-                    onClick={() => {
-                      handleMarkAllRead();
-                      setIsOpen(false);
-                    }}
-                    role="menuitem"
-                  >
-                    <span className="notification-item__icon" aria-hidden>📰</span>
-                    <div className="notification-item__content">
-                      <div className="notification-item__title">{item.title}</div>
-                      <div className="notification-item__message">{item.message}</div>
-                      <div className="notification-item__date">
-                        {item.createdAt instanceof Date
-                          ? item.createdAt.toLocaleDateString("es-MX", {
-                              month: "short",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })
-                          : ""}
+                visibleNotifications.map((item) => {
+                  const targetHref = item.commentId
+                    ? `/posts/${encodeURIComponent(item.postSlug)}#comment-${item.commentId}`
+                    : `/posts/${encodeURIComponent(item.postSlug)}`;
+
+                  return (
+                    <Link
+                      key={item.id}
+                      href={targetHref}
+                      className="notification-item notification-item--unread"
+                      onClick={() => {
+                        handleMarkAllRead();
+                        setIsOpen(false);
+                      }}
+                      role="menuitem"
+                    >
+                      <span className="notification-item__icon" aria-hidden>💬</span>
+                      <div className="notification-item__content">
+                        <div className="notification-item__title">{item.title}</div>
+                        <div className="notification-item__message">{item.message}</div>
+                        <div className="notification-item__date">
+                          {item.createdAt instanceof Date
+                            ? item.createdAt.toLocaleDateString("es-MX", {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                            : ""}
+                        </div>
                       </div>
-                    </div>
-                  </Link>
-                ))
+                    </Link>
+                  );
+                })
               )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Toast Flotante cuando llega un nuevo post */}
       {toastNotification && (
         <div className="notification-toast" role="status">
-          <span style={{ fontSize: "1.3rem" }}>📢</span>
+          <span style={{ fontSize: "1.3rem" }}>💬</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: "bold", fontSize: "0.8rem", color: "var(--color-accent-pink)" }}>
               {toastNotification.title}
@@ -299,11 +304,15 @@ export default function NotificationBell() {
             </div>
             {toastNotification.postSlug && (
               <Link
-                href={`/?post=${toastNotification.postSlug}`}
+                href={
+                  toastNotification.commentId
+                    ? `/posts/${encodeURIComponent(toastNotification.postSlug)}#comment-${toastNotification.commentId}`
+                    : `/posts/${encodeURIComponent(toastNotification.postSlug)}`
+                }
                 style={{ fontSize: "0.7rem", color: "var(--color-accent-green)", fontWeight: "bold", display: "inline-block", marginTop: "4px" }}
                 onClick={() => setToastNotification(null)}
               >
-                ★ Leer publicación →
+                ★ Ver comentario →
               </Link>
             )}
           </div>
@@ -320,3 +329,4 @@ export default function NotificationBell() {
     </div>
   );
 }
+

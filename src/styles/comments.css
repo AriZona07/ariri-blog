@@ -33,6 +33,12 @@
 }
 
 /* Entrada de comentario individual */
+.comment-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
 .comment-item {
   display: flex;
   gap: 0.65rem;
@@ -42,6 +48,39 @@
   border-radius: var(--radius-sm);
   border-left: 3px solid var(--color-accent-pink);
   padding: 0.6rem 0.75rem;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.comment-item--deleted {
+  opacity: 0.65;
+  border-left-color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.comment-item--reply {
+  margin-left: 1.5rem;
+  border-left: 3px solid var(--color-accent-cyan, #00f0ff);
+  background: #14101d;
+}
+
+.comment-item--highlighted {
+  animation: comment-highlight 2.5s ease-in-out;
+}
+
+@keyframes comment-highlight {
+  0% {
+    border-color: var(--color-accent-green);
+    box-shadow: 0 0 10px var(--color-accent-green);
+    background: #1f2a1e;
+  }
+  70% {
+    border-color: var(--color-accent-green);
+    box-shadow: 0 0 5px var(--color-accent-green);
+  }
+  100% {
+    border-color: var(--color-border);
+    box-shadow: none;
+  }
 }
 
 .comment-item__avatar {
@@ -51,6 +90,11 @@
   border: 2px solid var(--color-border);
   object-fit: cover;
   flex-shrink: 0;
+}
+
+.comment-item__avatar--sm {
+  width: 28px;
+  height: 28px;
 }
 
 .comment-item__avatar-placeholder {
@@ -64,6 +108,12 @@
   justify-content: center;
   font-size: 1.2rem;
   flex-shrink: 0;
+}
+
+.comment-item__avatar-placeholder--sm {
+  width: 28px;
+  height: 28px;
+  font-size: 0.9rem;
 }
 
 .comment-item__body { flex: 1; min-width: 0; }
@@ -92,6 +142,141 @@
   color: var(--color-text-secondary);
   word-break: break-word;
 }
+
+/* Acciones de Comentario (Likes, Responder, Borrar) */
+.comment-item__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.4rem;
+}
+
+.comment-action-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-family: var(--font-main);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: color 0.15s;
+}
+
+.comment-action-btn:hover:not(:disabled) {
+  color: var(--color-accent-pink);
+}
+
+.comment-action-btn--liked {
+  color: #ff3366;
+  font-weight: bold;
+}
+
+.comment-action-btn--delete:hover {
+  color: #ff4444;
+}
+
+/* Previsualización estilo WhatsApp */
+.reply-preview-box {
+  background: #1a1426;
+  border-left: 3px solid var(--color-accent-green);
+  border-radius: 3px;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.73rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.4rem;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reply-preview-box:hover {
+  background: #231b33;
+}
+
+.reply-preview-author {
+  color: var(--color-accent-green);
+  font-weight: bold;
+}
+
+.reply-preview-text {
+  font-style: italic;
+}
+
+/* Formulario de Respuesta Desplegable */
+.reply-form {
+  margin-left: 1.5rem;
+  background: #140f1f;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.reply-form__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.reply-form__cancel {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.reply-form__cancel:hover { color: #ff4444; }
+
+/* Contenedor de Respuestas (Estilo TikTok) */
+.comment-replies-container {
+  margin-left: 1.5rem;
+}
+
+.comment-replies-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--color-accent-pink);
+  font-family: var(--font-main);
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0.2rem 0;
+}
+.comment-replies-toggle-btn:hover { text-decoration: underline; }
+
+.comment-replies-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.3rem;
+}
+
+/* Cargar más comentarios */
+.comments-load-more-btn {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  background: var(--color-bg-box);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-accent-pink);
+  font-family: var(--font-main);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.comments-load-more-btn:hover {
+  background: var(--color-bg-sidebar);
+}
+
 
 /* Formulario de nuevo comentario */
 .comments-form {

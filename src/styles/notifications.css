@@ -247,6 +247,13 @@
   margin-top: 1rem;
 }
 
+.notification-section-desc {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: 0.2rem;
+  margin-bottom: 0.75rem;
+}
+
 .notification-toggle-label {
   display: flex;
   align-items: center;

@@ -52,15 +52,21 @@ export default function GuestbookWidget() {
       collection(db, "guestbook"),
       orderBy("createdAt", "desc")
     );
-    const unsub = onSnapshot(q, (snap) => {
-      const data: GuestbookEntry[] = snap.docs.map((doc: DocumentData) => ({
-        id:         doc.id,
-        message:    doc.data().message    ?? "",
-        authorName: doc.data().authorName ?? "Anónimo",
-        createdAt:  formatDate(doc.data().createdAt?.toDate()),
-      }));
-      setEntries(data);
-    });
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const data: GuestbookEntry[] = snap.docs.map((doc: DocumentData) => ({
+          id: doc.id,
+          message: doc.data().message ?? "",
+          authorName: doc.data().authorName ?? "Anónimo",
+          createdAt: formatDate(doc.data().createdAt?.toDate()),
+        }));
+        setEntries(data);
+      },
+      (err) => {
+        console.warn("Aviso al escuchar libro de visitas:", err);
+      }
+    );
     return () => unsub();
   }, []);
 
