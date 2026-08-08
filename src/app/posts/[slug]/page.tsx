@@ -47,25 +47,42 @@ export default function SinglePostPage({ params }: PostPageProps) {
     const unsub = onSnapshot(
       q,
       (snap) => {
-        const fsPosts: Post[] = snap.docs.map((doc: DocumentData) => {
-          const d = doc.data();
-          const playlistRaw = d.playlist ? String(d.playlist) : undefined;
-          const playlistId  = d.playlistId ?? (playlistRaw ? extractYouTubePlaylistId(playlistRaw) : undefined);
+        const nowMs = Date.now();
+        const fsPosts: Post[] = snap.docs
+          .filter((doc: DocumentData) => {
+            const d = doc.data();
+            const status = d.status ?? "published";
+            if (status === "draft") return false;
 
-          return {
-            slug:       String(d.slug       ?? doc.id),
-            title:      String(d.title      ?? "(Sin título)"),
-            date:       String(d.date       ?? ""),
-            mood:       String(d.mood       ?? ""),
-            song:       String(d.song       ?? ""),
-            songCover:  d.songCover ? String(d.songCover) : undefined,
-            playlist:   playlistRaw,
-            playlistId: playlistId,
-            cover:      d.cover ? String(d.cover) : undefined,
-            excerpt:    d.content ? String(d.content).slice(0, 160) + "…" : "",
-            content:    String(d.content    ?? ""),
-          };
-        });
+            if (status === "scheduled") {
+              const scheduledTime = d.scheduledAt && typeof d.scheduledAt.toDate === "function"
+                ? d.scheduledAt.toDate().getTime()
+                : null;
+              if (scheduledTime && scheduledTime > nowMs) {
+                return false;
+              }
+            }
+            return true;
+          })
+          .map((doc: DocumentData) => {
+            const d = doc.data();
+            const playlistRaw = d.playlist ? String(d.playlist) : undefined;
+            const playlistId  = d.playlistId ?? (playlistRaw ? extractYouTubePlaylistId(playlistRaw) : undefined);
+
+            return {
+              slug:       String(d.slug       ?? doc.id),
+              title:      String(d.title      ?? "(Sin título)"),
+              date:       String(d.date       ?? ""),
+              mood:       String(d.mood       ?? ""),
+              song:       String(d.song       ?? ""),
+              songCover:  d.songCover ? String(d.songCover) : undefined,
+              playlist:   playlistRaw,
+              playlistId: playlistId,
+              cover:      d.cover ? String(d.cover) : undefined,
+              excerpt:    d.content ? String(d.content).slice(0, 160) + "…" : "",
+              content:    String(d.content    ?? ""),
+            };
+          });
 
         setAllPosts(fsPosts);
         setLoading(false);

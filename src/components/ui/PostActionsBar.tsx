@@ -13,6 +13,7 @@ interface PostActionsBarProps {
   deletingDraft:   boolean;
   isEditing:       boolean;
   isDraft:         boolean;
+  publishLabel?:   string;
   onSaveDraft:     () => void;
   onRevertToDraft: () => void;
   onDeleteDraft:   () => void;
@@ -25,11 +26,15 @@ export default function PostActionsBar({
   deletingDraft,
   isEditing,
   isDraft,
+  publishLabel,
   onSaveDraft,
   onRevertToDraft,
   onDeleteDraft,
 }: PostActionsBarProps) {
   const isBusy = saving || savingDraft || revertingDraft || deletingDraft;
+
+  const defaultLabel = isEditing ? "★ Guardar cambios ★" : "★ Publicar post ★";
+  const labelText = saving ? "Guardando…" : publishLabel || defaultLabel;
 
   return (
     <div className="new-post-actions-bar">
@@ -39,7 +44,7 @@ export default function PostActionsBar({
         disabled={isBusy}
         id="np-publish-btn"
       >
-        {saving ? "Guardando…" : isEditing ? "★ Guardar cambios ★" : "★ Publicar post ★"}
+        {labelText}
       </button>
 
       <button

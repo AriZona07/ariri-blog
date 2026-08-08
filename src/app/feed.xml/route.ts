@@ -43,8 +43,20 @@ export async function GET() {
       if (res.ok) {
         const data = await res.json();
         if (data.documents && Array.isArray(data.documents)) {
+          const nowMs = Date.now();
           for (const doc of data.documents) {
             const fields = doc.fields || {};
+            const status = fields.status?.stringValue || "published";
+
+            if (status === "draft") continue;
+            if (status === "scheduled") {
+              const scheduledStr = fields.scheduledAt?.timestampValue;
+              if (scheduledStr) {
+                const scheduledTime = new Date(scheduledStr).getTime();
+                if (scheduledTime > nowMs) continue;
+              }
+            }
+
             const title   = fields.title?.stringValue   || "(Sin título)";
             const slug    = fields.slug?.stringValue    || doc.name.split("/").pop() || "";
             const date    = fields.date?.stringValue    || "";

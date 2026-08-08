@@ -31,10 +31,12 @@ import { useAuth }                  from "@/lib/auth-context";
 import { extractYouTubePlaylistId } from "@/lib/youtube";
 
 interface FirestorePost {
-  id:    string;
-  title: string;
-  date:  string;
-  slug:  string;
+  id:          string;
+  title:       string;
+  date:        string;
+  slug:        string;
+  status:      "published" | "scheduled" | "draft";
+  scheduledAt: Date | null;
 }
 
 interface FirestoreDraft {
@@ -43,16 +45,44 @@ interface FirestoreDraft {
   savedAt: string;
 }
 
+/** Formatea el tiempo restante para la liberación de un post programado */
+function getRemainingTime(targetDate: Date | null, nowMs: number): string {
+  if (!targetDate) return "";
+  const diff = targetDate.getTime() - nowMs;
+  if (diff <= 0) return "¡Listo para liberar!";
+
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const hours   = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const days    = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+  const parts = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0 || days > 0) parts.push(`${hours}h`);
+  parts.push(`${minutes}m`);
+
+  return `Faltan ${parts.join(" ")}`;
+}
+
 export default function SettingsAdminPage() {
   const { user, isAdmin, loading } = useAuth();
   const router = useRouter();
 
+  const [nowMs,          setNowMs]          = useState(() => Date.now());
   const [posts,          setPosts]          = useState<FirestorePost[]>([]);
   const [drafts,         setDrafts]         = useState<FirestoreDraft[]>([]);
+  const [activeTab,      setActiveTab]      = useState<"published" | "scheduled" | "drafts">("published");
   const [fetching,       setFetching]       = useState(true);
   const [draftsOpen,     setDraftsOpen]     = useState(false);
   const [fetchingDrafts, setFetchingDrafts] = useState(true);
   const [actionError,    setActionError]    = useState<string | null>(null);
+
+  /* Actualización periódica del reloj interno para el conteo regresivo */
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNowMs(Date.now());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Estado para la playlist del widget MP3
   const [musicPlaylistInput, setMusicPlaylistInput] = useState("");
@@ -86,12 +116,21 @@ export default function SettingsAdminPage() {
 
     const q = query(collection(db, "posts"), orderBy("date", "desc"));
     const unsub = onSnapshot(q, (snap) => {
-      const data: FirestorePost[] = snap.docs.map((doc: DocumentData) => ({
-        id:    doc.id,
-        title: doc.data().title ?? "(Sin título)",
-        date:  doc.data().date  ?? "",
-        slug:  doc.data().slug  ?? doc.id,
-      }));
+      const data: FirestorePost[] = snap.docs.map((doc: DocumentData) => {
+        const d = doc.data();
+        let scheduledAtDate: Date | null = null;
+        if (d.scheduledAt && typeof d.scheduledAt.toDate === "function") {
+          scheduledAtDate = d.scheduledAt.toDate();
+        }
+        return {
+          id:          doc.id,
+          title:       d.title ?? "(Sin título)",
+          date:        d.date  ?? "",
+          slug:        d.slug  ?? doc.id,
+          status:      d.status ?? "published",
+          scheduledAt: scheduledAtDate,
+        };
+      });
       setPosts(data);
       setFetching(false);
     });
@@ -135,6 +174,22 @@ export default function SettingsAdminPage() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [draftsOpen]);
+
+  /* Publicar inmediatamente un post programado */
+  async function handlePublishNow(postId: string) {
+    if (!window.confirm("¿Publicar este post inmediatamente en el blog?")) return;
+    setActionError(null);
+    try {
+      await setDoc(doc(db, "posts", postId), {
+        status: "published",
+        publishedAt: serverTimestamp(),
+        date: new Date().toISOString().split("T")[0],
+      }, { merge: true });
+    } catch (err) {
+      console.error("Error al publicar inmediatamente:", err);
+      setActionError("Ocurrió un error al publicar la entrada de inmediato.");
+    }
+  }
 
   /* Mover un post publicado a la colección de borradores */
   async function handleMoveToDraft(postId: string) {
@@ -197,6 +252,13 @@ export default function SettingsAdminPage() {
     }
   }
 
+  const publishedPosts = posts.filter(
+    (p) => p.status === "published" || !p.status || (p.status === "scheduled" && p.scheduledAt && p.scheduledAt.getTime() <= nowMs)
+  );
+  const scheduledPosts = posts.filter(
+    (p) => p.status === "scheduled" && p.scheduledAt && p.scheduledAt.getTime() > nowMs
+  );
+
   if (loading || (!loading && !isAdmin)) {
     return (
       <div className="retro-box">
@@ -254,22 +316,39 @@ export default function SettingsAdminPage() {
               </form>
             </div>
 
+            {/* Pestañas de Navegación del Panel Admin */}
+            <div className="admin-tabs">
+              <button
+                type="button"
+                className={`admin-tab ${activeTab === "published" ? "admin-tab--active-published" : ""}`}
+                onClick={() => setActiveTab("published")}
+              >
+                ✅ Publicados <span className="admin-tab__count">{publishedPosts.length}</span>
+              </button>
+              <button
+                type="button"
+                className={`admin-tab ${activeTab === "scheduled" ? "admin-tab--active-scheduled" : ""}`}
+                onClick={() => setActiveTab("scheduled")}
+              >
+                🗓️ Programados <span className="admin-tab__count">{scheduledPosts.length}</span>
+              </button>
+              <button
+                type="button"
+                className={`admin-tab ${activeTab === "drafts" ? "admin-tab--active-drafts" : ""}`}
+                onClick={() => setActiveTab("drafts")}
+              >
+                📄 Borradores <span className="admin-tab__count">{drafts.length}</span>
+              </button>
+            </div>
+
             <div className="admin-page__header">
-              <h2 className="admin-page__title">Posts en Firestore</h2>
+              <h2 className="admin-page__title">
+                {activeTab === "published" && "Posts Publicados en Firestore"}
+                {activeTab === "scheduled" && "Publicaciones Programadas"}
+                {activeTab === "drafts" && "Borradores Guardados"}
+              </h2>
 
               <div style={{ display: "flex", gap: "0.6rem", alignItems: "center", flexWrap: "wrap" }}>
-                <button
-                  className="admin-btn-drafts"
-                  id="admin-drafts-btn"
-                  onClick={() => setDraftsOpen(true)}
-                  aria-label="Ver borradores guardados"
-                >
-                  📄 Borradores
-                  {drafts.length > 0 && (
-                    <span className="admin-btn-drafts__badge">{drafts.length}</span>
-                  )}
-                </button>
-
                 <Link href="/settings/admin/new-post" className="admin-btn-new" id="admin-new-post-link">
                   + Nuevo post
                 </Link>
@@ -283,39 +362,127 @@ export default function SettingsAdminPage() {
             )}
 
             {fetching ? (
-              <p className="admin-empty">Cargando posts…</p>
-            ) : posts.length === 0 ? (
-              <p className="admin-empty">
-                No hay posts publicados aún. ¡Crea el primero!
-              </p>
-            ) : (
-              <div className="admin-post-list">
-                {posts.map((post) => (
-                  <div key={post.id} className="admin-post-item">
-                    <span className="admin-post-item__title">{post.title}</span>
-                    <span className="admin-post-item__date">{post.date}</span>
+              <p className="admin-empty">Cargando publicaciones…</p>
+            ) : activeTab === "published" ? (
+              publishedPosts.length === 0 ? (
+                <p className="admin-empty">
+                  No hay posts publicados aún. ¡Crea el primero!
+                </p>
+              ) : (
+                <div className="admin-post-list">
+                  {publishedPosts.map((post) => (
+                    <div key={post.id} className="admin-post-item">
+                      <span className="admin-post-item__title">{post.title}</span>
+                      <span className="admin-post-item__date">{post.date}</span>
 
-                    <div className="admin-post-item__actions">
-                      <Link
-                        href={`/settings/admin/new-post?edit=${post.id}`}
-                        className="admin-btn-action-edit"
-                        title="Editar este post"
-                      >
-                        ✏️ Editar
-                      </Link>
+                      <div className="admin-post-item__actions">
+                        <Link
+                          href={`/settings/admin/new-post?edit=${post.id}`}
+                          className="admin-btn-action-edit"
+                          title="Editar este post"
+                        >
+                          ✏️ Editar
+                        </Link>
 
-                      <button
-                        type="button"
-                        className="admin-btn-action-draft"
-                        title="Regresar post a borradores"
-                        onClick={() => handleMoveToDraft(post.id)}
-                      >
-                        ↩️ A borrador
-                      </button>
+                        <button
+                          type="button"
+                          className="admin-btn-action-draft"
+                          title="Regresar post a borradores"
+                          onClick={() => handleMoveToDraft(post.id)}
+                        >
+                          ↩️ A borrador
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )
+            ) : activeTab === "scheduled" ? (
+              scheduledPosts.length === 0 ? (
+                <p className="admin-empty">
+                  🗓️ No hay publicaciones programadas.
+                  <br />
+                  <small style={{ display: "block", marginTop: "0.4rem" }}>
+                    Al redactar un post en el editor, elige &quot;Programar publicación&quot; para definir su fecha de liberación.
+                  </small>
+                </p>
+              ) : (
+                <div className="admin-post-list">
+                  {scheduledPosts.map((post) => (
+                    <div key={post.id} className="admin-post-item admin-post-item--scheduled">
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="admin-post-item__title">{post.title}</div>
+                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginTop: "0.2rem" }}>
+                          <span className="scheduled-badge">
+                            ⏳ {getRemainingTime(post.scheduledAt, nowMs)}
+                          </span>
+                          <span className="admin-post-item__date">
+                            Prog: {post.scheduledAt?.toLocaleString("es-MX", { dateStyle: "short", timeStyle: "short" }) ?? post.date}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="admin-post-item__actions">
+                        <button
+                          type="button"
+                          className="admin-btn-action-edit"
+                          style={{ borderColor: "#00ff66", color: "#00ff66", background: "rgba(0,255,102,0.12)" }}
+                          title="Publicar de inmediato"
+                          onClick={() => handlePublishNow(post.id)}
+                        >
+                          ⚡ Publicar ya
+                        </button>
+
+                        <Link
+                          href={`/settings/admin/new-post?edit=${post.id}`}
+                          className="admin-btn-action-edit"
+                          title="Editar programación"
+                        >
+                          ✏️ Editar
+                        </Link>
+
+                        <button
+                          type="button"
+                          className="admin-btn-action-draft"
+                          title="Mover a borradores"
+                          onClick={() => handleMoveToDraft(post.id)}
+                        >
+                          ↩️ A borrador
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : (
+              fetchingDrafts ? (
+                <p className="admin-empty">Cargando borradores…</p>
+              ) : drafts.length === 0 ? (
+                <p className="admin-empty">
+                  📄 No hay borradores guardados.
+                  <br />
+                  <small style={{ display: "block", marginTop: "0.4rem" }}>
+                    Al crear o editar una entrada, presiona &quot;Guardar borrador&quot; para pausar y continuar después.
+                  </small>
+                </p>
+              ) : (
+                <div className="admin-post-list">
+                  {drafts.map((draft) => (
+                    <div key={draft.id} className="draft-item" style={{ marginBottom: 0 }}>
+                      <span className="draft-item__title">{draft.title || "(Sin título)"}</span>
+                      <div className="draft-item__meta" style={{ flexDirection: "row", alignItems: "center", gap: "0.6rem" }}>
+                        {draft.savedAt && <span className="draft-item__date">{draft.savedAt}</span>}
+                        <Link
+                          href={`/settings/admin/new-post?draft=${draft.id}`}
+                          className="admin-btn-action-edit"
+                        >
+                          ✏️ Editar borrador
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
             )}
 
           </div>

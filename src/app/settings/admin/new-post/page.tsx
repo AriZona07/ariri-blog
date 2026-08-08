@@ -27,6 +27,7 @@ import {
   deleteDoc,
   doc,
   serverTimestamp,
+  Timestamp,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage }      from "@/lib/firebase";
@@ -38,6 +39,12 @@ import SlugInput, { sanitizeSlug }          from "@/components/ui/SlugInput";
 import SongSection                          from "@/components/ui/SongSection";
 import PostActionsBar                       from "@/components/ui/PostActionsBar";
 import { markForDeletion, processScheduledDeletions } from "@/lib/deletion-queue";
+
+/** Convierte un objeto Date a string para el input datetime-local (YYYY-MM-DDTHH:mm) */
+function toLocalDateTimeString(d: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 function SettingsNewPostForm() {
   const { user, isAdmin, loading } = useAuth();
@@ -56,6 +63,14 @@ function SettingsNewPostForm() {
   const [song,      setSong]      = useState("");
   const [playlist,  setPlaylist]  = useState("");
   const [date,      setDate]      = useState(new Date().toISOString().split("T")[0]);
+
+  // Modo de publicación: inmediata vs programada
+  const [publishMode,       setPublishMode]       = useState<"immediate" | "scheduled">("immediate");
+  const [scheduledDateTime, setScheduledDateTime] = useState<string>(() => {
+    const nextHour = new Date();
+    nextHour.setHours(nextHour.getHours() + 1, 0, 0, 0);
+    return toLocalDateTimeString(nextHour);
+  });
 
   // Selección de portada del post (exclusiva: URL vs. archivo local)
   const [coverMode, setCoverMode] = useState<"url" | "file">("url");
@@ -106,6 +121,14 @@ function SettingsNewPostForm() {
           setSong(d.song ?? "");
           setPlaylist(d.playlist ?? "");
           if (d.date) setDate(d.date);
+          if (d.status === "scheduled" || d.scheduledAt) {
+            setPublishMode("scheduled");
+            if (d.scheduledAt && typeof d.scheduledAt.toDate === "function") {
+              setScheduledDateTime(toLocalDateTimeString(d.scheduledAt.toDate()));
+            }
+          } else {
+            setPublishMode("immediate");
+          }
           if (d.songCover) {
             setExistingSongCoverUrl(d.songCover);
             setSongCoverMode("url");
@@ -146,6 +169,14 @@ function SettingsNewPostForm() {
           setSong(d.song ?? "");
           setPlaylist(d.playlist ?? "");
           if (d.date) setDate(d.date);
+          if (d.status === "scheduled" || d.scheduledAt) {
+            setPublishMode("scheduled");
+            if (d.scheduledAt && typeof d.scheduledAt.toDate === "function") {
+              setScheduledDateTime(toLocalDateTimeString(d.scheduledAt.toDate()));
+            }
+          } else {
+            setPublishMode("immediate");
+          }
           if (d.songCover) {
             setExistingSongCoverUrl(d.songCover);
             setSongCoverMode("url");
@@ -249,18 +280,44 @@ function SettingsNewPostForm() {
     const cleanSlug = sanitizeSlug(slug.trim() || title.trim()).replace(/^-+|-+$/g, "");
     const extractedPlaylist = extractYouTubePlaylistId(playlist);
 
+    let statusValue: "published" | "scheduled" = "published";
+    let scheduledTimestamp = null;
+    let publishedTimestamp: unknown = serverTimestamp();
+    let postDateStr = date;
+
+    if (publishMode === "scheduled" && scheduledDateTime) {
+      const scheduledDateObj = new Date(scheduledDateTime);
+      if (scheduledDateObj.getTime() > Date.now()) {
+        statusValue = "scheduled";
+        scheduledTimestamp = Timestamp.fromDate(scheduledDateObj);
+        publishedTimestamp = Timestamp.fromDate(scheduledDateObj);
+        postDateStr = scheduledDateTime.split("T")[0];
+      } else {
+        statusValue = "published";
+        publishedTimestamp = serverTimestamp();
+        postDateStr = scheduledDateTime.split("T")[0];
+      }
+    } else {
+      statusValue = "published";
+      publishedTimestamp = serverTimestamp();
+      postDateStr = new Date().toISOString().split("T")[0];
+    }
+
     const rawData = {
-      title:     title.trim()      || "(Sin título)",
-      slug:      cleanSlug         || `post-${Date.now()}`,
-      content:   content.trim(),
-      date,
-      author:    user?.displayName  || "Ariri",
-      authorUid: user?.uid         || "",
-      mood:      mood.trim()       || null,
-      song:      song.trim()       || null,
-      songCover: finalSongCover    || null,
-      playlist:  extractedPlaylist || null,
-      cover:     finalCover        || null,
+      title:       title.trim()      || "(Sin título)",
+      slug:        cleanSlug         || `post-${Date.now()}`,
+      content:     content.trim(),
+      date:        postDateStr,
+      status:      statusValue,
+      publishedAt: publishedTimestamp,
+      scheduledAt: scheduledTimestamp,
+      author:      user?.displayName  || "Ariri",
+      authorUid:   user?.uid         || "",
+      mood:        mood.trim()       || null,
+      song:        song.trim()       || null,
+      songCover:   finalSongCover    || null,
+      playlist:    extractedPlaylist || null,
+      cover:       finalCover        || null,
     };
 
     return Object.fromEntries(
@@ -360,19 +417,17 @@ function SettingsNewPostForm() {
     setError(null);
     try {
       const data = await buildPostData();
+      const draftPayload = {
+        ...data,
+        status:    "draft",
+        authorUid: user!.uid,
+        savedAt:   serverTimestamp(),
+      };
 
       if (draftId) {
-        await setDoc(doc(db, "drafts", draftId), {
-          ...data,
-          authorUid: user!.uid,
-          savedAt:   serverTimestamp(),
-        });
+        await setDoc(doc(db, "drafts", draftId), draftPayload);
       } else {
-        const ref = await addDoc(collection(db, "drafts"), {
-          ...data,
-          authorUid: user!.uid,
-          savedAt:   serverTimestamp(),
-        });
+        const ref = await addDoc(collection(db, "drafts"), draftPayload);
         setDraftId(ref.id);
         window.history.replaceState({}, "", `/settings/admin/new-post?draft=${ref.id}`);
       }
@@ -554,17 +609,66 @@ function SettingsNewPostForm() {
                   />
                 </div>
 
-                {/* Fecha */}
+                {/* Opciones de Publicación: Inmediata vs Programada */}
                 <div className="auth-field">
-                  <label htmlFor="np-date" className="auth-field__label">Fecha *</label>
-                  <input
-                    id="np-date"
-                    type="date"
-                    className="auth-field__input"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    required
-                  />
+                  <label className="auth-field__label">Opciones de Publicación</label>
+                  <div className="publish-mode-selector">
+                    <div
+                      className={`publish-mode-option ${publishMode === "immediate" ? "publish-mode-option--active" : ""}`}
+                      onClick={() => setPublishMode("immediate")}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setPublishMode("immediate"); }}
+                    >
+                      <span style={{ fontSize: "1.2rem" }}>⚡</span>
+                      <div>
+                        <div style={{ color: publishMode === "immediate" ? "#00ff66" : "var(--color-text-primary)", fontWeight: "bold" }}>
+                          Publicar Inmediatamente
+                        </div>
+                        <div style={{ fontSize: "0.7rem", color: "var(--color-text-muted)" }}>
+                          Fecha asignada automáticamente al presionar publicar
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      className={`publish-mode-option ${publishMode === "scheduled" ? "publish-mode-option--active-scheduled" : ""}`}
+                      onClick={() => setPublishMode("scheduled")}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setPublishMode("scheduled"); }}
+                    >
+                      <span style={{ fontSize: "1.2rem" }}>🗓️</span>
+                      <div>
+                        <div style={{ color: publishMode === "scheduled" ? "#ffaa00" : "var(--color-text-primary)", fontWeight: "bold" }}>
+                          Programar Publicación
+                        </div>
+                        <div style={{ fontSize: "0.7rem", color: "var(--color-text-muted)" }}>
+                          Establecer fecha y hora futuras para su liberación
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {publishMode === "scheduled" && (
+                    <div className="scheduled-date-picker">
+                      <label htmlFor="np-scheduled-datetime" className="auth-field__label" style={{ color: "#ffaa00" }}>
+                        📅 Fecha y Hora de Liberación Programada *
+                      </label>
+                      <input
+                        id="np-scheduled-datetime"
+                        type="datetime-local"
+                        className="auth-field__input"
+                        style={{ borderColor: "#ffaa00", background: "#161021" }}
+                        value={scheduledDateTime}
+                        onChange={(e) => setScheduledDateTime(e.target.value)}
+                        required={publishMode === "scheduled"}
+                      />
+                      <small style={{ color: "var(--color-text-muted)", fontSize: "0.75rem", marginTop: "0.2rem" }}>
+                        La publicación permanecerá oculta para los visitantes del blog hasta alcanzar esta fecha y hora.
+                      </small>
+                    </div>
+                  )}
                 </div>
 
                 {/* Estado de ánimo */}
@@ -656,6 +760,7 @@ function SettingsNewPostForm() {
                   deletingDraft={deletingDraft}
                   isEditing={Boolean(editId)}
                   isDraft={Boolean(draftId)}
+                  publishLabel={publishMode === "scheduled" ? "★ Programar publicación ★" : undefined}
                   onSaveDraft={handleSaveDraft}
                   onRevertToDraft={handleRevertToDraft}
                   onDeleteDraft={handleDeleteDraft}
