@@ -26,15 +26,18 @@ export const metadata: Metadata = {
     default: "Ariri Blog",
     template: "%s | Ariri Blog",
   },
-  description: "Blog personal de Ariri — videojuegos, manga, linux, punk y más. Estética retro de los 2000s.",
-  keywords: ["blog", "retro", "linux", "manga", "gaming", "anarquismo", "software libre"],
+  description: "Blog personal de Ariri — Vida personal, reseñas a mangas y series. Estética retro de los 2000s.",
+  keywords: ["blog", "retro", "manga", "anime", "reseñas", "red social", "personal"],
   manifest: "/site.webmanifest",
   icons: {
     icon: [
+      { url: '/favicon.ico', sizes: 'any' },
       { url: '/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
       { url: '/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/icons/favicon.ico', sizes: 'any' }
+      { url: '/icons/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' }
     ],
+    shortcut: '/favicon.ico',
     apple: [
       { url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }
     ]
@@ -43,14 +46,14 @@ export const metadata: Metadata = {
     title: "Ariri Blog",
     description: "Mi vida y aficiones en un blog retro de los 2000s.",
     url: "https://ariri.app",
-    siteName: "ariri.app",
+    siteName: "Ariri Blog | Expresandome a las 3am",
     locale: "es_MX",
     type: "website",
     images: [{ url: "https://ariri.app/banners/og-image.png", width: 1200, height: 630, alt: "Vista previa del Blog de Ariri" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ariri Blog",
+    title: "Ariri Blog | Expresandome a las 3am",
     description: "Mi vida y aficiones en un blog retro de los 2000s.",
     images: ["https://ariri.app/banners/og-image.png"],
   },
@@ -70,6 +73,19 @@ export default function RootLayout({ children }: RootLayoutProps) {
           type="application/rss+xml"
           title="Ariri Blog — Feed RSS"
           href="/feed.xml"
+        />
+        {/* Esquema de datos estructurados JSON-LD para definir 'Ariri Blog' como Nombre de Sitio oficial en Google */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "Ariri Blog",
+              "alternateName": ["ariri.app"],
+              "url": "https://ariri.app"
+            })
+          }}
         />
       </head>
       <body suppressHydrationWarning>
