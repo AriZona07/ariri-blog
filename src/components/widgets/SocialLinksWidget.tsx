@@ -13,8 +13,8 @@ interface SocialLinksWidgetProps {
 
 /** Redes sociales por defecto de Ariri */
 const DEFAULT_LINKS: SocialLink[] = [
-  { href: "https://www.instagram.com/safos.arianna/",           icon: "📸", label: "Instagram" },
-  { href: "https://www.tiktok.com/@safos.arianna",              icon: "📱", label: "TikTok"    },
+  { href: "https://www.instagram.com/nyx.arianna/",           icon: "📸", label: "Instagram" },
+  { href: "https://www.tiktok.com/@nyx.arianna",              icon: "📱", label: "TikTok"    },
   { href: "https://mx.pinterest.com/safos_arianna/",            icon: "📌", label: "Pinterest" },
   { href: "https://open.spotify.com/user/qw3p144mgwlaf453m5gir7wum?si=f905c64b87104786", icon: "🎧", label: "Spotify" },
   { href: "https://discord.gg/AaVASS2ZRQ",                      icon: "💬", label: "Discord"   },
